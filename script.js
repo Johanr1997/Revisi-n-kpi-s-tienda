@@ -1,5 +1,28 @@
-// METAS FIJAS DE REFERENCIA PARA COMPARACIÓN EN ARREGLO SOS
-const METAS_SOS = { conversion: 23.0, accesorizacion: 29.4, ticket: 280 };
+// METAS SOS — cargadas desde localStorage (editables en Configuración)
+const METAS_SOS_DEFAULT = { conversion: 23.0, accesorizacion: 29.4, ticket: 280 };
+let METAS_SOS = JSON.parse(localStorage.getItem("metasSOS")) || { ...METAS_SOS_DEFAULT };
+
+function guardarMetasSOS() {
+    const conv  = parseFloat(document.getElementById("cfgMetaConversion").value);
+    const acc   = parseFloat(document.getElementById("cfgMetaAccesorizacion").value);
+    const tick  = parseFloat(document.getElementById("cfgMetaTicket").value);
+
+    if (isNaN(conv) || isNaN(acc) || isNaN(tick) || conv <= 0 || acc <= 0 || tick <= 0) {
+        alert("Por favor ingresa valores válidos y mayores a 0 para las tres metas.");
+        return;
+    }
+
+    METAS_SOS = { conversion: conv, accesorizacion: acc, ticket: tick };
+    localStorage.setItem("metasSOS", JSON.stringify(METAS_SOS));
+
+    // Actualizar los badges de meta en la pestaña Ventas
+    document.getElementById("metaVisualConv").textContent  = `${conv.toFixed(1)}%`;
+    document.getElementById("metaVisualAcc").textContent   = `${acc.toFixed(1)}%`;
+    document.getElementById("metaVisualTick").textContent  = `$${tick.toLocaleString()}`;
+
+    sincronizarYRenderizar();
+    alert("Metas del Plan SOS actualizadas correctamente.");
+}
 
 // ===================================================================
 // TABLAS DE INCENTIVOS (Fuente: Control_de_seguros_e_incentivos.xlsx)
@@ -104,6 +127,16 @@ document.addEventListener("DOMContentLoaded", function () {
     renderListaPendiente("insurama");
 
     renderTodo();
+
+    // Cargar metas SOS en los inputs de Configuración
+    document.getElementById("cfgMetaConversion").value    = METAS_SOS.conversion;
+    document.getElementById("cfgMetaAccesorizacion").value = METAS_SOS.accesorizacion;
+    document.getElementById("cfgMetaTicket").value         = METAS_SOS.ticket;
+
+    // Sincronizar badges de Ventas con los valores guardados
+    document.getElementById("metaVisualConv").textContent  = `${METAS_SOS.conversion.toFixed(1)}%`;
+    document.getElementById("metaVisualAcc").textContent   = `${METAS_SOS.accesorizacion.toFixed(1)}%`;
+    document.getElementById("metaVisualTick").textContent  = `$${METAS_SOS.ticket.toLocaleString()}`;
 });
 
 function configurarNavegacionPestañas() {
@@ -361,11 +394,12 @@ function guardarDatosAsesor() {
     appData.asesores[key].unidades.airpods += parseInt(document.getElementById("u_airpods").value) || 0;
     appData.asesores[key].unidades.audio += parseInt(document.getElementById("u_audio").value) || 0;
 
-    // Resetear valores transaccionales del formulario
-    document.getElementById("inputVentaSemanal").value = 0;
-    document.getElementById("inputQR").value = 0;
-    document.getElementById("inputTradeIn").value = 0;
-    document.querySelectorAll(".grid-2-col input").forEach(i => i.value = 0);
+    // Resetear valores transaccionales del formulario (solo campos de ingreso semanal)
+    ["inputVentaSemanal","inputQR","inputTradeIn",
+     "m_mac","m_ipad","m_iphone","m_watch","m_airpods","m_audio","m_acc_apple","m_acc_terceros",
+     "u_mac","u_ipad","u_iphone","u_watch","u_airpods","u_audio",
+     "inputGarexCantidad","inputGarexPrecio","inputInsuramaCantidad","inputInsuramaPrecio"
+    ].forEach(id => { const el = document.getElementById(id); if (el) el.value = 0; });
 
     sincronizarYRenderizar();
     actualizarCumplimientoAsesorVisual();
@@ -451,7 +485,9 @@ function renderTodo() {
         totalTradeIn += asor.tradeIn;
 
         const cumplimiento = asor.meta > 0 ? ((asor.ventaSemanal / asor.meta) * 100).toFixed(1) : 0;
-
+        const u = asor.unidades;
+        const totalUnidades = u.mac + u.ipad + u.iphone + u.watch + u.airpods + u.audio;
+        
         htmlResumenAsesores += `
             <div style="padding:15px; background:#F5F5F7; border-radius:12px; margin-bottom:15px;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
@@ -463,6 +499,17 @@ function renderTodo() {
                     Venta: $${asor.ventaSemanal.toLocaleString()} | Meta: $${asor.meta.toLocaleString()}<br>
                     QR Colocados: ${asor.qr} | Trade-In: ${asor.tradeIn}
                 </p>
+                <div style="margin-top:10px; padding-top:10px; border-top:1px solid #E5E5EA;">
+                    <p style="font-size:12px; font-weight:600; color:#1D1D1F; margin-bottom:6px;">Unidades acumuladas — <span style="color:#0071E3;">${totalUnidades} total</span></p>
+                    <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:4px; font-size:12px; color:#515154;">
+                        <div>Mac: <strong>${u.mac}</strong></div>
+                        <div>iPad: <strong>${u.ipad}</strong></div>
+                        <div>iPhone: <strong>${u.iphone}</strong></div>
+                        <div>Watch: <strong>${u.watch}</strong></div>
+                        <div>AirPods: <strong>${u.airpods}</strong></div>
+                        <div>Audio: <strong>${u.audio}</strong></div>
+                    </div>
+                </div>
             </div>`;
     });
     document.getElementById("resumenAsesoresVisual").innerHTML = htmlResumenAsesores;
@@ -485,6 +532,7 @@ function renderTodo() {
     document.getElementById("v_total_seguros").textContent = `${totalSeguros} U.`;
     document.getElementById("v_total_qr").textContent = `${totalQR} U.`;
     document.getElementById("v_total_tradein").textContent = `${totalTradeIn} U.`;
+    document.getElementById("v_trafico_acumulado").textContent = appData.inicio.trafico.toLocaleString();
 
     document.getElementById("txtDashboardComentarios").textContent = appData.inicio.comentarios || "Sin comentarios registrados en la semana.";
     document.getElementById("txtDashboardOportunidades").textContent = appData.inicio.oportunidades || "Sin oportunidades de mejora detectadas.";
@@ -691,6 +739,7 @@ function sincronizarYRenderizar() {
 function reiniciarTodoCero() {
     if (confirm("⚠️ ¿Estás completamente seguro de restaurar el ecosistema comercial? Se eliminarán todos los acumulados.")) {
         localStorage.removeItem("controlVentasData");
+        // Las metas SOS se conservan intencionalmente; solo se borran datos de ventas
         appData = {
             inicio: { conversion: 0, accesorizacion: 0, ticket: 0, trafico: 0, comentarios: "", oportunidades: "" },
             bitacoras: [],

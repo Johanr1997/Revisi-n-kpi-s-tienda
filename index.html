@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
+ 
     <div class="navbar">
         <h2>Control de Ventas</h2>
         <ul>
@@ -20,7 +20,7 @@
             <li class="tab-btn" data-target="configuracion">⚙ Configuración</li>
         </ul>
     </div>
-
+ 
     <div class="contenido">
         <div class="header">
             <div>
@@ -31,7 +31,7 @@
                 <span id="hora"></span>
             </div>
         </div>
-
+ 
         <!-- PESTAÑA INICIO -->
         <div id="inicio" class="seccion-dashboard active-seccion">
             <div class="formulario">
@@ -50,155 +50,170 @@
                     <label for="inputTicket">Ticket Promedio Semanal ($):</label>
                     <input type="number" id="inputTicket" placeholder="Ej: 265">
                 </div>
-
+ 
                 <hr style="margin: 20px 0; border: 0; border-top: 1px solid #E5E5EA;">
-
+ 
                 <div class="form-group">
                     <label for="inputTrafico">Tráfico Semanal:</label>
                     <input type="number" id="inputTrafico" placeholder="Ej: 1200">
                 </div>
-
+ 
                 <div class="form-group">
                     <label for="inputComentarios">Comentarios:</label>
                     <textarea id="inputComentarios" placeholder="Notas sobre el desempeño de la semana..."></textarea>
                 </div>
-
+ 
                 <div class="form-group">
                     <label for="inputOportunidades">Oportunidades de Mejora:</label>
                     <textarea id="inputOportunidades" placeholder="Estrategias de mejora detectadas..."></textarea>
                 </div>
-
+ 
                 <button class="btn-primary" onclick="guardarDatosReunion()">Guardar Datos de Inicio</button>
             </div>
         </div>
-
+ 
         <!-- PESTAÑA ASESORES -->
         <div id="asesores" class="seccion-dashboard">
-            <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 30px;">
+            <div style="display: flex; flex-direction: column; gap: 30px;">
                 <div class="formulario">
-                    <h2>Ingreso de Datos por Asesor</h2>
-                    
-                    <div class="form-group">
-                        <label for="selectAsesor">Asesor Responsable:</label>
-                        <select id="selectAsesor">
-                            <option value="asesor0">Kendall V.</option>
-                            <option value="asesor1">Fabián Q.</option>
-                            <option value="asesor2">Asesor Eventual</option>
-                        </select>
+                    <h2 style="margin-bottom: 20px;">Ingreso de Datos por Asesor</h2>
+ 
+                    <!-- Fila 1: Asesor + Meta + Venta semanal -->
+                    <div class="grid-2-col" style="grid-template-columns: 1fr 1fr 1fr;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label for="selectAsesor">Asesor Responsable:</label>
+                            <select id="selectAsesor">
+                                <option value="asesor0">Kendall V.</option>
+                                <option value="asesor1">Fabián Q.</option>
+                                <option value="asesor2">Asesor Eventual</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label for="inputMetaAsesor">Meta Mensual de Ventas ($):</label>
+                            <input type="number" id="inputMetaAsesor" value="0">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label for="inputVentaSemanal">Ventas Semanales Totales ($):</label>
+                            <input type="number" id="inputVentaSemanal" value="0">
+                        </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="inputMetaAsesor">Meta Mensual de Ventas ($):</label>
-                        <input type="number" id="inputMetaAsesor" value="0">
+ 
+                    <!-- Barra cumplimiento -->
+                    <div id="cumplimientoAsesorBox" style="background:#F5F5F7; border-radius:10px; padding:12px 14px; margin-top:14px;"></div>
+ 
+                    <!-- Fila 2: QR + Trade-In -->
+                    <div class="grid-2-col" style="grid-template-columns: 1fr 1fr; margin-top: 14px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label for="inputQR">Códigos QR Colocados en la Semana:</label>
+                            <input type="number" id="inputQR" value="0">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label for="inputTradeIn">Trade-In Realizados en la Semana:</label>
+                            <input type="number" id="inputTradeIn" value="0">
+                        </div>
                     </div>
-
-                    <div id="cumplimientoAsesorBox" style="background:#F5F5F7; border-radius:10px; padding:12px 14px; margin-bottom:14px;"></div>
-
-                    <div class="form-group">
-                        <label for="inputVentaSemanal">Ventas Semanales Totales ($):</label>
-                        <input type="number" id="inputVentaSemanal" value="0">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="inputQR">Códigos QR Colocados en la Semana:</label>
-                        <input type="number" id="inputQR" value="0">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="inputTradeIn">Trade-In Realizados en la Semana:</label>
-                        <input type="number" id="inputTradeIn" value="0">
-                    </div>
-
-                    <h3 style="font-size: 14px; margin: 15px 0 5px;">Monto de Ventas por Categoría ($)</h3>
-                    <div class="grid-2-col">
-                        <div class="form-group"><label>Mac:</label><input type="number" id="m_mac" value="0"></div>
-                        <div class="form-group"><label>iPad:</label><input type="number" id="m_ipad" value="0"></div>
-                        <div class="form-group"><label>iPhone:</label><input type="number" id="m_iphone" value="0"></div>
-                        <div class="form-group"><label>Watch:</label><input type="number" id="m_watch" value="0"></div>
-                        <div class="form-group"><label>AirPods:</label><input type="number" id="m_airpods" value="0"></div>
-                        <div class="form-group"><label>Audio:</label><input type="number" id="m_audio" value="0"></div>
-                        <div class="form-group"><label>Acc. Apple:</label><input type="number" id="m_acc_apple" value="0"></div>
-                        <div class="form-group"><label>Acc. Terceros:</label><input type="number" id="m_acc_terceros" value="0"></div>
-                    </div>
-
-                    <h3 style="font-size: 14px; margin: 15px 0 5px;">Unidades Vendidas</h3>
-                    <div class="grid-2-col">
-                        <div class="form-group"><label>U. Mac:</label><input type="number" id="u_mac" value="0"></div>
-                        <div class="form-group"><label>U. iPad:</label><input type="number" id="u_ipad" value="0"></div>
-                        <div class="form-group"><label>U. iPhone:</label><input type="number" id="u_iphone" value="0"></div>
-                        <div class="form-group"><label>U. Watch:</label><input type="number" id="u_watch" value="0"></div>
-                        <div class="form-group"><label>U. AirPods:</label><input type="number" id="u_airpods" value="0"></div>
-                        <div class="form-group"><label>U. Audio:</label><input type="number" id="u_audio" value="0"></div>
-                    </div>
-
-                    <div id="unidadesAcumuladasBox" style="background:#F5F5F7; border-radius:10px; padding:12px 14px; margin-bottom:15px;"></div>
-
-                    <h3 style="font-size: 14px; margin: 15px 0 5px;">🛡️ Garex (Garantía Extendida)</h3>
-                    <div style="background:#F5F5F7; padding:12px; border-radius:8px; margin-bottom:10px;">
-                        <div class="grid-2-col" style="background:transparent; padding:0; margin-bottom:10px;">
-                            <div class="form-group">
-                                <label for="selectGarexDispositivo">Dispositivo:</label>
-                                <select id="selectGarexDispositivo"></select>
-                            </div>
-                            <div class="form-group">
-                                <label for="selectGarexDuracion">Duración:</label>
-                                <select id="selectGarexDuracion"></select>
+ 
+                    <!-- Montos y Unidades en dos columnas lado a lado -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                        <div>
+                            <h3 style="font-size: 14px; margin-bottom: 10px;">Monto de Ventas por Categoría ($)</h3>
+                            <div class="grid-2-col">
+                                <div class="form-group"><label>Mac:</label><input type="number" id="m_mac" value="0"></div>
+                                <div class="form-group"><label>iPad:</label><input type="number" id="m_ipad" value="0"></div>
+                                <div class="form-group"><label>iPhone:</label><input type="number" id="m_iphone" value="0"></div>
+                                <div class="form-group"><label>Watch:</label><input type="number" id="m_watch" value="0"></div>
+                                <div class="form-group"><label>AirPods:</label><input type="number" id="m_airpods" value="0"></div>
+                                <div class="form-group"><label>Audio:</label><input type="number" id="m_audio" value="0"></div>
+                                <div class="form-group"><label>Acc. Apple:</label><input type="number" id="m_acc_apple" value="0"></div>
+                                <div class="form-group"><label>Acc. Terceros:</label><input type="number" id="m_acc_terceros" value="0"></div>
                             </div>
                         </div>
-                        <div class="grid-2-col" style="background:transparent; padding:0; margin-bottom:10px;">
-                            <div class="form-group" style="margin-bottom:0;">
-                                <label for="inputGarexCantidad">Cantidad Vendida:</label>
-                                <input type="number" id="inputGarexCantidad" value="0">
-                            </div>
-                            <div class="form-group" style="margin-bottom:0;">
-                                <label for="inputGarexPrecio">Precio Venta al Cliente ($, c/u):</label>
-                                <input type="number" id="inputGarexPrecio" value="0">
+                        <div>
+                            <h3 style="font-size: 14px; margin-bottom: 10px;">Unidades Vendidas</h3>
+                            <div class="grid-2-col">
+                                <div class="form-group"><label>U. Mac:</label><input type="number" id="u_mac" value="0"></div>
+                                <div class="form-group"><label>U. iPad:</label><input type="number" id="u_ipad" value="0"></div>
+                                <div class="form-group"><label>U. iPhone:</label><input type="number" id="u_iphone" value="0"></div>
+                                <div class="form-group"><label>U. Watch:</label><input type="number" id="u_watch" value="0"></div>
+                                <div class="form-group"><label>U. AirPods:</label><input type="number" id="u_airpods" value="0"></div>
+                                <div class="form-group"><label>U. Audio:</label><input type="number" id="u_audio" value="0"></div>
                             </div>
                         </div>
-                        <button type="button" class="btn-primary" style="background:#34C759;" onclick="agregarLineaGarex()">+ Agregar a la lista</button>
-                        <div id="listaGarexPendiente" style="margin-top:10px;"></div>
                     </div>
-
-                    <h3 style="font-size: 14px; margin: 15px 0 5px;">🛡️ Insurama (Seguros)</h3>
-                    <div style="background:#F5F5F7; padding:12px; border-radius:8px; margin-bottom:10px;">
-                        <div class="grid-2-col" style="background:transparent; padding:0; margin-bottom:10px;">
-                            <div class="form-group">
-                                <label for="selectInsuramaDispositivo">Dispositivo:</label>
-                                <select id="selectInsuramaDispositivo"></select>
-                            </div>
-                            <div class="form-group">
-                                <label for="selectInsuramaCobertura">Cobertura:</label>
-                                <select id="selectInsuramaCobertura"></select>
+ 
+                    <div id="unidadesAcumuladasBox" style="background:#F5F5F7; border-radius:10px; padding:12px 14px; margin-top:15px;"></div>
+ 
+                    <!-- Garex e Insurama lado a lado -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                        <div>
+                            <h3 style="font-size: 14px; margin-bottom: 10px;">Garex (Garantía Extendida)</h3>
+                            <div style="background:#F5F5F7; padding:12px; border-radius:8px;">
+                                <div class="grid-2-col" style="background:transparent; padding:0; margin-bottom:10px;">
+                                    <div class="form-group">
+                                        <label for="selectGarexDispositivo">Dispositivo:</label>
+                                        <select id="selectGarexDispositivo"></select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="selectGarexDuracion">Duración:</label>
+                                        <select id="selectGarexDuracion"></select>
+                                    </div>
+                                </div>
+                                <div class="grid-2-col" style="background:transparent; padding:0; margin-bottom:10px;">
+                                    <div class="form-group" style="margin-bottom:0;">
+                                        <label for="inputGarexCantidad">Cantidad Vendida:</label>
+                                        <input type="number" id="inputGarexCantidad" value="0">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom:0;">
+                                        <label for="inputGarexPrecio">Precio Venta al Cliente ($, c/u):</label>
+                                        <input type="number" id="inputGarexPrecio" value="0">
+                                    </div>
+                                </div>
+                                <button type="button" class="btn-primary" style="background:#34C759;" onclick="agregarLineaGarex()">+ Agregar a la lista</button>
+                                <div id="listaGarexPendiente" style="margin-top:10px;"></div>
                             </div>
                         </div>
-                        <div class="grid-2-col" style="background:transparent; padding:0; margin-bottom:10px;">
-                            <div class="form-group" style="margin-bottom:0;">
-                                <label for="selectInsuramaDuracion">Duración:</label>
-                                <select id="selectInsuramaDuracion"></select>
-                            </div>
-                            <div class="form-group" style="margin-bottom:0;">
-                                <label for="inputInsuramaCantidad">Cantidad Vendida:</label>
-                                <input type="number" id="inputInsuramaCantidad" value="0">
+                        <div>
+                            <h3 style="font-size: 14px; margin-bottom: 10px;">Insurama (Seguros)</h3>
+                            <div style="background:#F5F5F7; padding:12px; border-radius:8px;">
+                                <div class="grid-2-col" style="background:transparent; padding:0; margin-bottom:10px;">
+                                    <div class="form-group">
+                                        <label for="selectInsuramaDispositivo">Dispositivo:</label>
+                                        <select id="selectInsuramaDispositivo"></select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="selectInsuramaCobertura">Cobertura:</label>
+                                        <select id="selectInsuramaCobertura"></select>
+                                    </div>
+                                </div>
+                                <div class="grid-2-col" style="background:transparent; padding:0; margin-bottom:10px;">
+                                    <div class="form-group" style="margin-bottom:0;">
+                                        <label for="selectInsuramaDuracion">Duración:</label>
+                                        <select id="selectInsuramaDuracion"></select>
+                                    </div>
+                                    <div class="form-group" style="margin-bottom:0;">
+                                        <label for="inputInsuramaCantidad">Cantidad Vendida:</label>
+                                        <input type="number" id="inputInsuramaCantidad" value="0">
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin-bottom:10px;">
+                                    <label for="inputInsuramaPrecio">Precio Venta al Cliente ($, c/u):</label>
+                                    <input type="number" id="inputInsuramaPrecio" value="0">
+                                </div>
+                                <button type="button" class="btn-primary" style="background:#34C759;" onclick="agregarLineaInsurama()">+ Agregar a la lista</button>
+                                <div id="listaInsuramaPendiente" style="margin-top:10px;"></div>
                             </div>
                         </div>
-                        <div class="form-group" style="margin-bottom:10px;">
-                            <label for="inputInsuramaPrecio">Precio Venta al Cliente ($, c/u):</label>
-                            <input type="number" id="inputInsuramaPrecio" value="0">
-                        </div>
-                        <button type="button" class="btn-primary" style="background:#34C759;" onclick="agregarLineaInsurama()">+ Agregar a la lista</button>
-                        <div id="listaInsuramaPendiente" style="margin-top:10px;"></div>
                     </div>
-
-                    <button class="btn-primary" style="margin-top: 15px;" onclick="guardarDatosAsesor()">Actualizar Asesor</button>
+ 
+                    <button class="btn-primary" style="margin-top: 20px;" onclick="guardarDatosAsesor()">Actualizar Asesor</button>
                 </div>
-
+ 
                 <div class="ranking-box">
-                    <h2>Resumen de Desempeño por Asesor</h2>
+                    <h2 style="margin-bottom: 20px;">Resumen de Desempeño por Asesor</h2>
                     <div id="resumenAsesoresVisual"></div>
                 </div>
             </div>
         </div>
-
         <!-- PESTAÑA VENTAS -->
         <div id="ventas-pantalla" class="seccion-dashboard">
             <div class="cards">
@@ -210,8 +225,12 @@
                     <h3>Cumplimiento Meta Total</h3>
                     <h2 id="cumplimientoMetaTotal">0%</h2>
                 </div>
+                <div class="card">
+                    <h3>Tráfico Acumulado</h3>
+                    <h2 id="v_trafico_acumulado">0</h2>
+                </div>
             </div>
-
+ 
             <h2 style="font-size: 18px; margin-bottom: 15px;">Planes SOS</h2>
             <div class="cards">
                 <div class="card" id="cardConversion">
@@ -230,7 +249,7 @@
                     <div class="badge-mes">Meta: <span id="metaVisualTick">$305</span></div>
                 </div>
             </div>
-
+ 
             <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
                 <div class="card">
                     <h3>Garex Vendidos</h3>
@@ -249,35 +268,35 @@
                     <h2 id="v_total_tradein">0 U.</h2>
                 </div>
             </div>
-
+ 
             <div class="seccion-inferior" style="margin-top: 25px;">
                 <div class="observaciones-box">
-                    <h2>📝 Comentarios Semanales</h2>
+                    <h2>Comentarios Semanales</h2>
                     <p id="txtDashboardComentarios" style="font-size: 14px; color:#515154; line-height:1.5;">No hay comentarios.</p>
                 </div>
                 <div class="observaciones-box" style="border-left: 4px solid #FF9500;">
-                    <h2>💡 Oportunidades de Mejora</h2>
+                    <h2>Oportunidades de Mejora</h2>
                     <p id="txtDashboardOportunidades" style="font-size: 14px; color:#515154; line-height:1.5;">No hay oportunidades registradas.</p>
                 </div>
             </div>
         </div>
-
+ 
         <!-- PESTAÑA GAREX -->
         <div id="garex" class="seccion-dashboard">
             <div class="ranking-box">
-                <h2>🛡️ Desglose de Garantías Extendidas (Garex)</h2>
+                <h2>Desglose de Garantías Extendidas (Garex)</h2>
                 <div id="tablaGarexContenedor"></div>
             </div>
         </div>
-
+ 
         <!-- PESTAÑA INSURAMA -->
         <div id="insurama" class="seccion-dashboard">
             <div class="ranking-box">
-                <h2>🛡️ Desglose de Seguros (Insurama)</h2>
+                <h2>Desglose de Seguros (Insurama)</h2>
                 <div id="tablaInsuramaContenedor"></div>
             </div>
         </div>
-
+ 
         <!-- PESTAÑA BITÁCORAS -->
         <div id="bitacoras" class="seccion-dashboard">
             <div class="formulario">
@@ -291,9 +310,32 @@
                 <div id="contenedorBitacoras" style="margin-top: 25px;"></div>
             </div>
         </div>
-
+ 
         <!-- PESTAÑA CONFIGURACIÓN -->
         <div id="configuracion" class="seccion-dashboard">
+ 
+            <!-- Panel: Metas del Plan SOS -->
+            <div class="formulario" style="margin-bottom: 20px;">
+                <h2 style="margin-bottom: 6px;">Metas del Plan SOS</h2>
+                <p style="font-size: 13px; color: #86868B; margin-bottom: 20px;">Estas metas aplican a toda la tienda y se usan para el semáforo de Conversión, Accesorización y Ticket Promedio.</p>
+                <div class="grid-2-col" style="grid-template-columns: 1fr 1fr 1fr; background: #F5F5F7; padding: 14px; border-radius: 10px; margin-bottom: 16px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="cfgMetaConversion">Meta Conversión (%):</label>
+                        <input type="number" id="cfgMetaConversion" step="0.1" placeholder="Ej: 23.0">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="cfgMetaAccesorizacion">Meta Accesorización (%):</label>
+                        <input type="number" id="cfgMetaAccesorizacion" step="0.1" placeholder="Ej: 29.4">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="cfgMetaTicket">Meta Ticket Promedio ($):</label>
+                        <input type="number" id="cfgMetaTicket" step="1" placeholder="Ej: 280">
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="guardarMetasSOS()">Guardar Metas del Plan SOS</button>
+            </div>
+ 
+            <!-- Panel: Reset -->
             <div class="grafico-box" style="text-align: center; padding: 40px;">
                 <h2>⚙ Configuración del Sistema</h2>
                 <p style="margin-bottom: 30px; color: #86868B;">Administración y reseteo de ciclos comerciales.</p>
@@ -301,13 +343,13 @@
                     Reiniciar Todos los Datos a 0
                 </button>
                 <p style="margin-top: 15px; font-size: 12px; color: #86868B; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.4;">
-                    *Atención: Esta acción borrará de manera irreversible todas las ventas, metas, desgloses por dispositivo, registros de protección e historial de bitácoras guardados localmente.
+                    *Atención: Esta acción borrará de manera irreversible todas las ventas, metas, desgloses por dispositivo, registros de protección e historial de bitácoras guardados localmente. Las metas del Plan SOS no se borran.
                 </p>
             </div>
         </div>
-
+ 
     </div>
-
+ 
     <script src="script.js"></script>
 </body>
 </html>
