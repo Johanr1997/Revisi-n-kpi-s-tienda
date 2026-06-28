@@ -462,6 +462,8 @@ function renderTodo() {
     Object.keys(appData.asesores).forEach(key => {
         const asor = appData.asesores[key];
         acumuladoTotalVentas += asor.ventaSemanal;
+        acumuladoTotalVentas += sumarMontoVenta(asor.ventasGarex);
+        acumuladoTotalVentas += sumarMontoVenta(asor.ventasInsurama);
         metaTotalTienda += asor.meta;
         totalGarex += sumarCantidad(asor.ventasGarex);
         totalSeguros += sumarCantidad(asor.ventasInsurama);
