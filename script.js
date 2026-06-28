@@ -247,7 +247,8 @@ function actualizarRelojYFecha() {
     const ahora = new Date();
     const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     document.getElementById("fecha").textContent = ahora.toLocaleDateString('es-ES', opcionesFecha);
-    document.getElementById("hora").textContent = ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const elHora = document.getElementById("hora");
+    if (elHora) elHora.textContent = ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
 // GUARDAR INICIO
@@ -483,7 +484,18 @@ function renderTodo() {
 
         const cumplimiento = asor.meta > 0 ? ((asor.ventaSemanal / asor.meta) * 100).toFixed(1) : 0;
         const u = asor.unidades;
+        const m = asor.montos;
         const totalUnidades = u.mac + u.ipad + u.iphone + u.watch + u.airpods + u.audio;
+
+        // Conteo de Garex y Seguros colocados por este asesor, por dispositivo
+        const garexAsorPorDispositivo = { Mac: 0, iPad: 0, iPhone: 0, Watch: 0, AirPods: 0, Audio: 0 };
+        asor.ventasGarex.forEach(v => {
+            if (garexAsorPorDispositivo[v.dispositivo] !== undefined) garexAsorPorDispositivo[v.dispositivo] += v.cantidad;
+        });
+        const segurosAsorPorDispositivo = { Mac: 0, iPad: 0, iPhone: 0, Watch: 0 };
+        asor.ventasInsurama.forEach(v => {
+            if (segurosAsorPorDispositivo[v.dispositivo] !== undefined) segurosAsorPorDispositivo[v.dispositivo] += v.cantidad;
+        });
 
         htmlResumenAsesores += `
             <div style="padding:15px; background:#F5F5F7; border-radius:12px; margin-bottom:15px;">
@@ -499,12 +511,32 @@ function renderTodo() {
                 <div style="margin-top:10px; padding-top:10px; border-top:1px solid #E5E5EA;">
                     <p style="font-size:12px; font-weight:600; color:#1D1D1F; margin-bottom:6px;">Unidades acumuladas — <span style="color:#0071E3;">${totalUnidades} total</span></p>
                     <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:4px; font-size:12px; color:#515154;">
-                        <div>Unidades de Mac: <strong>${u.mac}</strong></div>
-                        <div>Unidades de iPad: <strong>${u.ipad}</strong></div>
-                        <div>Unidades de iPhone: <strong>${u.iphone}</strong></div>
-                        <div>Unidades de Watch: <strong>${u.watch}</strong></div>
-                        <div>Unidades de AirPods: <strong>${u.airpods}</strong></div>
-                        <div>Unidades de Audio: <strong>${u.audio}</strong></div>
+                        <div>Unidades de Mac: <strong>${u.mac}</strong> <span style="color:#86868B;">($${m.mac.toLocaleString()})</span></div>
+                        <div>Unidades de iPad: <strong>${u.ipad}</strong> <span style="color:#86868B;">($${m.ipad.toLocaleString()})</span></div>
+                        <div>Unidades de iPhone: <strong>${u.iphone}</strong> <span style="color:#86868B;">($${m.iphone.toLocaleString()})</span></div>
+                        <div>Unidades de Watch: <strong>${u.watch}</strong> <span style="color:#86868B;">($${m.watch.toLocaleString()})</span></div>
+                        <div>Unidades de AirPods: <strong>${u.airpods}</strong> <span style="color:#86868B;">($${m.airpods.toLocaleString()})</span></div>
+                        <div>Unidades de Audio: <strong>${u.audio}</strong> <span style="color:#86868B;">($${m.audio.toLocaleString()})</span></div>
+                    </div>
+                </div>
+                <div style="margin-top:10px; padding-top:10px; border-top:1px solid #E5E5EA;">
+                    <p style="font-size:12px; font-weight:600; color:#1D1D1F; margin-bottom:6px;">Garex colocados — <span style="color:#34C759;">${sumarCantidad(asor.ventasGarex)} total</span></p>
+                    <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:4px; font-size:12px; color:#515154;">
+                        <div>Mac: <strong>${garexAsorPorDispositivo.Mac}</strong></div>
+                        <div>iPad: <strong>${garexAsorPorDispositivo.iPad}</strong></div>
+                        <div>iPhone: <strong>${garexAsorPorDispositivo.iPhone}</strong></div>
+                        <div>Watch: <strong>${garexAsorPorDispositivo.Watch}</strong></div>
+                        <div>AirPods: <strong>${garexAsorPorDispositivo.AirPods}</strong></div>
+                        <div>Audio: <strong>${garexAsorPorDispositivo.Audio}</strong></div>
+                    </div>
+                </div>
+                <div style="margin-top:10px; padding-top:10px; border-top:1px solid #E5E5EA;">
+                    <p style="font-size:12px; font-weight:600; color:#1D1D1F; margin-bottom:6px;">Seguros colocados — <span style="color:#34C759;">${sumarCantidad(asor.ventasInsurama)} total</span></p>
+                    <div style="display:grid; grid-template-columns: repeat(4,1fr); gap:4px; font-size:12px; color:#515154;">
+                        <div>Mac: <strong>${segurosAsorPorDispositivo.Mac}</strong></div>
+                        <div>iPad: <strong>${segurosAsorPorDispositivo.iPad}</strong></div>
+                        <div>iPhone: <strong>${segurosAsorPorDispositivo.iPhone}</strong></div>
+                        <div>Watch: <strong>${segurosAsorPorDispositivo.Watch}</strong></div>
                     </div>
                 </div>
             </div>`;
