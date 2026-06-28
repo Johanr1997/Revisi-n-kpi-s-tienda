@@ -208,71 +208,100 @@
                 </div>
             </div>
         </div>
-        <!-- PESTAÑA VENTAS -->
+        <!-- PESTAÑA VENTAS — LIQUID GLASS -->
         <div id="ventas-pantalla" class="seccion-dashboard active-seccion">
-            <div class="cards">
-                <div class="card">
-                    <h3>Ventas Acumuladas</h3>
-                    <h2 id="ventasAcumuladas">$0</h2>
+
+            <!-- Orbes de color adicionales -->
+            <div class="v-orb v-orb-green"></div>
+            <div class="v-orb v-orb-rose"></div>
+
+            <!-- HERO -->
+            <div class="v-glass v-hero">
+                <div class="v-hero-left">
+                    <span class="v-eyebrow">Ventas acumuladas esta semana</span>
+                    <div class="v-hero-number" id="ventasAcumuladas">$0</div>
+                    <div class="v-hero-sub">Meta tienda acumulada</div>
                 </div>
-                <div class="card">
-                    <h3>Cumplimiento Meta Total</h3>
-                    <h2 id="cumplimientoMetaTotal">0%</h2>
-                </div>
-                <div class="card">
-                    <h3>Tráfico Acumulado</h3>
-                    <h2 id="v_trafico_acumulado">0</h2>
+                <div class="v-meta-ring-wrap">
+                    <div class="v-traf-pill">
+                        <span class="v-traf-num" id="v_trafico_acumulado">0</span>
+                        <span class="v-traf-label">visitantes</span>
+                    </div>
+                    <div class="v-meta-arc">
+                        <svg viewBox="0 0 100 100" class="v-arc-svg">
+                            <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(0,0,0,0.07)" stroke-width="8"/>
+                            <circle cx="50" cy="50" r="42" fill="none" stroke="#34C759" stroke-width="8"
+                                stroke-dasharray="263.9" stroke-dashoffset="263.9"
+                                stroke-linecap="round" transform="rotate(-90 50 50)"
+                                id="v_arcCircle"/>
+                        </svg>
+                        <div class="v-arc-label">
+                            <span class="v-arc-pct" id="cumplimientoMetaTotal">0%</span>
+                            <span class="v-arc-sub">meta</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <h2 style="font-size: 18px; margin-bottom: 15px;">Planes SOS</h2>
-            <div class="cards">
-                <div class="card" id="cardConversion">
-                    <h3>Conversión</h3>
-                    <h2 id="conversionReal">0%</h2>
-                    <div class="badge-mes">Meta: <span id="metaVisualConv">25.0%</span></div>
+            <!-- PLAN SOS -->
+            <div class="v-section-label">Plan SOS</div>
+            <div class="v-sos-grid">
+                <div class="v-glass v-sos-card" id="cardConversion">
+                    <div class="v-sos-dot" id="dotConversion"></div>
+                    <div class="v-sos-name">Conversión</div>
+                    <div class="v-sos-val" id="conversionReal">0%</div>
+                    <div class="v-sos-track"><div class="v-sos-fill" id="fillConversion"></div></div>
+                    <div class="v-sos-meta">Meta <span id="metaVisualConv">25.0%</span></div>
                 </div>
-                <div class="card" id="cardAccesorizacion">
-                    <h3>Accesorización</h3>
-                    <h2 id="accesorizacionReal">0%</h2>
-                    <div class="badge-mes">Meta: <span id="metaVisualAcc">29.4%</span></div>
+                <div class="v-glass v-sos-card" id="cardAccesorizacion">
+                    <div class="v-sos-dot" id="dotAccesorizacion"></div>
+                    <div class="v-sos-name">Accesorización</div>
+                    <div class="v-sos-val" id="accesorizacionReal">0%</div>
+                    <div class="v-sos-track"><div class="v-sos-fill" id="fillAccesorizacion"></div></div>
+                    <div class="v-sos-meta">Meta <span id="metaVisualAcc">29.4%</span></div>
                 </div>
-                <div class="card" id="cardTicket">
-                    <h3>Ticket Promedio</h3>
-                    <h2 id="ticketReal">$0</h2>
-                    <div class="badge-mes">Meta: <span id="metaVisualTick">$305</span></div>
-                </div>
-            </div>
-
-            <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
-                <div class="card">
-                    <h3>Garex Vendidos</h3>
-                    <h2 id="v_total_garex">0 Unidades</h2>
-                </div>
-                <div class="card">
-                    <h3>Seguros Vendidos</h3>
-                    <h2 id="v_total_seguros">0 Unidades</h2>
-                </div>
-                <div class="card">
-                    <h3>Códigos QR</h3>
-                    <h2 id="v_total_qr">0 Unidades</h2>
-                </div>
-                <div class="card">
-                    <h3>Trade-In</h3>
-                    <h2 id="v_total_tradein">0 Unidades</h2>
+                <div class="v-glass v-sos-card" id="cardTicket">
+                    <div class="v-sos-dot" id="dotTicket"></div>
+                    <div class="v-sos-name">Ticket Promedio</div>
+                    <div class="v-sos-val" id="ticketReal">$0</div>
+                    <div class="v-sos-track"><div class="v-sos-fill" id="fillTicket"></div></div>
+                    <div class="v-sos-meta">Meta <span id="metaVisualTick">$305</span></div>
                 </div>
             </div>
 
-            <div class="seccion-inferior" style="margin-top: 25px;">
-                <div class="observaciones-box">
-                    <h2>Comentarios Semanales</h2>
-                    <p id="txtDashboardComentarios" style="font-size: 14px; color:#515154; line-height:1.5;">No hay comentarios.</p>
+            <!-- PROTECCIONES Y ACTIVACIÓN -->
+            <div class="v-section-label">Protecciones &amp; Activación</div>
+            <div class="v-pill-row">
+                <div class="v-glass v-pill">
+                    <span class="v-pill-num" id="v_total_garex">0</span>
+                    <span class="v-pill-name">Garex</span>
                 </div>
-                <div class="observaciones-box" style="border-left: 4px solid #FF9500;">
-                    <h2>Oportunidades de Mejora</h2>
-                    <p id="txtDashboardOportunidades" style="font-size: 14px; color:#515154; line-height:1.5;">No hay oportunidades registradas.</p>
+                <div class="v-glass v-pill">
+                    <span class="v-pill-num" id="v_total_seguros">0</span>
+                    <span class="v-pill-name">Seguros</span>
+                </div>
+                <div class="v-glass v-pill">
+                    <span class="v-pill-num" id="v_total_qr">0</span>
+                    <span class="v-pill-name">Códigos QR</span>
+                </div>
+                <div class="v-glass v-pill">
+                    <span class="v-pill-num" id="v_total_tradein">0</span>
+                    <span class="v-pill-name">Trade-In</span>
                 </div>
             </div>
+
+            <!-- NOTAS -->
+            <div class="v-notas-grid">
+                <div class="v-glass v-nota-card v-nota-blue">
+                    <div class="v-nota-tag">Comentarios</div>
+                    <p id="txtDashboardComentarios">Sin comentarios registrados en la semana.</p>
+                </div>
+                <div class="v-glass v-nota-card v-nota-orange">
+                    <div class="v-nota-tag">Oportunidades de Mejora</div>
+                    <p id="txtDashboardOportunidades">Sin oportunidades detectadas.</p>
+                </div>
+            </div>
+
         </div>
 
         <!-- PESTAÑA GAREX -->

@@ -497,6 +497,16 @@ function renderTodo() {
     const porcMetaTienda = metaTotalTienda > 0 ? ((acumuladoTotalVentas / metaTotalTienda) * 100).toFixed(1) : 0;
     document.getElementById("cumplimientoMetaTotal").textContent = `${porcMetaTienda}%`;
 
+    // Animar arco SVG de cumplimiento de meta
+    const arcCircle = document.getElementById("v_arcCircle");
+    if (arcCircle) {
+        const circumference = 263.9;
+        const pct = Math.min(parseFloat(porcMetaTienda) / 100, 1);
+        arcCircle.style.strokeDashoffset = circumference - pct * circumference;
+        arcCircle.style.stroke = pct >= 1 ? "#34C759" : pct >= 0.85 ? "#FF9500" : "#FF3B30";
+        arcCircle.style.transition = "stroke-dashoffset 0.8s cubic-bezier(.4,0,.2,1), stroke 0.4s";
+    }
+
     // KPIs Plan SOS
     document.getElementById("conversionReal").textContent = `${appData.inicio.conversion.toFixed(1)}%`;
     document.getElementById("accesorizacionReal").textContent = `${appData.inicio.accesorizacion.toFixed(1)}%`;
@@ -506,10 +516,20 @@ function renderTodo() {
     evaluarSemaforoApple("cardAccesorizacion", appData.inicio.accesorizacion, METAS_SOS.accesorizacion);
     evaluarSemaforoApple("cardTicket", appData.inicio.ticket, METAS_SOS.ticket);
 
-    document.getElementById("v_total_garex").textContent = `${totalGarex} Unidades`;
-    document.getElementById("v_total_seguros").textContent = `${totalSeguros} Unidades`;
-    document.getElementById("v_total_qr").textContent = `${totalQR} Unidades`;
-    document.getElementById("v_total_tradein").textContent = `${totalTradeIn} Unidades`;
+    // Rellenar barras de progreso SOS
+    function setPctBar(fillId, real, meta) {
+        const el = document.getElementById(fillId);
+        if (!el || !meta) return;
+        el.style.width = Math.min((real / meta) * 100, 100) + "%";
+    }
+    setPctBar("fillConversion", appData.inicio.conversion, METAS_SOS.conversion);
+    setPctBar("fillAccesorizacion", appData.inicio.accesorizacion, METAS_SOS.accesorizacion);
+    setPctBar("fillTicket", appData.inicio.ticket, METAS_SOS.ticket);
+
+    document.getElementById("v_total_garex").textContent = totalGarex;
+    document.getElementById("v_total_seguros").textContent = totalSeguros;
+    document.getElementById("v_total_qr").textContent = totalQR;
+    document.getElementById("v_total_tradein").textContent = totalTradeIn;
     document.getElementById("v_trafico_acumulado").textContent = appData.inicio.trafico.toLocaleString();
 
     document.getElementById("txtDashboardComentarios").textContent = appData.inicio.comentarios || "Sin comentarios registrados en la semana.";
@@ -703,9 +723,19 @@ function evaluarSemaforoApple(idElemento, valorReal, valorMeta) {
     const tarjeta = document.getElementById(idElemento);
     if (!tarjeta) return;
     tarjeta.classList.remove("verde", "amarillo", "rojo");
-    if (valorReal >= valorMeta) tarjeta.classList.add("verde");
-    else if (valorReal >= (valorMeta * 0.85)) tarjeta.classList.add("amarillo");
-    else tarjeta.classList.add("rojo");
+    let estado;
+    if (valorReal >= valorMeta) estado = "verde";
+    else if (valorReal >= (valorMeta * 0.85)) estado = "amarillo";
+    else estado = "rojo";
+    tarjeta.classList.add(estado);
+
+    // Actualizar punto de color (liquid glass dot)
+    const dotId = "dot" + idElemento.replace("card", "");
+    const dot = document.getElementById(dotId);
+    if (dot) {
+        dot.classList.remove("verde", "amarillo", "rojo");
+        dot.classList.add(estado);
+    }
 }
 
 // ═══════════════════════════════════════════
