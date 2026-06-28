@@ -451,6 +451,11 @@ function renderTodo() {
     let totalQR = 0;
     let totalTradeIn = 0;
 
+    // Acumuladores para el attach rate por dispositivo (Garex y Seguros)
+    const unidadesPorDispositivo = { mac: 0, ipad: 0, iphone: 0, watch: 0 };
+    const garexPorDispositivo = { Mac: 0, iPad: 0, iPhone: 0, Watch: 0 };
+    const segurosPorDispositivo = { Mac: 0, iPad: 0, iPhone: 0, Watch: 0 };
+
     // Procesar Datos Globales de Asesores
     let htmlResumenAsesores = "";
     Object.keys(appData.asesores).forEach(key => {
@@ -461,6 +466,20 @@ function renderTodo() {
         totalSeguros += sumarCantidad(asor.ventasInsurama);
         totalQR += asor.qr;
         totalTradeIn += asor.tradeIn;
+
+        // Unidades vendidas por dispositivo (base para el attach rate)
+        unidadesPorDispositivo.mac    += asor.unidades.mac;
+        unidadesPorDispositivo.ipad   += asor.unidades.ipad;
+        unidadesPorDispositivo.iphone += asor.unidades.iphone;
+        unidadesPorDispositivo.watch  += asor.unidades.watch;
+
+        // Garex e Insurama colocados por dispositivo
+        asor.ventasGarex.forEach(v => {
+            if (garexPorDispositivo[v.dispositivo] !== undefined) garexPorDispositivo[v.dispositivo] += v.cantidad;
+        });
+        asor.ventasInsurama.forEach(v => {
+            if (segurosPorDispositivo[v.dispositivo] !== undefined) segurosPorDispositivo[v.dispositivo] += v.cantidad;
+        });
 
         const cumplimiento = asor.meta > 0 ? ((asor.ventaSemanal / asor.meta) * 100).toFixed(1) : 0;
         const u = asor.unidades;
@@ -494,6 +513,7 @@ function renderTodo() {
 
     // Render Pestaña Ventas
     document.getElementById("ventasAcumuladas").textContent = `$${acumuladoTotalVentas.toLocaleString()}`;
+    document.getElementById("v_metaTotalTienda").textContent = `$${metaTotalTienda.toLocaleString()}`;
     const porcMetaTienda = metaTotalTienda > 0 ? ((acumuladoTotalVentas / metaTotalTienda) * 100).toFixed(1) : 0;
     document.getElementById("cumplimientoMetaTotal").textContent = `${porcMetaTienda}%`;
 
@@ -531,6 +551,20 @@ function renderTodo() {
     document.getElementById("v_total_qr").textContent = totalQR;
     document.getElementById("v_total_tradein").textContent = totalTradeIn;
     document.getElementById("v_trafico_acumulado").textContent = appData.inicio.trafico.toLocaleString();
+
+    // Attach rate por dispositivo: % de unidades vendidas de ese dispositivo que llevaron Garex o Seguro
+    function calcularAttach(cantidadProteccion, unidadesDispositivo) {
+        return unidadesDispositivo > 0 ? ((cantidadProteccion / unidadesDispositivo) * 100).toFixed(1) : "0.0";
+    }
+    document.getElementById("v_attach_garex_iphone").textContent = `${calcularAttach(garexPorDispositivo.iPhone, unidadesPorDispositivo.iphone)}%`;
+    document.getElementById("v_attach_garex_mac").textContent    = `${calcularAttach(garexPorDispositivo.Mac, unidadesPorDispositivo.mac)}%`;
+    document.getElementById("v_attach_garex_ipad").textContent   = `${calcularAttach(garexPorDispositivo.iPad, unidadesPorDispositivo.ipad)}%`;
+    document.getElementById("v_attach_garex_watch").textContent  = `${calcularAttach(garexPorDispositivo.Watch, unidadesPorDispositivo.watch)}%`;
+
+    document.getElementById("v_attach_seguros_iphone").textContent = `${calcularAttach(segurosPorDispositivo.iPhone, unidadesPorDispositivo.iphone)}%`;
+    document.getElementById("v_attach_seguros_mac").textContent    = `${calcularAttach(segurosPorDispositivo.Mac, unidadesPorDispositivo.mac)}%`;
+    document.getElementById("v_attach_seguros_ipad").textContent   = `${calcularAttach(segurosPorDispositivo.iPad, unidadesPorDispositivo.ipad)}%`;
+    document.getElementById("v_attach_seguros_watch").textContent  = `${calcularAttach(segurosPorDispositivo.Watch, unidadesPorDispositivo.watch)}%`;
 
     document.getElementById("txtDashboardComentarios").textContent = appData.inicio.comentarios || "Sin comentarios registrados en la semana.";
     document.getElementById("txtDashboardOportunidades").textContent = appData.inicio.oportunidades || "Sin oportunidades de mejora detectadas.";

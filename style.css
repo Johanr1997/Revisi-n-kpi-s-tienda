@@ -299,6 +299,32 @@ body {
     letter-spacing: 0.07em; text-align: center;
 }
 
+/* Mini desglose de attach por dispositivo dentro del pill */
+.v-attach-mini {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px 10px;
+    width: 100%;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+}
+.v-attach-mini span {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: rgba(0,0,0,0.4);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.v-attach-mini span strong {
+    font-size: 10px;
+    color: #1D1D1F;
+    font-weight: 700;
+    margin-left: 4px;
+}
+
 /* NOTAS */
 .v-notas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 22px; }
 .v-nota-card {
@@ -320,3 +346,172 @@ body {
     .v-notas-grid { grid-template-columns: 1fr; }
     .v-hero       { padding: 22px 20px; }
 }
+
+/* ═══════════════════════════════════════════════════════ */
+/* PESTAÑA ASESORES — LIQUID GLASS (FONDO CLARO)         */
+/* ═══════════════════════════════════════════════════════ */
+
+.a-orb {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: -1;
+    filter: blur(50px);
+    opacity: 0.6;
+}
+.a-orb-blue {
+    width: 480px; height: 480px;
+    background: radial-gradient(circle, rgba(147,197,253,0.7) 0%, transparent 70%);
+    top: -100px; right: -80px;
+}
+.a-orb-yellow {
+    width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(253,224,138,0.65) 0%, transparent 70%);
+    bottom: 20px; left: -60px;
+}
+
+/* HERO: selector + meta + venta */
+.a-hero {
+    padding: 28px 32px;
+    margin-bottom: 20px;
+}
+.a-hero-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+}
+.a-select-group label {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: rgba(0,0,0,0.4);
+    margin-bottom: 4px;
+}
+.a-select-group select,
+.a-select-group input {
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.9);
+}
+
+.a-cumplimiento-box {
+    background: rgba(255,255,255,0.45);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 16px;
+    padding: 14px 18px;
+    margin-top: 18px;
+}
+
+/* PILLS QR / TRADE-IN (editables) */
+.a-pill-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 22px;
+}
+.a-pill {
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+}
+.a-pill .v-pill-ico { font-size: 26px; }
+.a-pill .v-pill-name {
+    flex: 1;
+    text-align: left;
+    font-size: 11px;
+    color: rgba(0,0,0,0.4);
+    letter-spacing: 0.04em;
+}
+.a-pill-input {
+    width: 90px;
+    text-align: right;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1D1D1F;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.9);
+    border-radius: 10px;
+    padding: 8px 10px;
+}
+
+/* TARJETAS DE CONTENIDO (montos, unidades, garex, insurama, resumen) */
+.a-card {
+    padding: 24px 26px;
+    margin-bottom: 22px;
+}
+.a-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1D1D1F;
+    margin-bottom: 14px;
+}
+.a-grid-categorias {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+.a-grid-categorias .form-group label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: rgba(0,0,0,0.4);
+    text-transform: uppercase;
+}
+.a-grid-categorias input {
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.85);
+}
+
+.a-proteccion-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+.a-proteccion-grid .grid-2-col {
+    background: rgba(255,255,255,0.4);
+}
+
+.a-btn-guardar {
+    width: 100%;
+    margin-bottom: 28px;
+    padding: 14px;
+    font-size: 15px;
+}
+
+@media (max-width: 780px) {
+    .a-hero-row, .a-pill-row, .a-proteccion-grid { grid-template-columns: 1fr; }
+    .a-grid-categorias { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ═══════════════════════════════════════════════════════ */
+/* ORBES DE COLOR — PLAN SOS / GAREX / INSURAMA / BITÁCORAS / CONFIGURACIÓN */
+/* ═══════════════════════════════════════════════════════ */
+
+.s-orb, .g-orb, .b-orb, .c-orb {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: -1;
+    filter: blur(50px);
+    opacity: 0.6;
+}
+
+/* Plan SOS — violeta / verde agua */
+.s-orb-purple { width: 460px; height: 460px; background: radial-gradient(circle, rgba(196,181,253,0.7) 0%, transparent 70%); top: -110px; left: -90px; }
+.s-orb-teal   { width: 380px; height: 380px; background: radial-gradient(circle, rgba(153,246,228,0.65) 0%, transparent 70%); bottom: 30px; right: -60px; }
+
+/* Garex — verde / azul (incentivo positivo) */
+.g-orb-green { width: 460px; height: 460px; background: radial-gradient(circle, rgba(134,239,172,0.7) 0%, transparent 70%); top: -100px; right: -90px; }
+.g-orb-blue  { width: 360px; height: 360px; background: radial-gradient(circle, rgba(147,197,253,0.6) 0%, transparent 70%); bottom: 20px; left: -60px; }
+
+/* Insurama — índigo / rosa */
+.g-orb-indigo { width: 460px; height: 460px; background: radial-gradient(circle, rgba(165,180,252,0.7) 0%, transparent 70%); top: -100px; left: -90px; }
+.g-orb-pink   { width: 360px; height: 360px; background: radial-gradient(circle, rgba(253,164,175,0.6) 0%, transparent 70%); bottom: 20px; right: -60px; }
+
+/* Bitácoras — ámbar / azul */
+.b-orb-amber { width: 440px; height: 440px; background: radial-gradient(circle, rgba(252,211,77,0.6) 0%, transparent 70%); top: -100px; right: -80px; }
+.b-orb-blue  { width: 360px; height: 360px; background: radial-gradient(circle, rgba(147,197,253,0.6) 0%, transparent 70%); bottom: 30px; left: -60px; }
+
+/* Configuración — gris neutro / rojo de advertencia (sutil) */
+.c-orb-gray { width: 440px; height: 440px; background: radial-gradient(circle, rgba(199,210,254,0.55) 0%, transparent 70%); top: -100px; left: -90px; }
+.c-orb-red  { width: 320px; height: 320px; background: radial-gradient(circle, rgba(254,202,202,0.5) 0%, transparent 70%); bottom: 10px; right: -50px; }
