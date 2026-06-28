@@ -1,5 +1,5 @@
 // METAS SOS — cargadas desde localStorage (editables en Configuración)
-const METAS_SOS_DEFAULT = { conversion: 23.0, accesorizacion: 29.4, ticket: 280 };
+const METAS_SOS_DEFAULT = { conversion: 0, accesorizacion: 0, ticket: 0 };
 let METAS_SOS = JSON.parse(localStorage.getItem("metasSOS")) || { ...METAS_SOS_DEFAULT };
 
 function guardarMetasSOS() {
@@ -85,9 +85,9 @@ let appData = JSON.parse(localStorage.getItem("controlVentasData")) || {
     inicio: { conversion: 0, accesorizacion: 0, ticket: 0, trafico: 0, comentarios: "", oportunidades: "" },
     bitacoras: [],
     asesores: {
-        asesor0: nuevoAsesor("Kendall V."),
-        asesor1: nuevoAsesor("Fabián Q."),
-        asesor2: nuevoAsesor("Asesor Eventual")
+        asesor0: nuevoAsesor("Asesor 1"),
+        asesor1: nuevoAsesor("Asesor 2"),
+        asesor2: nuevoAsesor("Asesor 3")
     }
 };
 
@@ -119,10 +119,14 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("inputComentarios").value = appData.inicio.comentarios || "";
     document.getElementById("inputOportunidades").value = appData.inicio.oportunidades || "";
 
+    // Construir el select de asesores dinámicamente
+    renderSelectAsesor(false);
+    const selInicial = document.getElementById("selectAsesor");
+    if (selInicial) selInicial.addEventListener("change", onSelectAsesorChange);
+
     // Mostrar el cumplimiento del asesor seleccionado por defecto al cargar
-    document.getElementById("inputMetaAsesor").value = appData.asesores[document.getElementById("selectAsesor").value].meta || 0;
+    document.getElementById("inputMetaAsesor").value = appData.asesores[document.getElementById("selectAsesor").value]?.meta || 0;
     actualizarCumplimientoAsesorVisual();
-    actualizarUnidadesAcumuladasVisual();
     renderListaPendiente("garex");
     renderListaPendiente("insurama");
 
@@ -139,6 +143,24 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("metaVisualTick").textContent  = `$${METAS_SOS.ticket.toLocaleString()}`;
 });
 
+function onSelectAsesorChange() {
+    if (lineasGarexPendientes.length > 0 || lineasInsuramaPendientes.length > 0) {
+        const continuar = confirm("Tienes líneas de Garex/Insurama sin guardar. Si cambias de asesor se perderán. ¿Deseas continuar?");
+        if (!continuar) {
+            this.value = this.dataset.previo || this.value;
+            return;
+        }
+        lineasGarexPendientes = [];
+        lineasInsuramaPendientes = [];
+        renderListaPendiente("garex");
+        renderListaPendiente("insurama");
+    }
+    const key = this.value;
+    this.dataset.previo = key;
+    document.getElementById("inputMetaAsesor").value = appData.asesores[key]?.meta || 0;
+    actualizarCumplimientoAsesorVisual();
+}
+
 function configurarNavegacionPestañas() {
     const botones = document.querySelectorAll(".tab-btn");
     botones.forEach(btn => {
@@ -153,29 +175,6 @@ function configurarNavegacionPestañas() {
             if (seccionActiva) seccionActiva.classList.add("active-seccion");
         });
     });
-
-    // Actualizar el recuadro de cumplimiento al cambiar de asesor seleccionado
-    const selectAsesor = document.getElementById("selectAsesor");
-    if (selectAsesor) {
-        selectAsesor.addEventListener("change", function () {
-            if (lineasGarexPendientes.length > 0 || lineasInsuramaPendientes.length > 0) {
-                const continuar = confirm("Tienes líneas de Garex/Insurama sin guardar. Si cambias de asesor se perderán. ¿Deseas continuar?");
-                if (!continuar) {
-                    this.value = this.dataset.previo || this.value;
-                    return;
-                }
-                lineasGarexPendientes = [];
-                lineasInsuramaPendientes = [];
-                renderListaPendiente("garex");
-                renderListaPendiente("insurama");
-            }
-            const key = this.value;
-            this.dataset.previo = key;
-            document.getElementById("inputMetaAsesor").value = appData.asesores[key].meta || 0;
-            actualizarCumplimientoAsesorVisual();
-            actualizarUnidadesAcumuladasVisual();
-        });
-    }
 
     // Previsualizar cumplimiento mientras se edita la meta mensual (antes de guardar)
     const inputMeta = document.getElementById("inputMetaAsesor");
@@ -403,32 +402,9 @@ function guardarDatosAsesor() {
 
     sincronizarYRenderizar();
     actualizarCumplimientoAsesorVisual();
-    actualizarUnidadesAcumuladasVisual();
     alert("Expediente comercial cargado y acumulado con éxito.");
 }
 
-// MOSTRAR UNIDADES ACUMULADAS POR CATEGORÍA DEL ASESOR SELECCIONADO (EN VIVO)
-function actualizarUnidadesAcumuladasVisual() {
-    const key = document.getElementById("selectAsesor").value;
-    const asor = appData.asesores[key];
-    const contenedor = document.getElementById("unidadesAcumuladasBox");
-    if (!asor || !contenedor) return;
-
-    const u = asor.unidades;
-    const totalUnidades = u.mac + u.ipad + u.iphone + u.watch + u.airpods + u.audio;
-
-    contenedor.innerHTML = `
-        <div style="font-size:13px; font-weight:600; color:#1D1D1F; margin-bottom:8px;">Unidades acumuladas (${asor.nombre})</div>
-        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; font-size:12px; color:#515154;">
-            <div>Mac: <strong>${u.mac}</strong></div>
-            <div>iPad: <strong>${u.ipad}</strong></div>
-            <div>iPhone: <strong>${u.iphone}</strong></div>
-            <div>Watch: <strong>${u.watch}</strong></div>
-            <div>AirPods: <strong>${u.airpods}</strong></div>
-            <div>Audio: <strong>${u.audio}</strong></div>
-        </div>
-        <div style="margin-top:8px; font-size:12px; font-weight:600; color:#0071E3;">Total: ${totalUnidades} unidades</div>`;
-}
 
 // MOSTRAR % DE CUMPLIMIENTO DE META MENSUAL DEL ASESOR SELECCIONADO (EN VIVO)
 function actualizarCumplimientoAsesorVisual() {
@@ -466,6 +442,8 @@ function agregarNotaBitacora() {
 
 // RENDERS MÚLTIPLES
 function renderTodo() {
+    renderSelectAsesor();
+    renderListaAsesoresConfig();
     let acumuladoTotalVentas = 0;
     let metaTotalTienda = 0;
     let totalGarex = 0;
@@ -487,7 +465,7 @@ function renderTodo() {
         const cumplimiento = asor.meta > 0 ? ((asor.ventaSemanal / asor.meta) * 100).toFixed(1) : 0;
         const u = asor.unidades;
         const totalUnidades = u.mac + u.ipad + u.iphone + u.watch + u.airpods + u.audio;
-        
+
         htmlResumenAsesores += `
             <div style="padding:15px; background:#F5F5F7; border-radius:12px; margin-bottom:15px;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
@@ -502,12 +480,12 @@ function renderTodo() {
                 <div style="margin-top:10px; padding-top:10px; border-top:1px solid #E5E5EA;">
                     <p style="font-size:12px; font-weight:600; color:#1D1D1F; margin-bottom:6px;">Unidades acumuladas — <span style="color:#0071E3;">${totalUnidades} total</span></p>
                     <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:4px; font-size:12px; color:#515154;">
-                        <div>Mac: <strong>${u.mac}</strong></div>
-                        <div>iPad: <strong>${u.ipad}</strong></div>
-                        <div>iPhone: <strong>${u.iphone}</strong></div>
-                        <div>Watch: <strong>${u.watch}</strong></div>
-                        <div>AirPods: <strong>${u.airpods}</strong></div>
-                        <div>Audio: <strong>${u.audio}</strong></div>
+                        <div>Unidades de Mac: <strong>${u.mac}</strong></div>
+                        <div>Unidades de iPad: <strong>${u.ipad}</strong></div>
+                        <div>Unidades de iPhone: <strong>${u.iphone}</strong></div>
+                        <div>Unidades de Watch: <strong>${u.watch}</strong></div>
+                        <div>Unidades de AirPods: <strong>${u.airpods}</strong></div>
+                        <div>Unidades de Audio: <strong>${u.audio}</strong></div>
                     </div>
                 </div>
             </div>`;
@@ -528,10 +506,10 @@ function renderTodo() {
     evaluarSemaforoApple("cardAccesorizacion", appData.inicio.accesorizacion, METAS_SOS.accesorizacion);
     evaluarSemaforoApple("cardTicket", appData.inicio.ticket, METAS_SOS.ticket);
 
-    document.getElementById("v_total_garex").textContent = `${totalGarex} U.`;
-    document.getElementById("v_total_seguros").textContent = `${totalSeguros} U.`;
-    document.getElementById("v_total_qr").textContent = `${totalQR} U.`;
-    document.getElementById("v_total_tradein").textContent = `${totalTradeIn} U.`;
+    document.getElementById("v_total_garex").textContent = `${totalGarex} Unidades`;
+    document.getElementById("v_total_seguros").textContent = `${totalSeguros} Unidades`;
+    document.getElementById("v_total_qr").textContent = `${totalQR} Unidades`;
+    document.getElementById("v_total_tradein").textContent = `${totalTradeIn} Unidades`;
     document.getElementById("v_trafico_acumulado").textContent = appData.inicio.trafico.toLocaleString();
 
     document.getElementById("txtDashboardComentarios").textContent = appData.inicio.comentarios || "Sin comentarios registrados en la semana.";
@@ -573,7 +551,7 @@ function renderTablaGarex(idContenedor) {
                 <tr style="background:#F5F5F7; color:#86868B;">
                     <th style="padding:10px;">Asesor</th>
                     ${dispositivos.map(d => `<th style="padding:10px; text-align:center;">${d}</th>`).join("")}
-                    <th style="padding:10px; text-align:center;">Total U.</th>
+                    <th style="padding:10px; text-align:center;">Total De Unidades</th>
                     <th style="padding:10px; text-align:right;">Monto Vendido</th>
                     <th style="padding:10px; text-align:right;">Incentivo Ganado</th>
                 </tr>
@@ -627,7 +605,7 @@ function renderTablaInsurama(idContenedor) {
                 <tr style="background:#F5F5F7; color:#86868B;">
                     <th style="padding:10px;">Asesor</th>
                     ${dispositivos.map(d => `<th style="padding:10px; text-align:center;">${d}</th>`).join("")}
-                    <th style="padding:10px; text-align:center;">Total U.</th>
+                    <th style="padding:10px; text-align:center;">Total De Unidades</th>
                     <th style="padding:10px; text-align:right;">Monto Vendido</th>
                     <th style="padding:10px; text-align:right;">Incentivo Ganado</th>
                 </tr>
@@ -730,6 +708,95 @@ function evaluarSemaforoApple(idElemento, valorReal, valorMeta) {
     else tarjeta.classList.add("rojo");
 }
 
+// ═══════════════════════════════════════════
+// GESTIÓN DE ASESORES (agregar / renombrar)
+// ═══════════════════════════════════════════
+
+function renderSelectAsesor(mantenerSeleccion = true) {
+    const sel = document.getElementById("selectAsesor");
+    if (!sel) return;
+    const valorActual = sel.value;
+    // Desconectar temporalmente el listener para evitar disparo accidental
+    const clonado = sel.cloneNode(false);
+    sel.parentNode.replaceChild(clonado, sel);
+    Object.keys(appData.asesores).forEach(key => {
+        const opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = appData.asesores[key].nombre;
+        clonado.appendChild(opt);
+    });
+    if (mantenerSeleccion && appData.asesores[valorActual]) clonado.value = valorActual;
+    // Re-adjuntar el listener de cambio de asesor
+    clonado.addEventListener("change", onSelectAsesorChange);
+}
+
+function renderListaAsesoresConfig() {
+    const contenedor = document.getElementById("listaAsesoresConfig");
+    if (!contenedor) return;
+    const keys = Object.keys(appData.asesores);
+    if (keys.length === 0) { contenedor.innerHTML = "<p style='color:#86868B; font-size:13px;'>No hay asesores registrados.</p>"; return; }
+
+    contenedor.innerHTML = keys.map((key, i) => `
+        <div style="display:grid; grid-template-columns: 1fr auto auto; gap:8px; align-items:center; padding:10px 12px; background:#F5F5F7; border-radius:8px; margin-bottom:8px;">
+            <input type="text" id="cfgNombreAsesor_${key}" value="${appData.asesores[key].nombre}"
+                style="font-size:14px; border:1px solid #D2D2D7; border-radius:6px; padding:8px; outline:none;">
+            <button onclick="renombrarAsesor('${key}')"
+                style="background:#0071E3; color:white; border:none; padding:8px 14px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">
+                Guardar
+            </button>
+            ${keys.length > 1 ? `<button onclick="eliminarAsesor('${key}')"
+                style="background:#FF3B30; color:white; border:none; padding:8px 14px; border-radius:6px; font-size:13px; cursor:pointer;">
+                ✕
+            </button>` : `<div></div>`}
+        </div>`
+    ).join("");
+}
+
+function renombrarAsesor(key) {
+    const input = document.getElementById(`cfgNombreAsesor_${key}`);
+    const nuevoNombre = input ? input.value.trim() : "";
+    if (!nuevoNombre) { alert("El nombre no puede estar vacío."); return; }
+    appData.asesores[key].nombre = nuevoNombre;
+    sincronizarYRenderizar();
+    renderListaAsesoresConfig();
+    alert(`Asesor renombrado a "${nuevoNombre}" correctamente.`);
+}
+
+function agregarNuevoAsesor() {
+    const input = document.getElementById("inputNuevoAsesor");
+    const nombre = input ? input.value.trim() : "";
+    if (!nombre) { alert("Ingresa un nombre para el nuevo asesor."); return; }
+
+    // Generar key única
+    const keys = Object.keys(appData.asesores);
+    const nextNum = keys.length > 0
+        ? Math.max(...keys.map(k => parseInt(k.replace("asesor", "")) || 0)) + 1
+        : 0;
+    const newKey = `asesor${nextNum}`;
+
+    appData.asesores[newKey] = nuevoAsesor(nombre);
+    if (input) input.value = "";
+    sincronizarYRenderizar();
+    renderListaAsesoresConfig();
+    alert(`Asesor "${nombre}" agregado correctamente.`);
+}
+
+function eliminarAsesor(key) {
+    const nombre = appData.asesores[key]?.nombre || key;
+    if (!confirm(`¿Eliminar al asesor "${nombre}"? Se borrarán todos sus datos acumulados.`)) return;
+    delete appData.asesores[key];
+    sincronizarYRenderizar();
+    renderListaAsesoresConfig();
+    // Si el select apuntaba al eliminado, redirigir al primero
+    const sel = document.getElementById("selectAsesor");
+    const primerKey = Object.keys(appData.asesores)[0];
+    if (sel && primerKey) {
+        sel.value = primerKey;
+        document.getElementById("inputMetaAsesor").value = appData.asesores[primerKey].meta || 0;
+        actualizarCumplimientoAsesorVisual();
+    }
+}
+
 function sincronizarYRenderizar() {
     localStorage.setItem("controlVentasData", JSON.stringify(appData));
     renderTodo();
@@ -744,9 +811,9 @@ function reiniciarTodoCero() {
             inicio: { conversion: 0, accesorizacion: 0, ticket: 0, trafico: 0, comentarios: "", oportunidades: "" },
             bitacoras: [],
             asesores: {
-                asesor0: nuevoAsesor("Kendall V."),
-                asesor1: nuevoAsesor("Fabián Q."),
-                asesor2: nuevoAsesor("Asesor Eventual")
+                asesor0: nuevoAsesor("Asesor 1"),
+                asesor1: nuevoAsesor("Asesor 2"),
+                asesor2: nuevoAsesor("Asesor 3")
             }
         };
         document.querySelectorAll("input, textarea").forEach(el => el.value = "");
@@ -756,7 +823,6 @@ function reiniciarTodoCero() {
         renderListaPendiente("insurama");
         sincronizarYRenderizar();
         actualizarCumplimientoAsesorVisual();
-        actualizarUnidadesAcumuladasVisual();
         alert("Ciclo comercial formateado a cero.");
     }
 }
