@@ -96,10 +96,43 @@
                         <input type="number" id="inputMetaAsesor" value="0">
                     </div>
                     <div class="form-group a-select-group">
-                        <label for="inputVentaSemanal">Ventas Semanales Totales ($)</label>
-                        <input type="number" id="inputVentaSemanal" value="0">
+                        <label for="inputVentaSemanal">Monto de Ventas ($) <span style="font-size:11px; color:#86868B;">(suma automática)</span></label>
+                        <input type="number" id="inputVentaSemanal" value="0" readonly style="background:rgba(0,113,227,0.06); color:#0071E3; font-weight:600;" oninput="actualizarResumenIngreso()">
                     </div>
                 </div>
+
+                <!-- Selector Día / Semana -->
+                <div class="venta-modo-wrap">
+                    <div class="venta-modo-toggle">
+                        <button class="venta-modo-btn active" id="btnModoDia" onclick="setModoVenta('dia')">📅 Por Día</button>
+                        <button class="venta-modo-btn" id="btnModoSemana" onclick="setModoVenta('semana')">📆 Por Semana</button>
+                    </div>
+
+                    <!-- Modo DÍA -->
+                    <div id="panelModoDia" class="venta-fecha-panel">
+                        <div class="form-group" style="margin-bottom:0; flex:1;">
+                            <label for="inputVentaFechaDia">Fecha de la venta</label>
+                            <input type="date" id="inputVentaFechaDia">
+                        </div>
+                        <div class="venta-resumen" id="resumenDia" style="display:none;">
+                            Se registrará <strong id="resumenDiaMonto">$0</strong> el día <strong id="resumenDiaFecha">—</strong>
+                        </div>
+                    </div>
+
+                    <!-- Modo SEMANA -->
+                    <div id="panelModoSemana" class="venta-fecha-panel" style="display:none;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label for="inputVentaFechaDesde">Desde</label>
+                            <input type="date" id="inputVentaFechaDesde" oninput="actualizarResumenIngreso()">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label for="inputVentaFechaHasta">Hasta</label>
+                            <input type="date" id="inputVentaFechaHasta" oninput="actualizarResumenIngreso()">
+                        </div>
+                        <div class="venta-resumen" id="resumenSemana" style="display:none;"></div>
+                    </div>
+                </div>
+
                 <div id="cumplimientoAsesorBox" class="a-cumplimiento-box"></div>
             </div>
 
@@ -121,14 +154,14 @@
             <div class="v-section-label">Monto de Ventas por Categoría ($)</div>
             <div class="v-glass a-card">
                 <div class="a-grid-categorias">
-                    <div class="form-group"><label>Mac</label><input type="number" id="m_mac" value="0"></div>
-                    <div class="form-group"><label>iPad</label><input type="number" id="m_ipad" value="0"></div>
-                    <div class="form-group"><label>iPhone</label><input type="number" id="m_iphone" value="0"></div>
-                    <div class="form-group"><label>Watch</label><input type="number" id="m_watch" value="0"></div>
-                    <div class="form-group"><label>AirPods</label><input type="number" id="m_airpods" value="0"></div>
-                    <div class="form-group"><label>Audio</label><input type="number" id="m_audio" value="0"></div>
-                    <div class="form-group"><label>Acc. Apple</label><input type="number" id="m_acc_apple" value="0"></div>
-                    <div class="form-group"><label>Acc. Terceros</label><input type="number" id="m_acc_terceros" value="0"></div>
+                    <div class="form-group"><label>Mac</label><input type="number" id="m_mac" value="0" oninput="recalcularMontoVentaTotal()"></div>
+                    <div class="form-group"><label>iPad</label><input type="number" id="m_ipad" value="0" oninput="recalcularMontoVentaTotal()"></div>
+                    <div class="form-group"><label>iPhone</label><input type="number" id="m_iphone" value="0" oninput="recalcularMontoVentaTotal()"></div>
+                    <div class="form-group"><label>Watch</label><input type="number" id="m_watch" value="0" oninput="recalcularMontoVentaTotal()"></div>
+                    <div class="form-group"><label>AirPods</label><input type="number" id="m_airpods" value="0" oninput="recalcularMontoVentaTotal()"></div>
+                    <div class="form-group"><label>Audio</label><input type="number" id="m_audio" value="0" oninput="recalcularMontoVentaTotal()"></div>
+                    <div class="form-group"><label>Acc. Apple</label><input type="number" id="m_acc_apple" value="0" oninput="recalcularMontoVentaTotal()"></div>
+                    <div class="form-group"><label>Acc. Terceros</label><input type="number" id="m_acc_terceros" value="0" oninput="recalcularMontoVentaTotal()"></div>
                 </div>
             </div>
 
@@ -146,7 +179,14 @@
 
             <!-- GAREX E INSURAMA -->
             <div class="v-section-label">Protecciones &amp; Activación</div>
-            <div class="a-proteccion-grid">
+            <div class="v-glass a-card" style="margin-bottom:0; border-bottom-left-radius:0; border-bottom-right-radius:0;">
+                <div class="form-group" style="margin-bottom:0;">
+                    <label for="inputFechaProteccion">📅 Fecha de venta de protecciones (Garex / Insurama)</label>
+                    <input type="date" id="inputFechaProteccion" style="max-width:220px;">
+                    <span style="font-size:12px; color:#86868B; margin-left:10px;">Deja vacío para usar la fecha de hoy</span>
+                </div>
+            </div>
+            <div class="a-proteccion-grid" style="margin-top:0;">
                 <div class="v-glass a-card">
                     <h3 class="a-card-title">Garex (Garantía Extendida)</h3>
                     <div class="grid-2-col" style="background:transparent; padding:0; margin-bottom:10px;">
@@ -377,11 +417,22 @@
             <div class="b-orb b-orb-amber"></div>
             <div class="b-orb b-orb-blue"></div>
 
+            <!-- Formulario Bitácora -->
             <div class="v-glass a-card">
                 <h3 class="a-card-title">Bitácora Semanal de Cambios</h3>
                 <div class="form-group">
                     <label for="inputNotaBitacora">Anotar cosas que se deben cambiar en la semana</label>
                     <textarea id="inputNotaBitacora" placeholder="Escribe aquí las modificaciones, ajustes de horarios o cambios tácticos..."></textarea>
+                </div>
+                <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+                    <div class="form-group" style="margin-bottom:0; flex:0 0 200px;">
+                        <label for="inputBitacoraFecha">Fecha (opcional)</label>
+                        <input type="date" id="inputBitacoraFecha">
+                    </div>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#515154; cursor:pointer; margin-top:20px;">
+                        <input type="checkbox" id="checkBitacoraCalendario" checked style="width:16px; height:16px; cursor:pointer;">
+                        Agregar al calendario
+                    </label>
                 </div>
                 <button class="btn-primary" onclick="agregarNotaBitacora()">Agregar Comentario a la Bitácora</button>
             </div>
@@ -394,6 +445,36 @@
         <div id="recordatorios" class="seccion-dashboard" style="position: relative; isolation: isolate;">
             <div class="r-orb r-orb-orange"></div>
             <div class="r-orb r-orb-purple"></div>
+
+            <!-- CALENDARIO -->
+            <div class="v-section-label">📅 Calendario</div>
+            <div class="v-glass a-card cal-wrapper">
+                <div class="cal-header">
+                    <button class="cal-nav-btn" onclick="calNavegar(-1)">‹</button>
+                    <div class="cal-titulo" id="calTitulo"></div>
+                    <button class="cal-nav-btn" onclick="calNavegar(1)">›</button>
+                    <button class="cal-hoy-btn" onclick="calIrHoy()">Hoy</button>
+                </div>
+                <div class="cal-dias-semana">
+                    <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
+                </div>
+                <div class="cal-grid" id="calGrid"></div>
+                <div class="cal-leyenda">
+                    <span class="cal-dot" style="background:#0071E3;"></span> Recordatorio
+                    <span class="cal-dot" style="background:#FF9500; margin-left:14px;"></span> Clínica pendiente
+                    <span class="cal-dot" style="background:#34C759; margin-left:14px;"></span> Clínica realizada / Venta
+                    <span class="cal-dot" style="background:#86868B; margin-left:14px;"></span> Bitácora
+                </div>
+            </div>
+
+            <!-- Panel de detalle al clickear un día -->
+            <div class="v-glass a-card" id="calDetalle" style="display:none; margin-top:0;">
+                <div class="cal-detalle-header">
+                    <span id="calDetalleFecha" style="font-weight:700; font-size:14px;"></span>
+                    <button onclick="document.getElementById('calDetalle').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:18px;color:rgba(0,0,0,0.3);">✕</button>
+                </div>
+                <div id="calDetalleContenido"></div>
+            </div>
 
             <!-- RECORDATORIOS MENSUALES -->
             <div class="v-section-label">📌 Recordatorios Mensuales</div>

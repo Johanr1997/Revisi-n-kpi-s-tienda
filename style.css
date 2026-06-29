@@ -776,3 +776,212 @@ body {
     transition: color 0.15s, background 0.15s;
 }
 .c-item-del:hover { color: #FF3B30; background: rgba(255,59,48,0.08); }
+/* ═══════════════════════════════════════════════════════ */
+/* CALENDARIO — BITÁCORAS                                  */
+/* ═══════════════════════════════════════════════════════ */
+
+.cal-wrapper { padding: 24px 26px 20px; margin-bottom: 22px; }
+
+.cal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+.cal-titulo {
+    flex: 1;
+    font-size: 17px;
+    font-weight: 700;
+    color: #1D1D1F;
+    text-transform: capitalize;
+}
+.cal-nav-btn {
+    background: rgba(0,0,0,0.05);
+    border: none;
+    border-radius: 50%;
+    width: 32px; height: 32px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #1D1D1F;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+    line-height: 1;
+}
+.cal-nav-btn:hover { background: rgba(0,0,0,0.1); }
+.cal-hoy-btn {
+    background: rgba(0,113,227,0.10);
+    border: none;
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #0071E3;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.cal-hoy-btn:hover { background: rgba(0,113,227,0.18); }
+
+.cal-dias-semana {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 6px;
+}
+.cal-dias-semana span {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: rgba(0,0,0,0.35);
+    text-transform: uppercase;
+    padding: 4px 0;
+}
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+}
+.cal-celda {
+    min-height: 78px;
+    border-radius: 10px;
+    padding: 6px 7px 4px;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+}
+.cal-celda:hover { background: rgba(0,0,0,0.04); }
+.cal-celda.otro-mes { opacity: 0.35; }
+.cal-celda.hoy .cal-dia-num {
+    background: #FF3B30;
+    color: #fff;
+    border-radius: 50%;
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+}
+.cal-celda.seleccionada { background: rgba(0,113,227,0.07); outline: 2px solid rgba(0,113,227,0.25); }
+.cal-dia-num {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1D1D1F;
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 4px;
+}
+.cal-eventos {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.cal-evento-pill {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+.cal-pill-recordatorio { background: rgba(0,113,227,0.12); color: #0055b3; }
+.cal-pill-clinica-p    { background: rgba(255,149,0,0.13); color: #8a5000; }
+.cal-pill-clinica-r    { background: rgba(52,199,89,0.13); color: #1a6e35; }
+.cal-pill-bitacora     { background: rgba(134,134,139,0.12); color: #3a3a3c; }
+
+.cal-leyenda {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 14px;
+    font-size: 11px;
+    color: rgba(0,0,0,0.45);
+    flex-wrap: wrap;
+}
+.cal-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Panel de detalle */
+.cal-detalle-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.cal-detalle-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    font-size: 13px;
+}
+.cal-detalle-item:last-child { border-bottom: none; }
+.cal-detalle-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-top: 4px;
+    flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════ */
+/* SELECTOR MODO VENTA (DÍA / SEMANA) — ASESORES         */
+/* ═══════════════════════════════════════════════════════ */
+
+.venta-modo-wrap {
+    margin-top: 18px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    padding-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.venta-modo-toggle {
+    display: flex;
+    gap: 8px;
+}
+
+.venta-modo-btn {
+    background: rgba(0,0,0,0.05);
+    border: none;
+    border-radius: 999px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(0,0,0,0.45);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.venta-modo-btn.active {
+    background: #0071E3;
+    color: #fff;
+    font-weight: 600;
+}
+.venta-modo-btn:hover:not(.active) {
+    background: rgba(0,0,0,0.09);
+    color: #1D1D1F;
+}
+
+.venta-fecha-panel {
+    display: flex;
+    gap: 14px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.venta-resumen {
+    background: rgba(0,113,227,0.07);
+    border: 1px solid rgba(0,113,227,0.18);
+    border-radius: 10px;
+    padding: 9px 16px;
+    font-size: 13px;
+    color: #1D1D1F;
+    flex: 1;
+    min-width: 220px;
+}
+.venta-resumen strong { color: #0071E3; }
+.cal-pill-venta { background: rgba(52,199,89,0.13); color: #1a6e35; }
