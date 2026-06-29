@@ -1301,6 +1301,52 @@ function reiniciarTodoCero() {
         alert("Ciclo comercial formateado a cero.");
     }
 }
+
+// Borra únicamente los registros de Garex e Insurama (todos los asesores).
+// No afecta ventas, montos, unidades, metas, recordatorios, clínicas ni bitácoras.
+function borrarGarexSeguros() {
+    if (confirm("⚠️ Esto borrará TODOS los registros de Garex y Seguros (Insurama) de todos los asesores. Las ventas, montos y unidades NO se verán afectados. ¿Deseas continuar?")) {
+        Object.keys(appData.asesores).forEach(key => {
+            appData.asesores[key].ventasGarex = [];
+            appData.asesores[key].ventasInsurama = [];
+        });
+
+        // Limpiar también líneas pendientes que no se hayan guardado todavía
+        lineasGarexPendientes = [];
+        lineasInsuramaPendientes = [];
+        renderListaPendiente("garex");
+        renderListaPendiente("insurama");
+
+        sincronizarYRenderizar();
+        actualizarCumplimientoAsesorVisual();
+        alert("Registros de Garex y Seguros borrados correctamente.");
+    }
+}
+
+// Borra únicamente los datos de ventas (monto semanal, montos por categoría,
+// unidades, QR, Trade-In y el historial del calendario de ventas) de todos los asesores.
+// No afecta Garex, Insurama, metas, recordatorios, clínicas ni bitácoras.
+function borrarVentas() {
+    if (confirm("⚠️ Esto borrará TODAS las ventas acumuladas (monto, montos por categoría, unidades, QR y Trade-In) de todos los asesores, además del historial de ventas en el calendario. Garex y Seguros NO se verán afectados. ¿Deseas continuar?")) {
+        Object.keys(appData.asesores).forEach(key => {
+            const a = appData.asesores[key];
+            a.ventaSemanal = 0;
+            a.qr = 0;
+            a.tradeIn = 0;
+            a.montos = { mac:0, ipad:0, iphone:0, watch:0, airpods:0, audio:0, acc_apple:0, acc_terceros:0 };
+            a.unidades = { mac:0, ipad:0, iphone:0, watch:0, airpods:0, audio:0 };
+        });
+
+        // Quitar del calendario solo las entradas de tipo "venta" (no toca recordatorios/clínicas)
+        ventasCalendario = ventasCalendario.filter(v => v.tipo !== "venta");
+        guardarVentasCalendario();
+        renderCalendario();
+
+        sincronizarYRenderizar();
+        actualizarCumplimientoAsesorVisual();
+        alert("Ventas borradas correctamente.");
+    }
+}
 // ═══════════════════════════════════════════
 // RECORDATORIOS MENSUALES
 // ═══════════════════════════════════════════
