@@ -19,80 +19,36 @@ body {
 .navbar {
     width: calc(100% - 40px);
     max-width: 1200px;
-
-    /* Glass ultra ligero */
-    background: rgba(255, 255, 255, 0.8);
-
-    /* Desenfoque */
-    backdrop-filter: blur(5px) saturate(180%);
-    -webkit-backdrop-filter: blur(5px) saturate(180%);
-
-    /* Borde muy tenue */
-    border: 1px solid rgba(255, 255, 255, 0.15);
-
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.85);
     padding: 0 28px;
-
     position: fixed;
     top: 16px;
     left: 50%;
     transform: translateX(-50%);
-
-    width: calc(100% - 40px);
     height: 56px;
-
+    z-index: 1000;
     display: flex;
     justify-content: space-between;
     align-items: center;
-
     border-radius: 999px;
     overflow: hidden;
-
-    z-index: 1000;
-
-    /* Sombra muy suave */
     box-shadow:
-        0 8px 30px rgba(0, 0, 0, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        0 8px 30px rgba(0,0,0,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.9);
 }
 
-/* Reflejo superior */
+/* Reflejo especular sutil, igual que las tarjetas .v-glass */
 .navbar::before {
     content: "";
     position: absolute;
-    top: 0;
-    left: 12%;
-    right: 12%;
+    top: 0; left: 12%; right: 12%;
     height: 1px;
-
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.22) 40%,
-        rgba(255, 255, 255, 0.22) 60%,
-        transparent
-    );
-
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95) 40%, rgba(255,255,255,0.95) 60%, transparent);
     pointer-events: none;
     border-radius: inherit;
-}
-
-/* Reflejo inferior muy tenue */
-.navbar::after {
-    content: "";
-    position: absolute;
-    left: 18%;
-    right: 18%;
-    bottom: 0;
-    height: 1px;
-
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.08),
-        transparent
-    );
-
-    pointer-events: none;
 }
 
 .navbar h2 { font-size: 16px; font-weight: 600; }
@@ -422,6 +378,96 @@ body {
     .v-hero       { padding: 22px 20px; }
 }
 
+/* Barra de progreso de meta semanal */
+.v-progreso-meta-box {
+    padding: 20px 26px;
+    margin-bottom: 16px;
+}
+.v-progreso-meta-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(0,0,0,0.4);
+}
+.v-progreso-meta-header span:last-child {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1D1D1F;
+    text-transform: none;
+    letter-spacing: 0;
+}
+.v-progreso-meta-track {
+    width: 100%;
+    height: 14px;
+    background: rgba(0,0,0,0.07);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.v-progreso-meta-fill {
+    height: 100%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #34C759, #30D158);
+    transition: width 0.6s cubic-bezier(.4,0,.2,1);
+}
+
+/* Top Vendedores */
+.v-top-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 6px;
+}
+.v-top-card {
+    padding: 20px 22px;
+}
+.v-top-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1D1D1F;
+    margin-bottom: 14px;
+}
+.v-top-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.v-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.v-top-row:last-child { border-bottom: none; padding-bottom: 0; }
+.v-top-rank {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+    background: rgba(0,0,0,0.06);
+    color: rgba(0,0,0,0.5);
+}
+.v-top-row:nth-child(1) .v-top-rank { background: #FFD60A; color: #5C4400; }
+.v-top-row:nth-child(2) .v-top-rank { background: #D1D1D6; color: #3A3A3C; }
+.v-top-row:nth-child(3) .v-top-rank { background: #FF9F0A; color: #5C3D00; }
+.v-top-name { flex: 1; color: #1D1D1F; font-weight: 500; }
+.v-top-value { font-weight: 700; color: #1D1D1F; }
+.v-top-empty { font-size: 12px; color: rgba(0,0,0,0.35); text-align: center; padding: 10px 0; }
+
+@media (max-width: 780px) {
+    .v-top-grid { grid-template-columns: 1fr; }
+}
+
 /* ═══════════════════════════════════════════════════════ */
 /* PESTAÑA ASESORES — LIQUID GLASS (FONDO CLARO)         */
 /* ═══════════════════════════════════════════════════════ */
@@ -546,6 +592,20 @@ body {
     background: rgba(255,255,255,0.4);
 }
 
+.a-precio-calculado {
+    background: rgba(52,199,89,0.12);
+    border: 1px solid rgba(52,199,89,0.3);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #1D1D1F;
+    margin-bottom: 14px;
+}
+.a-precio-calculado strong {
+    color: #248A3D;
+    font-size: 15px;
+}
+
 .a-btn-guardar {
     width: 100%;
     margin-bottom: 28px;
@@ -590,3 +650,129 @@ body {
 /* Configuración — gris neutro / rojo de advertencia (sutil) */
 .c-orb-gray { width: 440px; height: 440px; background: radial-gradient(circle, rgba(199,210,254,0.55) 0%, transparent 70%); top: -100px; left: -90px; }
 .c-orb-red  { width: 320px; height: 320px; background: radial-gradient(circle, rgba(254,202,202,0.5) 0%, transparent 70%); bottom: 10px; right: -50px; }
+
+/* Recordatorios — naranja cálido / púrpura */
+.r-orb-orange { width: 450px; height: 450px; background: radial-gradient(circle, rgba(253,186,116,0.6) 0%, transparent 70%); top: -110px; right: -80px; }
+.r-orb-purple { width: 370px; height: 370px; background: radial-gradient(circle, rgba(196,181,253,0.6) 0%, transparent 70%); bottom: 20px; left: -60px; }
+
+.r-orb {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: -1;
+    filter: blur(50px);
+    opacity: 0.6;
+}
+
+/* Fila de formulario de recordatorios */
+.r-form-row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+/* Ítem de recordatorio */
+.r-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.r-item:last-child { border-bottom: none; }
+.r-item-fecha {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(0,0,0,0.38);
+    min-width: 90px;
+    white-space: nowrap;
+}
+.r-item-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.r-badge-mantenimiento { background: rgba(255,159,10,0.12); color: #B26A00; }
+.r-badge-reunion       { background: rgba(0,113,227,0.10); color: #0071E3; }
+.r-badge-tarea         { background: rgba(52,199,89,0.12); color: #248A3D; }
+.r-badge-otro          { background: rgba(0,0,0,0.06); color: #515154; }
+
+.r-item-texto {
+    flex: 1;
+    font-size: 13px;
+    color: #1D1D1F;
+}
+.r-item-del {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: rgba(0,0,0,0.2);
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+}
+.r-item-del:hover { color: #FF3B30; background: rgba(255,59,48,0.08); }
+
+/* Ítem de clínica */
+.c-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    transition: background 0.15s;
+}
+.c-item:last-child { border-bottom: none; }
+.c-item-check {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid #D2D2D7;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 13px;
+    transition: border-color 0.2s, background 0.2s;
+    background: transparent;
+}
+.c-item-check.realizada {
+    border-color: #34C759;
+    background: #34C759;
+    color: white;
+}
+.c-item-nombre {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1D1D1F;
+    transition: color 0.2s;
+}
+.c-item-nombre.realizada { color: rgba(0,0,0,0.32); text-decoration: line-through; }
+.c-item-fecha {
+    font-size: 12px;
+    color: rgba(0,0,0,0.38);
+    white-space: nowrap;
+}
+.c-item-estado {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+.c-estado-pendiente { background: rgba(255,159,10,0.12); color: #B26A00; }
+.c-estado-realizada { background: rgba(52,199,89,0.12); color: #248A3D; }
+.c-item-del {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: rgba(0,0,0,0.2);
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+}
+.c-item-del:hover { color: #FF3B30; background: rgba(255,59,48,0.08); }

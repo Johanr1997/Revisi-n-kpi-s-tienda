@@ -1,24 +1,27 @@
 // METAS SOS — cargadas desde localStorage (editables en Configuración)
-const METAS_SOS_DEFAULT = { conversion: 0, accesorizacion: 0, ticket: 0 };
+const METAS_SOS_DEFAULT = { conversion: 0, accesorizacion: 0, ticket: 0, qr: 0 };
 let METAS_SOS = JSON.parse(localStorage.getItem("metasSOS")) || { ...METAS_SOS_DEFAULT };
+if (METAS_SOS.qr === undefined) METAS_SOS.qr = 0; // Compatibilidad con datos guardados antes de este campo
 
 function guardarMetasSOS() {
     const conv  = parseFloat(document.getElementById("cfgMetaConversion").value);
     const acc   = parseFloat(document.getElementById("cfgMetaAccesorizacion").value);
     const tick  = parseFloat(document.getElementById("cfgMetaTicket").value);
+    const qr    = parseFloat(document.getElementById("cfgMetaQR").value);
 
-    if (isNaN(conv) || isNaN(acc) || isNaN(tick) || conv <= 0 || acc <= 0 || tick <= 0) {
-        alert("Por favor ingresa valores válidos y mayores a 0 para las tres metas.");
+    if (isNaN(conv) || isNaN(acc) || isNaN(tick) || isNaN(qr) || conv <= 0 || acc <= 0 || tick <= 0 || qr < 0) {
+        alert("Por favor ingresa valores válidos para las metas (la meta de QR puede ser 0).");
         return;
     }
 
-    METAS_SOS = { conversion: conv, accesorizacion: acc, ticket: tick };
+    METAS_SOS = { conversion: conv, accesorizacion: acc, ticket: tick, qr: qr };
     localStorage.setItem("metasSOS", JSON.stringify(METAS_SOS));
 
     // Actualizar los badges de meta en la pestaña Ventas
     document.getElementById("metaVisualConv").textContent  = `${conv.toFixed(1)}%`;
     document.getElementById("metaVisualAcc").textContent   = `${acc.toFixed(1)}%`;
     document.getElementById("metaVisualTick").textContent  = `$${tick.toLocaleString()}`;
+    document.getElementById("metaVisualQR").textContent    = `${qr}`;
 
     sincronizarYRenderizar();
     alert("Metas del Plan SOS actualizadas correctamente.");
@@ -64,6 +67,94 @@ function obtenerIncentivoGarex(dispositivo, duracion) {
 }
 function obtenerIncentivoInsurama(dispositivo, cobertura, duracion) {
     return (TABLA_INSURAMA[dispositivo] && TABLA_INSURAMA[dispositivo][cobertura] && TABLA_INSURAMA[dispositivo][cobertura][duracion]) || 0;
+}
+
+// ===================================================================
+// PRECIOS AL CLIENTE POR RANGO DE VALOR DEL DISPOSITIVO (Garex/Insurama)
+// Cada par es [limiteSuperiorDelRango, montoACobrar]. Se busca el primer
+// rango cuyo limite sea >= al precio del dispositivo ingresado.
+// ===================================================================
+
+// GAREX: "general" aplica para Mac, iPad, Watch, AirPods y Audio (36 Meses)
+//        "iPhone" aplica solo para iPhone (12 y 24 Meses)
+const PRECIOS_GAREX_CLIENTE = {
+    general: { "36 Meses": [[50, 6], [100, 10], [250, 20], [500, 40], [1000, 50], [1500, 60], [2000, 70], [2500, 75], [3000, 85], [5000, 110]] },
+    iPhone: { "12 Meses": [[250, 13.33], [500, 26.67], [1000, 33.33], [1500, 40], [2000, 46.67], [2500, 50]], "24 Meses": [[250, 20], [500, 40], [1000, 50], [1500, 60], [2000, 70], [2500, 75]] }
+};
+
+// INSURAMA: por dispositivo, cobertura y duracion
+const PRECIOS_INSURAMA_CLIENTE = {
+    "Mac": {
+        "Daño Accidental": {
+            "12 Meses": [[800, 45], [1000, 60], [1500, 75], [2000, 130], [2500, 155], [4250, 195], [5000, 280], [6250, 340]],
+            "18 Meses": [[800, 65], [1000, 85], [1500, 110], [2000, 180], [2500, 215], [4250, 275], [5000, 390], [6250, 475]],
+            "24 Meses": [[800, 70], [1000, 100], [1500, 125], [2000, 210], [2500, 245], [4250, 310], [5000, 445], [6250, 540]]
+        },
+        "Robo & Hurto + Daño Accidental": {
+            "12 Meses": [[800, 70], [1000, 95], [1500, 130], [2000, 215], [2500, 280], [4250, 355], [5000, 510], [6250, 615]],
+            "18 Meses": [[800, 95], [1000, 130], [1500, 180], [2000, 305], [2500, 390], [4250, 500], [5000, 710], [6250, 865]],
+            "24 Meses": [[800, 110], [1000, 150], [1500, 210], [2000, 345], [2500, 450], [4250, 570], [5000, 810], [6250, 985]]
+        }
+    },
+    "iPad": {
+        "Robo & Hurto": {
+            "12 Meses": [[450, 25], [650, 40], [900, 55], [1250, 65], [1625, 85], [2000, 105], [2375, 125], [2625, 145], [2875, 160], [3125, 175], [3500, 190], [3875, 210], [5000, 285]],
+            "18 Meses": [[450, 35], [650, 55], [900, 75], [1250, 90], [1625, 116], [2000, 145], [2375, 175], [2625, 200], [2875, 220], [3125, 240], [3500, 265], [3875, 295], [5000, 400]],
+            "24 Meses": [[450, 40], [650, 60], [900, 85], [1250, 100], [1625, 135], [2000, 170], [2375, 200], [2625, 230], [2875, 255], [3125, 275], [3500, 305], [3875, 340], [5000, 455]]
+        },
+        "Robo & Hurto + Daño Accidental": {
+            "12 Meses": [[450, 50], [650, 80], [900, 110], [1250, 130], [1625, 170], [2000, 210], [2375, 260], [2625, 295], [2875, 325], [3125, 350], [3500, 390], [3875, 435], [5000, 570]],
+            "18 Meses": [[450, 70], [650, 110], [900, 155], [1250, 185], [1625, 235], [2000, 300], [2375, 360], [2625, 410], [2875, 450], [3125, 495], [3500, 545], [3875, 605], [5000, 800]],
+            "24 Meses": [[450, 80], [650, 125], [900, 175], [1250, 210], [1625, 270], [2000, 340], [2375, 410], [2625, 470], [2875, 515], [3125, 565], [3500, 620], [3875, 690], [5000, 915]]
+        }
+    },
+    "iPhone": {
+        "Robo & Hurto": {
+            "12 Meses": [[450, 40], [650, 64], [900, 90], [1250, 95], [1625, 140], [2000, 175], [2375, 210], [3000, 255]],
+            "18 Meses": [[450, 55], [650, 90], [900, 125], [1250, 135], [1625, 195], [2000, 245], [2375, 295], [3000, 360]],
+            "24 Meses": [[450, 65], [650, 105], [900, 140], [1250, 150], [1625, 220], [2000, 280], [2375, 340], [3000, 410]]
+        },
+        "Robo & Hurto + Daño Accidental": {
+            "12 Meses": [[450, 80], [650, 130], [900, 185], [1250, 195], [1625, 280], [2000, 355], [2375, 430], [3000, 520]],
+            "18 Meses": [[450, 115], [650, 180], [900, 255], [1250, 275], [1625, 395], [2000, 495], [2375, 600], [3000, 730]],
+            "24 Meses": [[450, 130], [650, 205], [900, 290], [1250, 310], [1625, 450], [2000, 565], [2375, 690], [3000, 835]]
+        }
+    },
+    "Watch": {
+        "Robo & Hurto": {
+            "12 Meses": [[450, 15], [650, 25], [900, 35], [1150, 45], [1400, 55]],
+            "18 Meses": [[450, 20], [650, 30], [900, 45], [1150, 60], [1400, 75]],
+            "24 Meses": [[450, 25], [650, 40], [900, 50], [1150, 70], [1400, 85]]
+        },
+        "Robo & Hurto + Daño Accidental": {
+            "12 Meses": [[450, 45], [650, 70], [900, 95], [1150, 110], [1400, 130]],
+            "18 Meses": [[450, 60], [650, 95], [900, 135], [1150, 155], [1400, 185]],
+            "24 Meses": [[450, 70], [650, 110], [900, 155], [1150, 175], [1400, 210]]
+        }
+    }
+};
+
+// Busca en una lista de [limiteRango, monto] (ordenada ascendente) el primer
+// rango cuyo limite sea >= al precio del dispositivo. Si el precio excede
+// el rango más alto disponible, se usa el monto del rango más alto (tope).
+function buscarPrecioPorRango(precioDispositivo, listaRangos) {
+    if (!listaRangos || listaRangos.length === 0 || isNaN(precioDispositivo)) return 0;
+    for (const [limite, monto] of listaRangos) {
+        if (precioDispositivo <= limite) return monto;
+    }
+    return listaRangos[listaRangos.length - 1][1]; // Tope: precio mayor a todos los rangos
+}
+
+// Devuelve el precio a cobrar al cliente por un Garex, según dispositivo, duración y precio del equipo
+function calcularPrecioGarexCliente(dispositivo, duracion, precioDispositivo) {
+    const tabla = dispositivo === "iPhone" ? PRECIOS_GAREX_CLIENTE.iPhone : PRECIOS_GAREX_CLIENTE.general;
+    return buscarPrecioPorRango(precioDispositivo, tabla[duracion]);
+}
+
+// Devuelve el precio a cobrar al cliente por un Insurama, según dispositivo, cobertura, duración y precio del equipo
+function calcularPrecioInsuramaCliente(dispositivo, cobertura, duracion, precioDispositivo) {
+    const tabla = PRECIOS_INSURAMA_CLIENTE[dispositivo] && PRECIOS_INSURAMA_CLIENTE[dispositivo][cobertura];
+    return buscarPrecioPorRango(precioDispositivo, tabla ? tabla[duracion] : null);
 }
 
 // ESTRUCTURA DE CONTROL CENTRALIZADA
@@ -136,11 +227,13 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("cfgMetaConversion").value    = METAS_SOS.conversion;
     document.getElementById("cfgMetaAccesorizacion").value = METAS_SOS.accesorizacion;
     document.getElementById("cfgMetaTicket").value         = METAS_SOS.ticket;
+    document.getElementById("cfgMetaQR").value             = METAS_SOS.qr;
 
     // Sincronizar badges de Ventas con los valores guardados
     document.getElementById("metaVisualConv").textContent  = `${METAS_SOS.conversion.toFixed(1)}%`;
     document.getElementById("metaVisualAcc").textContent   = `${METAS_SOS.accesorizacion.toFixed(1)}%`;
     document.getElementById("metaVisualTick").textContent  = `$${METAS_SOS.ticket.toLocaleString()}`;
+    document.getElementById("metaVisualQR").textContent    = `${METAS_SOS.qr}`;
 });
 
 function onSelectAsesorChange() {
@@ -212,7 +305,7 @@ function configurarSelectsProteccion() {
 
     if (selectGarexDispositivo) {
         selectGarexDispositivo.innerHTML = Object.keys(TABLA_GAREX).map(d => `<option value="${d}">${d}</option>`).join("");
-        selectGarexDispositivo.addEventListener("change", poblarDuracionesGarex);
+        selectGarexDispositivo.addEventListener("change", () => { poblarDuracionesGarex(); actualizarPrecioGarexCalculado(); });
         poblarDuracionesGarex();
     }
 
@@ -237,10 +330,45 @@ function configurarSelectsProteccion() {
 
     if (selectInsuramaDispositivo) {
         selectInsuramaDispositivo.innerHTML = Object.keys(TABLA_INSURAMA).map(d => `<option value="${d}">${d}</option>`).join("");
-        selectInsuramaDispositivo.addEventListener("change", poblarCoberturasInsurama);
-        selectInsuramaCobertura.addEventListener("change", poblarDuracionesInsurama);
+        selectInsuramaDispositivo.addEventListener("change", () => { poblarCoberturasInsurama(); actualizarPrecioInsuramaCalculado(); });
+        selectInsuramaCobertura.addEventListener("change", () => { poblarDuracionesInsurama(); actualizarPrecioInsuramaCalculado(); });
         poblarCoberturasInsurama();
     }
+
+    // --- Recalcular precio al cliente cuando cambien duración o precio del dispositivo ---
+    const elGarexDuracion = document.getElementById("selectGarexDuracion");
+    const elGarexPrecioDisp = document.getElementById("inputGarexPrecioDispositivo");
+    if (elGarexDuracion) elGarexDuracion.addEventListener("change", actualizarPrecioGarexCalculado);
+    if (elGarexPrecioDisp) elGarexPrecioDisp.addEventListener("input", actualizarPrecioGarexCalculado);
+
+    const elInsuramaDuracion = document.getElementById("selectInsuramaDuracion");
+    const elInsuramaPrecioDisp = document.getElementById("inputInsuramaPrecioDispositivo");
+    if (elInsuramaDuracion) elInsuramaDuracion.addEventListener("change", actualizarPrecioInsuramaCalculado);
+    if (elInsuramaPrecioDisp) elInsuramaPrecioDisp.addEventListener("input", actualizarPrecioInsuramaCalculado);
+
+    actualizarPrecioGarexCalculado();
+    actualizarPrecioInsuramaCalculado();
+}
+
+// Recalcula y muestra el precio Garex al cliente según dispositivo, duración y precio del equipo
+function actualizarPrecioGarexCalculado() {
+    const dispositivo = document.getElementById("selectGarexDispositivo")?.value;
+    const duracion = document.getElementById("selectGarexDuracion")?.value;
+    const precioDispositivo = parseFloat(document.getElementById("inputGarexPrecioDispositivo")?.value) || 0;
+    const precio = calcularPrecioGarexCliente(dispositivo, duracion, precioDispositivo);
+    const el = document.getElementById("v_garexPrecioCalculado");
+    if (el) el.textContent = `$${precio.toLocaleString()}`;
+}
+
+// Recalcula y muestra el precio Insurama al cliente según dispositivo, cobertura, duración y precio del equipo
+function actualizarPrecioInsuramaCalculado() {
+    const dispositivo = document.getElementById("selectInsuramaDispositivo")?.value;
+    const cobertura = document.getElementById("selectInsuramaCobertura")?.value;
+    const duracion = document.getElementById("selectInsuramaDuracion")?.value;
+    const precioDispositivo = parseFloat(document.getElementById("inputInsuramaPrecioDispositivo")?.value) || 0;
+    const precio = calcularPrecioInsuramaCliente(dispositivo, cobertura, duracion, precioDispositivo);
+    const el = document.getElementById("v_insuramaPrecioCalculado");
+    if (el) el.textContent = `$${precio.toLocaleString()}`;
 }
 
 function actualizarRelojYFecha() {
@@ -269,10 +397,15 @@ function agregarLineaGarex() {
     const dispositivo = document.getElementById("selectGarexDispositivo").value;
     const duracion = document.getElementById("selectGarexDuracion").value;
     const cantidad = parseInt(document.getElementById("inputGarexCantidad").value) || 0;
-    const precioUnitario = parseFloat(document.getElementById("inputGarexPrecio").value) || 0;
+    const precioDispositivo = parseFloat(document.getElementById("inputGarexPrecioDispositivo").value) || 0;
+    const precioUnitario = calcularPrecioGarexCliente(dispositivo, duracion, precioDispositivo);
 
     if (cantidad <= 0) {
         alert("Ingresa una cantidad mayor a 0 para agregar el Garex a la lista.");
+        return;
+    }
+    if (precioDispositivo <= 0) {
+        alert("Ingresa el precio del dispositivo para calcular el monto del Garex.");
         return;
     }
 
@@ -286,7 +419,8 @@ function agregarLineaGarex() {
     });
 
     document.getElementById("inputGarexCantidad").value = 0;
-    document.getElementById("inputGarexPrecio").value = 0;
+    document.getElementById("inputGarexPrecioDispositivo").value = 0;
+    actualizarPrecioGarexCalculado();
     renderListaPendiente("garex");
 }
 
@@ -296,10 +430,15 @@ function agregarLineaInsurama() {
     const cobertura = document.getElementById("selectInsuramaCobertura").value;
     const duracion = document.getElementById("selectInsuramaDuracion").value;
     const cantidad = parseInt(document.getElementById("inputInsuramaCantidad").value) || 0;
-    const precioUnitario = parseFloat(document.getElementById("inputInsuramaPrecio").value) || 0;
+    const precioDispositivo = parseFloat(document.getElementById("inputInsuramaPrecioDispositivo").value) || 0;
+    const precioUnitario = calcularPrecioInsuramaCliente(dispositivo, cobertura, duracion, precioDispositivo);
 
     if (cantidad <= 0) {
         alert("Ingresa una cantidad mayor a 0 para agregar el Insurama a la lista.");
+        return;
+    }
+    if (precioDispositivo <= 0) {
+        alert("Ingresa el precio del dispositivo para calcular el monto del Insurama.");
         return;
     }
 
@@ -313,7 +452,8 @@ function agregarLineaInsurama() {
     });
 
     document.getElementById("inputInsuramaCantidad").value = 0;
-    document.getElementById("inputInsuramaPrecio").value = 0;
+    document.getElementById("inputInsuramaPrecioDispositivo").value = 0;
+    actualizarPrecioInsuramaCalculado();
     renderListaPendiente("insurama");
 }
 
@@ -398,8 +538,10 @@ function guardarDatosAsesor() {
     ["inputVentaSemanal","inputQR","inputTradeIn",
      "m_mac","m_ipad","m_iphone","m_watch","m_airpods","m_audio","m_acc_apple","m_acc_terceros",
      "u_mac","u_ipad","u_iphone","u_watch","u_airpods","u_audio",
-     "inputGarexCantidad","inputGarexPrecio","inputInsuramaCantidad","inputInsuramaPrecio"
+     "inputGarexCantidad","inputGarexPrecioDispositivo","inputInsuramaCantidad","inputInsuramaPrecioDispositivo"
     ].forEach(id => { const el = document.getElementById(id); if (el) el.value = 0; });
+    actualizarPrecioGarexCalculado();
+    actualizarPrecioInsuramaCalculado();
 
     sincronizarYRenderizar();
     actualizarCumplimientoAsesorVisual();
@@ -561,6 +703,15 @@ function renderTodo() {
         arcCircle.style.transition = "stroke-dashoffset 0.8s cubic-bezier(.4,0,.2,1), stroke 0.4s";
     }
 
+    // Barra de progreso de meta semanal
+    const fillProgreso = document.getElementById("v_progresoMetaFill");
+    if (fillProgreso) {
+        const pctBarra = metaTotalTienda > 0 ? Math.min((acumuladoTotalVentas / metaTotalTienda) * 100, 100) : 0;
+        fillProgreso.style.width = `${pctBarra}%`;
+        document.getElementById("v_progresoMetaTexto").textContent =
+            `$${acumuladoTotalVentas.toLocaleString()} de $${metaTotalTienda.toLocaleString()}`;
+    }
+
     // KPIs Plan SOS
     document.getElementById("conversionReal").textContent = `${appData.inicio.conversion.toFixed(1)}%`;
     document.getElementById("accesorizacionReal").textContent = `${appData.inicio.accesorizacion.toFixed(1)}%`;
@@ -614,6 +765,48 @@ function renderTodo() {
             <span style="font-size:11px; color:#86868B; display:block; margin-top:4px;">${b.fecha}</span>
         </div>
     `).join("") || `<p style="color:#86868B; font-style:italic;">No hay comentarios registrados en la bitácora.</p>`;
+
+    renderTopVendedores();
+}
+
+// Genera los rankings "Top Ventas", "Top Garex" y "Top Seguros" en la pestaña Ventas
+function renderTopVendedores() {
+    const asesoresArr = Object.values(appData.asesores);
+
+    function pintarTop(contenedorId, items, formatearValor) {
+        const contenedor = document.getElementById(contenedorId);
+        if (!contenedor) return;
+        const top3 = items.filter(i => i.valor > 0).sort((a, b) => b.valor - a.valor).slice(0, 3);
+        if (top3.length === 0) {
+            contenedor.innerHTML = `<div class="v-top-empty">Sin datos registrados aún.</div>`;
+            return;
+        }
+        contenedor.innerHTML = top3.map((item, idx) => `
+            <div class="v-top-row">
+                <span class="v-top-rank">${idx + 1}</span>
+                <span class="v-top-name">${item.nombre}</span>
+                <span class="v-top-value">${formatearValor(item.valor)}</span>
+            </div>
+        `).join("");
+    }
+
+    // Top Ventas (venta semanal + monto cobrado por Garex/Seguros, igual que el acumulado de tienda)
+    pintarTop("v_top_ventas", asesoresArr.map(a => ({
+        nombre: a.nombre,
+        valor: a.ventaSemanal + sumarMontoVenta(a.ventasGarex) + sumarMontoVenta(a.ventasInsurama)
+    })), v => `$${v.toLocaleString()}`);
+
+    // Top Garex (unidades colocadas)
+    pintarTop("v_top_garex", asesoresArr.map(a => ({
+        nombre: a.nombre,
+        valor: sumarCantidad(a.ventasGarex)
+    })), v => `${v} uds.`);
+
+    // Top Seguros (unidades colocadas)
+    pintarTop("v_top_seguros", asesoresArr.map(a => ({
+        nombre: a.nombre,
+        valor: sumarCantidad(a.ventasInsurama)
+    })), v => `${v} uds.`);
 }
 
 // Suma la cantidad total de unidades en una lista de ventas (Garex o Insurama)
@@ -924,3 +1117,136 @@ function reiniciarTodoCero() {
         alert("Ciclo comercial formateado a cero.");
     }
 }
+// ═══════════════════════════════════════════
+// RECORDATORIOS MENSUALES
+// ═══════════════════════════════════════════
+
+let recordatoriosData = JSON.parse(localStorage.getItem("recordatoriosData")) || [];
+let clinicasData = JSON.parse(localStorage.getItem("clinicasData")) || [];
+
+function guardarRecordatorios() {
+    localStorage.setItem("recordatoriosData", JSON.stringify(recordatoriosData));
+}
+function guardarClinicas() {
+    localStorage.setItem("clinicasData", JSON.stringify(clinicasData));
+}
+
+function agregarRecordatorio() {
+    const fecha  = document.getElementById("inputRecordatorioFecha").value;
+    const texto  = document.getElementById("inputRecordatorioTexto").value.trim();
+    const tipo   = document.getElementById("selectRecordatorioTipo").value;
+
+    if (!fecha || !texto) {
+        alert("Por favor ingresa la fecha y la descripción del recordatorio.");
+        return;
+    }
+
+    recordatoriosData.push({ id: Date.now(), fecha, texto, tipo });
+    recordatoriosData.sort((a, b) => a.fecha.localeCompare(b.fecha));
+    guardarRecordatorios();
+    renderRecordatorios();
+
+    document.getElementById("inputRecordatorioFecha").value = "";
+    document.getElementById("inputRecordatorioTexto").value = "";
+    document.getElementById("selectRecordatorioTipo").value = "mantenimiento";
+}
+
+function eliminarRecordatorio(id) {
+    if (!confirm("¿Eliminar este recordatorio?")) return;
+    recordatoriosData = recordatoriosData.filter(r => r.id !== id);
+    guardarRecordatorios();
+    renderRecordatorios();
+}
+
+function renderRecordatorios() {
+    const cont = document.getElementById("listaRecordatorios");
+    if (!cont) return;
+
+    if (recordatoriosData.length === 0) {
+        cont.innerHTML = '<p style="color:rgba(0,0,0,0.35); font-size:13px; text-align:center; padding:10px 0;">No hay recordatorios registrados.</p>';
+        return;
+    }
+
+    const badgeLabels = { mantenimiento: "🔧 Mantenimiento", reunion: "📅 Reunión", tarea: "✅ Tarea", otro: "📎 Otro" };
+
+    cont.innerHTML = recordatoriosData.map(r => {
+        const [y, m, d] = r.fecha.split("-");
+        const fechaDisplay = `${d}/${m}/${y}`;
+        return `
+        <div class="r-item">
+            <span class="r-item-fecha">${fechaDisplay}</span>
+            <span class="r-item-badge r-badge-${r.tipo}">${badgeLabels[r.tipo] || r.tipo}</span>
+            <span class="r-item-texto">${r.texto}</span>
+            <button class="r-item-del" onclick="eliminarRecordatorio(${r.id})" title="Eliminar">✕</button>
+        </div>`;
+    }).join("");
+}
+
+// ═══════════════════════════════════════════
+// CLÍNICAS DE EXPERIENCIA
+// ═══════════════════════════════════════════
+
+function agregarClinica() {
+    const nombre = document.getElementById("inputClinicaNombre").value.trim();
+    const fecha  = document.getElementById("inputClinicaFecha").value;
+
+    if (!nombre) {
+        alert("Por favor ingresa el nombre de la clínica.");
+        return;
+    }
+
+    clinicasData.push({ id: Date.now(), nombre, fecha, realizada: false, fechaRealizada: null });
+    guardarClinicas();
+    renderClinicas();
+
+    document.getElementById("inputClinicaNombre").value = "";
+    document.getElementById("inputClinicaFecha").value = "";
+}
+
+function toggleClinica(id) {
+    const clinica = clinicasData.find(c => c.id === id);
+    if (!clinica) return;
+    clinica.realizada = !clinica.realizada;
+    clinica.fechaRealizada = clinica.realizada ? new Date().toISOString().slice(0, 10) : null;
+    guardarClinicas();
+    renderClinicas();
+}
+
+function eliminarClinica(id) {
+    if (!confirm("¿Eliminar esta clínica?")) return;
+    clinicasData = clinicasData.filter(c => c.id !== id);
+    guardarClinicas();
+    renderClinicas();
+}
+
+function renderClinicas() {
+    const cont = document.getElementById("listaClinicas");
+    if (!cont) return;
+
+    if (clinicasData.length === 0) {
+        cont.innerHTML = '<p style="color:rgba(0,0,0,0.35); font-size:13px; text-align:center; padding:10px 0;">No hay clínicas registradas.</p>';
+        return;
+    }
+
+    cont.innerHTML = clinicasData.map(c => {
+        const realizada = c.realizada;
+        const fechaDisplay = c.fecha ? (() => { const [y,m,d] = c.fecha.split("-"); return `${d}/${m}/${y}`; })() : "Sin fecha";
+        const fechaRealizadaDisplay = c.fechaRealizada ? (() => { const [y,m,d] = c.fechaRealizada.split("-"); return `${d}/${m}/${y}`; })() : "";
+        return `
+        <div class="c-item">
+            <div class="c-item-check ${realizada ? 'realizada' : ''}" onclick="toggleClinica(${c.id})" title="${realizada ? 'Marcar como pendiente' : 'Marcar como realizada'}">
+                ${realizada ? '✓' : ''}
+            </div>
+            <span class="c-item-nombre ${realizada ? 'realizada' : ''}">${c.nombre}</span>
+            <span class="c-item-fecha">${realizada ? 'Realizada: ' + fechaRealizadaDisplay : 'Programada: ' + fechaDisplay}</span>
+            <span class="c-item-estado ${realizada ? 'c-estado-realizada' : 'c-estado-pendiente'}">${realizada ? '✅ Realizada' : '⏳ Pendiente'}</span>
+            <button class="c-item-del" onclick="eliminarClinica(${c.id})" title="Eliminar">✕</button>
+        </div>`;
+    }).join("");
+}
+
+// Inicializar las listas al cargar la página
+document.addEventListener("DOMContentLoaded", function () {
+    renderRecordatorios();
+    renderClinicas();
+});

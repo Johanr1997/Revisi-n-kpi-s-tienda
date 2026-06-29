@@ -17,6 +17,7 @@
             <li class="tab-btn" data-target="garex">Garex</li>
             <li class="tab-btn" data-target="insurama">Insurama</li>
             <li class="tab-btn" data-target="bitacoras">Bitácoras</li>
+            <li class="tab-btn" data-target="recordatorios">Recordatorios</li>
             <li class="tab-btn tab-icon-only" data-target="configuracion" title="Configuración">⚙</li>
         </ul>
     </div>
@@ -160,13 +161,16 @@
                     </div>
                     <div class="grid-2-col" style="background:transparent; padding:0; margin-bottom:10px;">
                         <div class="form-group" style="margin-bottom:0;">
+                            <label for="inputGarexPrecioDispositivo">Precio del Dispositivo ($):</label>
+                            <input type="number" id="inputGarexPrecioDispositivo" value="0" placeholder="Ej: 999">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
                             <label for="inputGarexCantidad">Cantidad Vendida:</label>
                             <input type="number" id="inputGarexCantidad" value="0">
                         </div>
-                        <div class="form-group" style="margin-bottom:0;">
-                            <label for="inputGarexPrecio">Precio Venta al Cliente ($, c/u):</label>
-                            <input type="number" id="inputGarexPrecio" value="0">
-                        </div>
+                    </div>
+                    <div class="a-precio-calculado">
+                        Precio Garex al cliente (c/u): <strong id="v_garexPrecioCalculado">$0</strong>
                     </div>
                     <button type="button" class="btn-primary" style="background:#34C759;" onclick="agregarLineaGarex()">+ Agregar a la lista</button>
                     <div id="listaGarexPendiente" style="margin-top:10px;"></div>
@@ -194,8 +198,11 @@
                         </div>
                     </div>
                     <div class="form-group" style="margin-bottom:10px;">
-                        <label for="inputInsuramaPrecio">Precio Venta al Cliente ($, c/u):</label>
-                        <input type="number" id="inputInsuramaPrecio" value="0">
+                        <label for="inputInsuramaPrecioDispositivo">Precio del Dispositivo ($):</label>
+                        <input type="number" id="inputInsuramaPrecioDispositivo" value="0" placeholder="Ej: 999">
+                    </div>
+                    <div class="a-precio-calculado">
+                        Precio Insurama al cliente (c/u): <strong id="v_insuramaPrecioCalculado">$0</strong>
                     </div>
                     <button type="button" class="btn-primary" style="background:#34C759;" onclick="agregarLineaInsurama()">+ Agregar a la lista</button>
                     <div id="listaInsuramaPendiente" style="margin-top:10px;"></div>
@@ -242,6 +249,17 @@
                             <span class="v-arc-sub">meta</span>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- BARRA DE PROGRESO DE META -->
+            <div class="v-glass v-progreso-meta-box">
+                <div class="v-progreso-meta-header">
+                    <span>Progreso hacia la meta semanal</span>
+                    <span id="v_progresoMetaTexto">$0 de $0</span>
+                </div>
+                <div class="v-progreso-meta-track">
+                    <div class="v-progreso-meta-fill" id="v_progresoMetaFill" style="width:0%;"></div>
                 </div>
             </div>
 
@@ -297,10 +315,28 @@
                 <div class="v-glass v-pill">
                     <span class="v-pill-num" id="v_total_qr">0</span>
                     <span class="v-pill-name">Códigos QR</span>
+                    <div class="v-sos-meta" style="margin-top: 2px;">Meta <span id="metaVisualQR">0</span></div>
                 </div>
                 <div class="v-glass v-pill">
                     <span class="v-pill-num" id="v_total_tradein">0</span>
                     <span class="v-pill-name">Trade-In</span>
+                </div>
+            </div>
+
+            <!-- TOP VENDEDORES -->
+            <div class="v-section-label">Top Vendedores</div>
+            <div class="v-top-grid">
+                <div class="v-glass v-top-card">
+                    <div class="v-top-card-title">🏆 Top Ventas</div>
+                    <div id="v_top_ventas" class="v-top-list"></div>
+                </div>
+                <div class="v-glass v-top-card">
+                    <div class="v-top-card-title">🛡️ Top Garex</div>
+                    <div id="v_top_garex" class="v-top-list"></div>
+                </div>
+                <div class="v-glass v-top-card">
+                    <div class="v-top-card-title">🔒 Top Seguros</div>
+                    <div id="v_top_seguros" class="v-top-list"></div>
                 </div>
             </div>
 
@@ -354,6 +390,65 @@
             <div class="v-glass a-card" id="contenedorBitacoras"></div>
         </div>
 
+        <!-- PESTAÑA RECORDATORIOS — LIQUID GLASS -->
+        <div id="recordatorios" class="seccion-dashboard" style="position: relative; isolation: isolate;">
+            <div class="r-orb r-orb-orange"></div>
+            <div class="r-orb r-orb-purple"></div>
+
+            <!-- RECORDATORIOS MENSUALES -->
+            <div class="v-section-label">📌 Recordatorios Mensuales</div>
+            <div class="v-glass a-card">
+                <div class="r-form-row">
+                    <div class="form-group" style="flex:0 0 160px; margin-bottom:0;">
+                        <label for="inputRecordatorioFecha">Fecha</label>
+                        <input type="date" id="inputRecordatorioFecha">
+                    </div>
+                    <div class="form-group" style="flex:1; margin-bottom:0;">
+                        <label for="inputRecordatorioTexto">Descripción</label>
+                        <input type="text" id="inputRecordatorioTexto" placeholder="Ej: Mantenimiento de cámaras, Reunión zona, Revisión de metas...">
+                    </div>
+                    <div class="form-group" style="flex:0 0 140px; margin-bottom:0;">
+                        <label for="selectRecordatorioTipo">Tipo</label>
+                        <select id="selectRecordatorioTipo">
+                            <option value="mantenimiento">🔧 Mantenimiento</option>
+                            <option value="reunion">📅 Reunión</option>
+                            <option value="tarea">✅ Tarea</option>
+                            <option value="otro">📎 Otro</option>
+                        </select>
+                    </div>
+                    <div style="flex:0 0 auto; display:flex; align-items:flex-end;">
+                        <button class="btn-primary" style="width:auto; padding:10px 20px; white-space:nowrap;" onclick="agregarRecordatorio()">+ Agregar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="v-glass a-card" id="listaRecordatorios">
+                <p style="color:rgba(0,0,0,0.35); font-size:13px; text-align:center; padding:10px 0;">No hay recordatorios registrados.</p>
+            </div>
+
+            <!-- CLÍNICAS DE EXPERIENCIA -->
+            <div class="v-section-label">🎓 Clínicas de Experiencia</div>
+            <div class="v-glass a-card">
+                <div class="r-form-row">
+                    <div class="form-group" style="flex:1; margin-bottom:0;">
+                        <label for="inputClinicaNombre">Nombre de la Clínica</label>
+                        <input type="text" id="inputClinicaNombre" placeholder="Ej: Clínica iPhone 16, Clínica Apple Watch Series 10...">
+                    </div>
+                    <div class="form-group" style="flex:0 0 160px; margin-bottom:0;">
+                        <label for="inputClinicaFecha">Fecha Programada</label>
+                        <input type="date" id="inputClinicaFecha">
+                    </div>
+                    <div style="flex:0 0 auto; display:flex; align-items:flex-end;">
+                        <button class="btn-primary" style="width:auto; padding:10px 20px; white-space:nowrap;" onclick="agregarClinica()">+ Agregar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="v-glass a-card" id="listaClinicas">
+                <p style="color:rgba(0,0,0,0.35); font-size:13px; text-align:center; padding:10px 0;">No hay clínicas registradas.</p>
+            </div>
+        </div>
+
         <!-- PESTAÑA CONFIGURACIÓN — LIQUID GLASS -->
         <div id="configuracion" class="seccion-dashboard" style="position: relative; isolation: isolate;">
             <div class="c-orb c-orb-gray"></div>
@@ -379,7 +474,7 @@
             <div class="v-section-label">📊 Metas del Plan SOS</div>
             <div class="v-glass a-card">
                 <p style="font-size: 13px; color: rgba(0,0,0,0.45); margin-bottom: 20px;">Estas metas aplican a toda la tienda y se usan para el semáforo de Conversión, Accesorización y Ticket Promedio.</p>
-                <div class="a-grid-categorias" style="grid-template-columns: 1fr 1fr 1fr; margin-bottom: 16px;">
+                <div class="a-grid-categorias" style="grid-template-columns: 1fr 1fr 1fr 1fr; margin-bottom: 16px;">
                     <div class="form-group" style="margin-bottom: 0;">
                         <label for="cfgMetaConversion">Meta Conversión (%):</label>
                         <input type="number" id="cfgMetaConversion" step="0.1" placeholder="Ej: 23.0">
@@ -391,6 +486,10 @@
                     <div class="form-group" style="margin-bottom: 0;">
                         <label for="cfgMetaTicket">Meta Ticket Promedio ($):</label>
                         <input type="number" id="cfgMetaTicket" step="1" placeholder="Ej: 280">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="cfgMetaQR">Meta Códigos QR (semana):</label>
+                        <input type="number" id="cfgMetaQR" step="1" placeholder="Ej: 20">
                     </div>
                 </div>
                 <button class="btn-primary" onclick="guardarMetasSOS()">Guardar Metas del Plan SOS</button>
