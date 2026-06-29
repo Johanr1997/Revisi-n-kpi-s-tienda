@@ -104,8 +104,8 @@
                 <!-- Selector Día / Semana -->
                 <div class="venta-modo-wrap">
                     <div class="venta-modo-toggle">
-                        <button class="venta-modo-btn active" id="btnModoDia" onclick="setModoVenta('dia')">📅 Por Día</button>
-                        <button class="venta-modo-btn" id="btnModoSemana" onclick="setModoVenta('semana')">📆 Por Semana</button>
+                        <button class="venta-modo-btn active" id="btnModoDia" onclick="setModoVenta('dia')">Por Día</button>
+                        <button class="venta-modo-btn" id="btnModoSemana" onclick="setModoVenta('semana')">Por Semana</button>
                     </div>
 
                     <!-- Modo DÍA -->
@@ -139,12 +139,12 @@
             <!-- QR + TRADE-IN -->
             <div class="a-pill-row">
                 <div class="v-glass a-pill">
-                    <span class="v-pill-ico">🏷️</span>
+                    <span class="v-pill-ico"></span>
                     <label class="v-pill-name" for="inputQR">Códigos QR en la Semana</label>
                     <input type="number" id="inputQR" value="0" class="a-pill-input">
                 </div>
                 <div class="v-glass a-pill">
-                    <span class="v-pill-ico">🔄</span>
+                    <span class="v-pill-ico"></span>
                     <label class="v-pill-name" for="inputTradeIn">Trade-In en la Semana</label>
                     <input type="number" id="inputTradeIn" value="0" class="a-pill-input">
                 </div>
@@ -181,7 +181,7 @@
             <div class="v-section-label">Protecciones &amp; Activación</div>
             <div class="v-glass a-card" style="margin-bottom:0; border-bottom-left-radius:0; border-bottom-right-radius:0;">
                 <div class="form-group" style="margin-bottom:0;">
-                    <label for="inputFechaProteccion">📅 Fecha de venta de protecciones (Garex / Insurama)</label>
+                    <label for="inputFechaProteccion">Fecha de venta de protecciones (Garex / Insurama)</label>
                     <input type="date" id="inputFechaProteccion" style="max-width:220px;">
                     <span style="font-size:12px; color:#86868B; margin-left:10px;">Deja vacío para usar la fecha de hoy</span>
                 </div>
@@ -367,15 +367,15 @@
             <div class="v-section-label">Top Vendedores</div>
             <div class="v-top-grid">
                 <div class="v-glass v-top-card">
-                    <div class="v-top-card-title">🏆 Top Ventas</div>
+                    <div class="v-top-card-title">Top Ventas</div>
                     <div id="v_top_ventas" class="v-top-list"></div>
                 </div>
                 <div class="v-glass v-top-card">
-                    <div class="v-top-card-title">🛡️ Top Garex</div>
+                    <div class="v-top-card-title">Top Garex</div>
                     <div id="v_top_garex" class="v-top-list"></div>
                 </div>
                 <div class="v-glass v-top-card">
-                    <div class="v-top-card-title">🔒 Top Seguros</div>
+                    <div class="v-top-card-title">Top Seguros</div>
                     <div id="v_top_seguros" class="v-top-list"></div>
                 </div>
             </div>
@@ -424,15 +424,15 @@
                     <label for="inputNotaBitacora">Anotar cosas que se deben cambiar en la semana</label>
                     <textarea id="inputNotaBitacora" placeholder="Escribe aquí las modificaciones, ajustes de horarios o cambios tácticos..."></textarea>
                 </div>
-                <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+                <div style="display:flex; gap:16px; align-items:center; justify-content:flex-end; flex-wrap:wrap; margin-bottom:12px;">
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#515154; cursor:pointer;">
+                        <input type="checkbox" id="checkBitacoraCalendario" checked style="width:16px; height:16px; cursor:pointer;">
+                        Agregar al calendario
+                    </label>
                     <div class="form-group" style="margin-bottom:0; flex:0 0 200px;">
                         <label for="inputBitacoraFecha">Fecha (opcional)</label>
                         <input type="date" id="inputBitacoraFecha">
                     </div>
-                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#515154; cursor:pointer; margin-top:20px;">
-                        <input type="checkbox" id="checkBitacoraCalendario" checked style="width:16px; height:16px; cursor:pointer;">
-                        Agregar al calendario
-                    </label>
                 </div>
                 <button class="btn-primary" onclick="agregarNotaBitacora()">Agregar Comentario a la Bitácora</button>
             </div>
@@ -480,10 +480,6 @@
             <div class="v-section-label">📌 Recordatorios Mensuales</div>
             <div class="v-glass a-card">
                 <div class="r-form-row">
-                    <div class="form-group" style="flex:0 0 160px; margin-bottom:0;">
-                        <label for="inputRecordatorioFecha">Fecha</label>
-                        <input type="date" id="inputRecordatorioFecha">
-                    </div>
                     <div class="form-group" style="flex:1; margin-bottom:0;">
                         <label for="inputRecordatorioTexto">Descripción</label>
                         <input type="text" id="inputRecordatorioTexto" placeholder="Ej: Mantenimiento de cámaras, Reunión zona, Revisión de metas...">
@@ -496,6 +492,10 @@
                             <option value="tarea">✅ Tarea</option>
                             <option value="otro">📎 Otro</option>
                         </select>
+                    </div>
+                    <div class="form-group" style="flex:0 0 160px; margin-bottom:0;">
+                        <label for="inputRecordatorioFecha">Fecha</label>
+                        <input type="date" id="inputRecordatorioFecha">
                     </div>
                     <div style="flex:0 0 auto; display:flex; align-items:flex-end;">
                         <button class="btn-primary" style="width:auto; padding:10px 20px; white-space:nowrap;" onclick="agregarRecordatorio()">+ Agregar</button>

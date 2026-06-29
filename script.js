@@ -1092,7 +1092,7 @@ function renderDetalleVentas(tipo, idContenedorTabla) {
         if (lista.length === 0) return;
         hayDatos = true;
 
-        html += `<p style="font-size:13px; font-weight:600; margin:14px 0 6px; color:#0071E3;">👤 ${asor.nombre}</p>
+        html += `<p style="font-size:13px; font-weight:600; margin:14px 0 6px; color:#0071E3;">${asor.nombre}</p>
         <table style="width:100%; border-collapse:collapse; text-align:left; font-size:12px; margin-bottom:10px;">
             <thead>
                 <tr style="background:#F5F5F7; color:#86868B;">
