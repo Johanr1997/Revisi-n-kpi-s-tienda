@@ -582,12 +582,18 @@
 
             <!-- Panel: Apariencia -->
             <div class="v-section-label">🌗 Apariencia</div>
-            <div class="v-glass a-card" style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
-                <div>
-                    <p style="font-weight:600; font-size:14px; margin-bottom:4px;">Modo oscuro</p>
-                    <p style="font-size:13px; color: rgba(0,0,0,0.45); margin:0;">Cambia la apariencia de toda la aplicación. Tu preferencia se guarda automáticamente.</p>
+            <div class="v-glass a-card">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom: 16px;">
+                    <div>
+                        <p style="font-weight:600; font-size:14px; margin-bottom:4px;">Modo oscuro</p>
+                        <p style="font-size:13px; color: rgba(0,0,0,0.45); margin:0;">Cambia la apariencia de toda la aplicación. Tu preferencia se guarda automáticamente.</p>
+                    </div>
+                    <button type="button" class="btn-primary" style="width:auto; padding:10px 22px; white-space:nowrap;" id="btnThemeToggleConfig" onclick="toggleModoOscuro()">☽ Activar modo oscuro</button>
                 </div>
-                <button type="button" class="btn-primary" style="width:auto; padding:10px 22px; white-space:nowrap;" id="btnThemeToggleConfig" onclick="toggleModoOscuro()">☽ Activar modo oscuro</button>
+                <label class="cal-checkbox-wrap" for="chkModoOscuroAuto" style="padding-top:14px; border-top:1px solid rgba(0,0,0,0.07);">
+                    <input type="checkbox" id="chkModoOscuroAuto" checked onchange="toggleModoOscuroAuto()">
+                    <span>Detectar automáticamente el modo del dispositivo (claro/oscuro)</span>
+                </label>
             </div>
 
             <!-- Panel: Reset -->

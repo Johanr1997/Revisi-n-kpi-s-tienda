@@ -200,6 +200,8 @@ let lineasInsuramaPendientes = [];
 // ═══════════════════════════════════════════
 // MODO OSCURO
 // ═══════════════════════════════════════════
+const mediaModoOscuroSistema = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+
 function aplicarModoOscuro(activar) {
     document.body.classList.toggle("dark-mode", activar);
 
@@ -212,16 +214,56 @@ function aplicarModoOscuro(activar) {
     if (btnCfg) {
         btnCfg.textContent = activar ? "☼ Activar modo claro" : "☽ Activar modo oscuro";
     }
+    const chkAuto = document.getElementById("chkModoOscuroAuto");
+    if (chkAuto) chkAuto.checked = localStorage.getItem("modoOscuroAuto") !== "0";
 }
 
+// El usuario eligió manualmente un tema: se guarda y deja de seguir al sistema
 function toggleModoOscuro() {
     const activar = !document.body.classList.contains("dark-mode");
     localStorage.setItem("modoOscuro", activar ? "1" : "0");
+    localStorage.setItem("modoOscuroAuto", "0");
     aplicarModoOscuro(activar);
 }
 
+// Activa/desactiva que la app siga automáticamente el modo del sistema operativo
+function toggleModoOscuroAuto() {
+    const chk = document.getElementById("chkModoOscuroAuto");
+    const seguirSistema = chk ? chk.checked : true;
+    localStorage.setItem("modoOscuroAuto", seguirSistema ? "1" : "0");
+    if (seguirSistema) {
+        const prefiereOscuro = mediaModoOscuroSistema ? mediaModoOscuroSistema.matches : false;
+        localStorage.setItem("modoOscuro", prefiereOscuro ? "1" : "0");
+        aplicarModoOscuro(prefiereOscuro);
+        mostrarAlerta("La app ahora seguirá el modo del sistema automáticamente.", "success");
+    } else {
+        mostrarAlerta("Modo automático desactivado. Puedes elegir el tema manualmente.", "success");
+    }
+}
+
+function inicializarModoOscuro() {
+    const seguirSistema = localStorage.getItem("modoOscuroAuto") !== "0"; // por defecto, sí sigue al sistema
+    let activar;
+    if (seguirSistema && mediaModoOscuroSistema) {
+        activar = mediaModoOscuroSistema.matches;
+    } else {
+        activar = localStorage.getItem("modoOscuro") === "1";
+    }
+    aplicarModoOscuro(activar);
+
+    // Si el sistema cambia de tema en vivo y el modo automático sigue activo, la app se actualiza sola
+    if (mediaModoOscuroSistema) {
+        mediaModoOscuroSistema.addEventListener("change", (e) => {
+            if (localStorage.getItem("modoOscuroAuto") !== "0") {
+                localStorage.setItem("modoOscuro", e.matches ? "1" : "0");
+                aplicarModoOscuro(e.matches);
+            }
+        });
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
-    aplicarModoOscuro(localStorage.getItem("modoOscuro") === "1");
+    inicializarModoOscuro();
     configurarNavegacionPestañas();
     configurarSelectsProteccion();
     actualizarRelojYFecha();

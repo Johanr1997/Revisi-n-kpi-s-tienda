@@ -1667,3 +1667,11 @@ body.dark-mode .tabla-header-row {
 body.dark-mode table tbody tr {
     border-bottom-color: rgba(255,255,255,0.08) !important;
 }
+
+/* Separador del check de modo automático en Configuración */
+body.dark-mode #chkModoOscuroAuto {
+    accent-color: #0A84FF;
+}
+body.dark-mode label[for="chkModoOscuroAuto"] {
+    border-top-color: rgba(255,255,255,0.1) !important;
+}
