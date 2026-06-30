@@ -183,13 +183,14 @@ let appData = JSON.parse(localStorage.getItem("controlVentasData")) || {
 };
 
 // MIGRACIÓN: si hay datos guardados de una versión anterior (sin ventasGarex/ventasInsurama), los completa
+let _migracionContadorId = 0;
 Object.keys(appData.asesores).forEach(key => {
     const a = appData.asesores[key];
     if (!a.ventasGarex) a.ventasGarex = [];
     if (!a.ventasInsurama) a.ventasInsurama = [];
     // Migrar registros antiguos que no tengan montoVenta (precio al cliente)
-    a.ventasGarex.forEach(v => { if (v.montoVenta === undefined) v.montoVenta = 0; });
-    a.ventasInsurama.forEach(v => { if (v.montoVenta === undefined) v.montoVenta = 0; });
+    a.ventasGarex.forEach(v => { if (v.montoVenta === undefined) v.montoVenta = 0; if (v.id === undefined) v.id = "migrado_" + (_migracionContadorId++); });
+    a.ventasInsurama.forEach(v => { if (v.montoVenta === undefined) v.montoVenta = 0; if (v.id === undefined) v.id = "migrado_" + (_migracionContadorId++); });
 });
 
 // LÍNEAS PENDIENTES DE AGREGAR (estado temporal en memoria, no se guarda hasta presionar "Actualizar Asesor")
@@ -570,7 +571,8 @@ function guardarDatosAsesor() {
                 fecha,
                 label: `💰 ${nombreAsesor}: $${monto.toLocaleString()}`,
                 tipo: "venta",
-                monto
+                monto,
+                asesorKey: key
             });
             guardarVentasCalendario();
         }
@@ -585,13 +587,17 @@ function guardarDatosAsesor() {
             if (desde > hasta) { alert("La fecha de inicio no puede ser posterior a la de fin."); return; }
             const fechas = generarRangoFechas(desde, hasta);
             const montoPorDia = monto / fechas.length;
+            const grupoSemanaId = "grp_" + Date.now();
             fechas.forEach((f, i) => {
                 ventasCalendario.push({
                     id: Date.now() + i,
                     fecha: f,
                     label: `💰 ${nombreAsesor}: $${montoPorDia.toFixed(0)}/día`,
                     tipo: "venta",
-                    monto: montoPorDia
+                    monto: montoPorDia,
+                    asesorKey: key,
+                    grupoId: grupoSemanaId,
+                    montoTotalGrupo: monto
                 });
             });
             guardarVentasCalendario();
@@ -608,13 +614,13 @@ function guardarDatosAsesor() {
     const fechaProteccionISO = fechaGarexInput || new Date().toISOString().slice(0, 10);
     const [fp_y, fp_m, fp_d] = fechaProteccionISO.split("-");
     const fechaProteccionDisplay = `${fp_d}/${fp_m}/${fp_y}`;
-    lineasGarexPendientes.forEach(linea => {
-        appData.asesores[key].ventasGarex.push({ ...linea, fecha: fechaProteccionDisplay, fechaISO: fechaProteccionISO });
+    lineasGarexPendientes.forEach((linea, i) => {
+        appData.asesores[key].ventasGarex.push({ ...linea, id: Date.now() + i, fecha: fechaProteccionDisplay, fechaISO: fechaProteccionISO });
     });
 
     // Volcar todas las líneas pendientes de Insurama con su fecha de registro
-    lineasInsuramaPendientes.forEach(linea => {
-        appData.asesores[key].ventasInsurama.push({ ...linea, fecha: fechaProteccionDisplay, fechaISO: fechaProteccionISO });
+    lineasInsuramaPendientes.forEach((linea, i) => {
+        appData.asesores[key].ventasInsurama.push({ ...linea, id: Date.now() + 1000 + i, fecha: fechaProteccionDisplay, fechaISO: fechaProteccionISO });
     });
 
     // Limpiar las listas pendientes ya volcadas
@@ -1075,6 +1081,22 @@ function renderTablaInsurama(idContenedor) {
 }
 
 // Muestra el detalle línea por línea (cobertura/duración/cantidad/incentivo) de cada venta, agrupado por asesor
+// Elimina UNA línea específica de Garex o Insurama (identificada por su id) de un asesor puntual
+function eliminarVentaProteccion(tipo, asesorKey, id) {
+    const asor = appData.asesores[asesorKey];
+    if (!asor) return;
+    if (!confirm(`¿Eliminar este registro de ${tipo}? Esta acción no se puede deshacer.`)) return;
+
+    if (tipo === "Garex") {
+        asor.ventasGarex = asor.ventasGarex.filter(v => String(v.id) !== String(id));
+    } else {
+        asor.ventasInsurama = asor.ventasInsurama.filter(v => String(v.id) !== String(id));
+    }
+
+    sincronizarYRenderizar();
+    actualizarCumplimientoAsesorVisual();
+}
+
 function renderDetalleVentas(tipo, idContenedorTabla) {
     const esGarex = tipo === "Garex";
     const detalleId = `detalle_${tipo.toLowerCase()}_${idContenedorTabla}`;
@@ -1103,6 +1125,7 @@ function renderDetalleVentas(tipo, idContenedorTabla) {
                     <th style="padding:8px; text-align:right;">Monto Vendido</th>
                     <th style="padding:8px; text-align:right;">Incentivo</th>
                     <th style="padding:8px; text-align:right;">Fecha</th>
+                    <th style="padding:8px; text-align:center; width:30px;"></th>
                 </tr>
             </thead>
             <tbody>`;
@@ -1117,6 +1140,9 @@ function renderDetalleVentas(tipo, idContenedorTabla) {
                     <td style="padding:8px; text-align:right;">$${(v.montoVenta || 0).toFixed(2)}</td>
                     <td style="padding:8px; text-align:right; color:#34C759; font-weight:600;">$${v.incentivoTotal.toFixed(2)}</td>
                     <td style="padding:8px; text-align:right; color:#86868B;">${v.fecha}</td>
+                    <td style="padding:8px; text-align:center;">
+                        <button type="button" onclick="eliminarVentaProteccion('${tipo}', '${key}', '${v.id}')" title="Eliminar este registro" style="background:none; border:none; color:#FF3B30; font-size:15px; cursor:pointer; padding:0 4px; line-height:1;">✕</button>
+                    </td>
                 </tr>`;
         });
 
@@ -1549,7 +1575,7 @@ function obtenerEventosPorFecha() {
 
     // 4. Ventas ingresadas desde Asesores
     ventasCalendario.forEach(v => {
-        agregar(v.fecha, { tipo:"venta", label: v.label, color:"#34C759", pillClass:"cal-pill-venta" });
+        agregar(v.fecha, { tipo:"venta", id: v.id, label: v.label, color:"#34C759", pillClass:"cal-pill-venta", asesorKey: v.asesorKey, monto: v.monto, grupoId: v.grupoId });
     });
 
     return mapa;
@@ -1649,13 +1675,54 @@ function calClickDia(fecha) {
         contenido.innerHTML = `<p style="color:rgba(0,0,0,0.35); font-size:13px; padding:8px 0;">No hay eventos este día.</p>`;
     } else {
         contenido.innerHTML = evsDia.map(e => `
-            <div class="cal-detalle-item">
-                <div class="cal-detalle-dot" style="background:${e.color};"></div>
-                <span>${e.label}</span>
+            <div class="cal-detalle-item" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                <span style="display:flex; align-items:center; gap:8px;">
+                    <span class="cal-detalle-dot" style="background:${e.color};"></span>
+                    <span>${e.label}</span>
+                </span>
+                ${e.tipo === "venta" ? `<button type="button" onclick="eliminarVentaCalendario(${e.id}, '${fecha}')" title="Eliminar esta venta" style="background:none; border:none; color:#FF3B30; font-size:15px; cursor:pointer; padding:0 4px; line-height:1; flex-shrink:0;">✕</button>` : ""}
             </div>
         `).join("");
     }
 
     detalle.style.display = "block";
     detalle.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+// Elimina una venta puntual del calendario, y resta el monto correspondiente
+// del total acumulado del asesor (asor.ventaSemanal) para mantener todo consistente.
+// Si la venta pertenece a un rango de semana repartido en varios días, pregunta
+// si se desea eliminar solo ese día o el rango semanal completo.
+function eliminarVentaCalendario(id, fecha) {
+    const entrada = ventasCalendario.find(v => v.id === id);
+    if (!entrada) return;
+
+    const asor = entrada.asesorKey ? appData.asesores[entrada.asesorKey] : null;
+
+    if (entrada.grupoId) {
+        const diasDelGrupo = ventasCalendario.filter(v => v.grupoId === entrada.grupoId);
+        const borrarTodo = confirm(
+            `Esta venta forma parte de un rango semanal repartido en ${diasDelGrupo.length} día(s) (total $${(entrada.montoTotalGrupo || 0).toLocaleString()}).\n\n` +
+            `Presiona "Aceptar" para eliminar TODO el rango semanal, o "Cancelar" para elegir entre eliminar solo este día.`
+        );
+
+        if (borrarTodo) {
+            if (asor) asor.ventaSemanal = Math.max(0, asor.ventaSemanal - (entrada.montoTotalGrupo || 0));
+            ventasCalendario = ventasCalendario.filter(v => v.grupoId !== entrada.grupoId);
+        } else {
+            const borrarSoloEsteDia = confirm(`¿Eliminar únicamente el registro de este día (${fecha})? Se restará solo su parte proporcional ($${entrada.monto.toFixed(0)}).`);
+            if (!borrarSoloEsteDia) return;
+            if (asor) asor.ventaSemanal = Math.max(0, asor.ventaSemanal - entrada.monto);
+            ventasCalendario = ventasCalendario.filter(v => v.id !== id);
+        }
+    } else {
+        if (!confirm(`¿Eliminar esta venta del ${fecha}? Se restará $${(entrada.monto || 0).toLocaleString()} del total acumulado del asesor. Esta acción no se puede deshacer.`)) return;
+        if (asor) asor.ventaSemanal = Math.max(0, asor.ventaSemanal - (entrada.monto || 0));
+        ventasCalendario = ventasCalendario.filter(v => v.id !== id);
+    }
+
+    guardarVentasCalendario();
+    sincronizarYRenderizar();
+    renderCalendario();
+    calClickDia(fecha);
 }
