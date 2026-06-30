@@ -620,15 +620,17 @@ function guardarDatosAsesor() {
         mostrarAlerta("Por favor ingresa la fecha de la venta.", "warning");
         return;
     }
-    if (monto > 0 && fecha && reflejarEnCalendario) {
-        // Guardar evento en el calendario (recordatoriosData lo usamos como fuente de ventas)
+    if (monto > 0 && fecha) {
+        // Siempre se guarda en el calendario (para poder gestionarla/eliminarla desde ahí),
+        // pero si "reflejarEnCalendario" es falso, no se muestra como pastilla en la celda del día.
         ventasCalendario.push({
             id: Date.now(),
             fecha,
             label: `💰 ${nombreAsesor}: $${monto.toLocaleString()}`,
             tipo: "venta",
             monto,
-            asesorKey: key
+            asesorKey: key,
+            visibleEnCalendario: reflejarEnCalendario
         });
         guardarVentasCalendario();
     }
@@ -1278,10 +1280,21 @@ function renombrarAsesor(key) {
     }));
     guardarVentasCalendario();
 
+    // Crear clínica de experiencia automática para el asesor con su nombre actualizado
+    clinicasData.push({
+        id: Date.now(),
+        nombre: `Clínica de experiencia — ${nuevoNombre}`,
+        fecha: "",
+        realizada: false,
+        fechaRealizada: null
+    });
+    guardarClinicas();
+    renderClinicas();
+
     sincronizarYRenderizar();
     renderListaAsesoresConfig();
     renderCalendario();
-    mostrarAlerta(`Asesor renombrado a "${nuevoNombre}" correctamente.`, "success");
+    mostrarAlerta(`Asesor renombrado a "${nuevoNombre}" correctamente. Se creó una clínica de experiencia para él en la pestaña Recordatorios.`, "success");
 }
 
 function agregarNuevoAsesor() {
@@ -1355,7 +1368,9 @@ function reiniciarTodoCero() {
             }
         };
         recordatoriosData = [];
+        // Siempre se recrea una clínica fija "Interna" para Fábrica, sin importar cuántas veces se reinicie
         clinicasData = [];
+        asegurarClinicaInterna();
         ventasCalendario = [];
         document.querySelectorAll("input, textarea").forEach(el => el.value = "");
         lineasGarexPendientes = [];
@@ -1565,8 +1580,24 @@ function renderClinicas() {
     }).join("");
 }
 
+// Garantiza que siempre exista la clínica fija "Clínica de experiencia — Interna", sin importar reinicios
+function asegurarClinicaInterna() {
+    const existe = clinicasData.some(c => c.nombre === "Clínica de experiencia — Interna");
+    if (!existe) {
+        clinicasData.unshift({
+            id: Date.now(),
+            nombre: "Clínica de experiencia — Interna",
+            fecha: "",
+            realizada: false,
+            fechaRealizada: null
+        });
+        guardarClinicas();
+    }
+}
+
 // Inicializar las listas al cargar la página
 document.addEventListener("DOMContentLoaded", function () {
+    asegurarClinicaInterna();
     renderRecordatorios();
     renderClinicas();
     renderCalendario();
@@ -1630,7 +1661,7 @@ function obtenerEventosPorFecha() {
 
     // 4. Ventas ingresadas desde Asesores
     ventasCalendario.forEach(v => {
-        agregar(v.fecha, { tipo:"venta", id: v.id, label: v.label, color:"#34C759", pillClass:"cal-pill-venta", asesorKey: v.asesorKey, monto: v.monto, grupoId: v.grupoId });
+        agregar(v.fecha, { tipo:"venta", id: v.id, label: v.label, color:"#34C759", pillClass:"cal-pill-venta", asesorKey: v.asesorKey, monto: v.monto, grupoId: v.grupoId, visibleEnCalendario: v.visibleEnCalendario !== false });
     });
 
     return mapa;
@@ -1688,7 +1719,10 @@ function renderCalendario() {
 function renderCelda(dia, fecha, otroMes, hoyStr, eventos, esDelMes) {
     const esHoy = fecha === hoyStr;
     const esSeleccionada = fecha === calDiaSeleccionado;
-    const evs = eventos[fecha] || [];
+    // En la celda del día solo se muestran los eventos visibles (las ventas marcadas
+    // para no reflejarse en el calendario quedan ocultas aquí, pero siguen disponibles
+    // en el detalle del día al hacer clic, para poder eliminarlas si es necesario).
+    const evs = (eventos[fecha] || []).filter(e => e.tipo !== "venta" || e.visibleEnCalendario !== false);
 
     let clases = "cal-celda";
     if (otroMes) clases += " otro-mes";
@@ -1733,7 +1767,7 @@ function calClickDia(fecha) {
             <div class="cal-detalle-item" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
                 <span style="display:flex; align-items:center; gap:8px;">
                     <span class="cal-detalle-dot" style="background:${e.color};"></span>
-                    <span>${e.label}</span>
+                    <span>${e.label}${e.tipo === "venta" && e.visibleEnCalendario === false ? ' <span style="color:#86868B; font-size:11px;">(oculta del calendario)</span>' : ""}</span>
                 </span>
                 ${e.tipo === "venta" ? `<button type="button" onclick="eliminarVentaCalendario(${e.id}, '${fecha}')" title="Eliminar esta venta" style="background:none; border:none; color:#FF3B30; font-size:15px; cursor:pointer; padding:0 4px; line-height:1; flex-shrink:0;">✕</button>` : ""}
             </div>
