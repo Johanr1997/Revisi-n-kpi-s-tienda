@@ -197,7 +197,31 @@ Object.keys(appData.asesores).forEach(key => {
 let lineasGarexPendientes = [];
 let lineasInsuramaPendientes = [];
 
+// ═══════════════════════════════════════════
+// MODO OSCURO
+// ═══════════════════════════════════════════
+function aplicarModoOscuro(activar) {
+    document.body.classList.toggle("dark-mode", activar);
+
+    const btnNav = document.getElementById("btnThemeToggle");
+    if (btnNav) {
+        btnNav.textContent = activar ? "☼" : "☽";
+        btnNav.title = activar ? "Cambiar a modo claro" : "Cambiar a modo oscuro";
+    }
+    const btnCfg = document.getElementById("btnThemeToggleConfig");
+    if (btnCfg) {
+        btnCfg.textContent = activar ? "☼ Activar modo claro" : "☽ Activar modo oscuro";
+    }
+}
+
+function toggleModoOscuro() {
+    const activar = !document.body.classList.contains("dark-mode");
+    localStorage.setItem("modoOscuro", activar ? "1" : "0");
+    aplicarModoOscuro(activar);
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+    aplicarModoOscuro(localStorage.getItem("modoOscuro") === "1");
     configurarNavegacionPestañas();
     configurarSelectsProteccion();
     actualizarRelojYFecha();
@@ -829,33 +853,33 @@ function renderTodo() {
         const incentivoTotal    = incentivoGarex + incentivoInsurama;
 
         htmlResumenAsesores += `
-            <div style="padding:15px; background:#F5F5F7; border-radius:12px; margin-bottom:15px;">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:5px;">
+            <div class="ra-card">
+                <div class="ra-header">
                     <div>
                         <strong>${asor.nombre}</strong>
-                        <span style="display:inline-block; margin-left:10px; font-size:11px; font-weight:600; background:rgba(52,199,89,0.13); color:#1a6e35; padding:2px 9px; border-radius:999px;">💰 Incentivos: $${incentivoTotal.toFixed(2)}</span>
+                        <span class="ra-incentivo">💰 Incentivos: $${incentivoTotal.toFixed(2)}</span>
                     </div>
-                    <span style="color:#0071E3; font-weight:600;">${cumplimiento}% de cumplimiento</span>
+                    <span class="ra-cumplimiento">${cumplimiento}% de cumplimiento</span>
                 </div>
                 <div class="barra-progreso"><div class="progreso-relleno" style="width:${Math.min(cumplimiento,100)}%;"></div></div>
-                <p style="font-size:12px; margin-top:8px; color:#6E6E73;">
+                <p class="ra-sub">
                     Venta: $${asor.ventaSemanal.toLocaleString()} | Meta: $${asor.meta.toLocaleString()}<br>
                     QR Colocados: ${asor.qr} | Trade-In: ${asor.tradeIn}
                 </p>
-                <div style="margin-top:10px; padding-top:10px; border-top:1px solid #E5E5EA;">
-                    <p style="font-size:12px; font-weight:600; color:#1D1D1F; margin-bottom:6px;">Unidades acumuladas — <span style="color:#0071E3;">${totalUnidades} total</span></p>
-                    <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:4px; font-size:12px; color:#515154;">
-                        <div>Unidades de Mac: <strong>${u.mac}</strong> <span style="color:#86868B;">($${m.mac.toLocaleString()})</span></div>
-                        <div>Unidades de iPad: <strong>${u.ipad}</strong> <span style="color:#86868B;">($${m.ipad.toLocaleString()})</span></div>
-                        <div>Unidades de iPhone: <strong>${u.iphone}</strong> <span style="color:#86868B;">($${m.iphone.toLocaleString()})</span></div>
-                        <div>Unidades de Watch: <strong>${u.watch}</strong> <span style="color:#86868B;">($${m.watch.toLocaleString()})</span></div>
-                        <div>Unidades de AirPods: <strong>${u.airpods}</strong> <span style="color:#86868B;">($${m.airpods.toLocaleString()})</span></div>
-                        <div>Unidades de Audio: <strong>${u.audio}</strong> <span style="color:#86868B;">($${m.audio.toLocaleString()})</span></div>
+                <div class="ra-section">
+                    <p class="ra-section-title">Unidades acumuladas — <span class="ra-accent-blue">${totalUnidades} total</span></p>
+                    <div class="ra-grid ra-grid-3">
+                        <div>Unidades de Mac: <strong>${u.mac}</strong> <span class="ra-muted">($${m.mac.toLocaleString()})</span></div>
+                        <div>Unidades de iPad: <strong>${u.ipad}</strong> <span class="ra-muted">($${m.ipad.toLocaleString()})</span></div>
+                        <div>Unidades de iPhone: <strong>${u.iphone}</strong> <span class="ra-muted">($${m.iphone.toLocaleString()})</span></div>
+                        <div>Unidades de Watch: <strong>${u.watch}</strong> <span class="ra-muted">($${m.watch.toLocaleString()})</span></div>
+                        <div>Unidades de AirPods: <strong>${u.airpods}</strong> <span class="ra-muted">($${m.airpods.toLocaleString()})</span></div>
+                        <div>Unidades de Audio: <strong>${u.audio}</strong> <span class="ra-muted">($${m.audio.toLocaleString()})</span></div>
                     </div>
                 </div>
-                <div style="margin-top:10px; padding-top:10px; border-top:1px solid #E5E5EA;">
-                    <p style="font-size:12px; font-weight:600; color:#1D1D1F; margin-bottom:6px;">Garex colocados — <span style="color:#34C759;">${sumarCantidad(asor.ventasGarex)} total</span></p>
-                    <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:4px; font-size:12px; color:#515154;">
+                <div class="ra-section">
+                    <p class="ra-section-title">Garex colocados — <span class="ra-accent-green">${sumarCantidad(asor.ventasGarex)} total</span></p>
+                    <div class="ra-grid ra-grid-3">
                         <div>Mac: <strong>${garexAsorPorDispositivo.Mac}</strong></div>
                         <div>iPad: <strong>${garexAsorPorDispositivo.iPad}</strong></div>
                         <div>iPhone: <strong>${garexAsorPorDispositivo.iPhone}</strong></div>
@@ -864,9 +888,9 @@ function renderTodo() {
                         <div>Audio: <strong>${garexAsorPorDispositivo.Audio}</strong></div>
                     </div>
                 </div>
-                <div style="margin-top:10px; padding-top:10px; border-top:1px solid #E5E5EA;">
-                    <p style="font-size:12px; font-weight:600; color:#1D1D1F; margin-bottom:6px;">Seguros colocados — <span style="color:#34C759;">${sumarCantidad(asor.ventasInsurama)} total</span></p>
-                    <div style="display:grid; grid-template-columns: repeat(4,1fr); gap:4px; font-size:12px; color:#515154;">
+                <div class="ra-section">
+                    <p class="ra-section-title">Seguros colocados — <span class="ra-accent-green">${sumarCantidad(asor.ventasInsurama)} total</span></p>
+                    <div class="ra-grid ra-grid-4">
                         <div>Mac: <strong>${segurosAsorPorDispositivo.Mac}</strong></div>
                         <div>iPad: <strong>${segurosAsorPorDispositivo.iPad}</strong></div>
                         <div>iPhone: <strong>${segurosAsorPorDispositivo.iPhone}</strong></div>
@@ -1023,7 +1047,7 @@ function renderTablaGarex(idContenedor) {
     let html = `
         <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;">
             <thead>
-                <tr style="background:#F5F5F7; color:#86868B;">
+                <tr class="tabla-header-row">
                     <th style="padding:10px;">Asesor</th>
                     ${dispositivos.map(d => `<th style="padding:10px; text-align:center;">${d}</th>`).join("")}
                     <th style="padding:10px; text-align:center;">Total De Unidades</th>
@@ -1077,7 +1101,7 @@ function renderTablaInsurama(idContenedor) {
     let html = `
         <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;">
             <thead>
-                <tr style="background:#F5F5F7; color:#86868B;">
+                <tr class="tabla-header-row">
                     <th style="padding:10px;">Asesor</th>
                     ${dispositivos.map(d => `<th style="padding:10px; text-align:center;">${d}</th>`).join("")}
                     <th style="padding:10px; text-align:center;">Total De Unidades</th>
@@ -1162,7 +1186,7 @@ function renderDetalleVentas(tipo, idContenedorTabla) {
         html += `<p style="font-size:13px; font-weight:600; margin:14px 0 6px; color:#0071E3;">${asor.nombre}</p>
         <table style="width:100%; border-collapse:collapse; text-align:left; font-size:12px; margin-bottom:10px;">
             <thead>
-                <tr style="background:#F5F5F7; color:#86868B;">
+                <tr class="tabla-header-row">
                     <th style="padding:8px;">Dispositivo</th>
                     ${esGarex ? "" : '<th style="padding:8px;">Cobertura</th>'}
                     <th style="padding:8px; text-align:center;">Duración</th>
@@ -1250,15 +1274,13 @@ function renderListaAsesoresConfig() {
     if (keys.length === 0) { contenedor.innerHTML = "<p style='color:#86868B; font-size:13px;'>No hay asesores registrados.</p>"; return; }
 
     contenedor.innerHTML = keys.map((key, i) => `
-        <div style="display:grid; grid-template-columns: 1fr auto auto; gap:8px; align-items:center; padding:10px 12px; background:#F5F5F7; border-radius:8px; margin-bottom:8px;">
+        <div class="asesor-config-row">
             <input type="text" id="cfgNombreAsesor_${key}" value="${appData.asesores[key].nombre}"
-                style="font-size:14px; border:1px solid #D2D2D7; border-radius:6px; padding:8px; outline:none;">
-            <button onclick="renombrarAsesor('${key}')"
-                style="background:#0071E3; color:white; border:none; padding:8px 14px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">
+                class="asesor-config-input">
+            <button onclick="renombrarAsesor('${key}')" class="asesor-config-save">
                 Guardar
             </button>
-            ${keys.length > 1 ? `<button onclick="eliminarAsesor('${key}')"
-                style="background:#FF3B30; color:white; border:none; padding:8px 14px; border-radius:6px; font-size:13px; cursor:pointer;">
+            ${keys.length > 1 ? `<button onclick="eliminarAsesor('${key}')" class="asesor-config-del">
                 ✕
             </button>` : `<div></div>`}
         </div>`
@@ -1580,13 +1602,13 @@ function renderClinicas() {
     }).join("");
 }
 
-// Garantiza que siempre exista la clínica fija "Clínica de experiencia — Interna", sin importar reinicios
+// Garantiza que siempre exista la clínica fija "Fábrica — Interna", sin importar reinicios
 function asegurarClinicaInterna() {
-    const existe = clinicasData.some(c => c.nombre === "Clínica de experiencia — Interna");
+    const existe = clinicasData.some(c => c.nombre === "Fábrica — Interna");
     if (!existe) {
         clinicasData.unshift({
             id: Date.now(),
-            nombre: "Clínica de experiencia — Interna",
+            nombre: "Fábrica — Interna",
             fecha: "",
             realizada: false,
             fechaRealizada: null
