@@ -10,7 +10,7 @@ function guardarMetasSOS() {
     const qr    = parseFloat(document.getElementById("cfgMetaQR").value);
 
     if (isNaN(conv) || isNaN(acc) || isNaN(tick) || isNaN(qr) || conv <= 0 || acc <= 0 || tick <= 0 || qr < 0) {
-        alert("Por favor ingresa valores válidos para las metas (la meta de QR puede ser 0).");
+        mostrarAlerta("Por favor ingresa valores válidos para las metas (la meta de QR puede ser 0).", "warning");
         return;
     }
 
@@ -24,7 +24,7 @@ function guardarMetasSOS() {
     document.getElementById("metaVisualQR").textContent    = `${qr}`;
 
     sincronizarYRenderizar();
-    alert("Metas del Plan SOS actualizadas correctamente.");
+    mostrarAlerta("Metas del Plan SOS actualizadas correctamente.", "success");
 }
 
 // ===================================================================
@@ -207,9 +207,9 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("inputConversion").value = appData.inicio.conversion || "";
     document.getElementById("inputAccesorizacion").value = appData.inicio.accesorizacion || "";
     document.getElementById("inputTicket").value = appData.inicio.ticket || "";
-    document.getElementById("inputTrafico").value = appData.inicio.trafico || "";
     document.getElementById("inputComentarios").value = appData.inicio.comentarios || "";
     document.getElementById("inputOportunidades").value = appData.inicio.oportunidades || "";
+    actualizarLabelTraficoAcumulado();
 
     // Construir el select de asesores dinámicamente
     renderSelectAsesor(false);
@@ -381,16 +381,39 @@ function actualizarRelojYFecha() {
 }
 
 // GUARDAR INICIO
+let modoTrafico = 'sumar'; // 'sumar' | 'reemplazar'
+
+function setModoTrafico(modo) {
+    modoTrafico = modo;
+    document.getElementById("btnTraficoSumar").classList.toggle("active", modo === 'sumar');
+    document.getElementById("btnTraficoReemplazar").classList.toggle("active", modo === 'reemplazar');
+}
+
+function actualizarLabelTraficoAcumulado() {
+    const lbl = document.getElementById("lblTraficoAcumulado");
+    if (lbl) lbl.textContent = (appData.inicio.trafico || 0).toLocaleString();
+}
+
 function guardarDatosReunion() {
     appData.inicio.conversion = parseFloat(document.getElementById("inputConversion").value) || 0;
     appData.inicio.accesorizacion = parseFloat(document.getElementById("inputAccesorizacion").value) || 0;
     appData.inicio.ticket = parseFloat(document.getElementById("inputTicket").value) || 0;
-    appData.inicio.trafico = parseInt(document.getElementById("inputTrafico").value) || 0;
+
+    const inputTraficoEl = document.getElementById("inputTrafico");
+    if (inputTraficoEl.value !== "") {
+        const valorTrafico = parseInt(inputTraficoEl.value) || 0;
+        appData.inicio.trafico = modoTrafico === 'sumar'
+            ? (appData.inicio.trafico || 0) + valorTrafico
+            : valorTrafico;
+        inputTraficoEl.value = "";
+    }
+
     appData.inicio.comentarios = document.getElementById("inputComentarios").value;
     appData.inicio.oportunidades = document.getElementById("inputOportunidades").value;
 
+    actualizarLabelTraficoAcumulado();
     sincronizarYRenderizar();
-    alert("Datos de pestaña Inicio guardados correctamente.");
+    mostrarAlerta("Datos de pestaña Inicio guardados correctamente.", "success");
 }
 
 // AGREGAR UNA LÍNEA DE GAREX A LA LISTA PENDIENTE (no se guarda en appData todavía)
@@ -402,11 +425,11 @@ function agregarLineaGarex() {
     const precioUnitario = calcularPrecioGarexCliente(dispositivo, duracion, precioDispositivo);
 
     if (cantidad <= 0) {
-        alert("Ingresa una cantidad mayor a 0 para agregar el Garex a la lista.");
+        mostrarAlerta("Ingresa una cantidad mayor a 0 para agregar el Garex a la lista.", "warning");
         return;
     }
     if (precioDispositivo <= 0) {
-        alert("Ingresa el precio del dispositivo para calcular el monto del Garex.");
+        mostrarAlerta("Ingresa el precio del dispositivo para calcular el monto del Garex.", "warning");
         return;
     }
 
@@ -435,11 +458,11 @@ function agregarLineaInsurama() {
     const precioUnitario = calcularPrecioInsuramaCliente(dispositivo, cobertura, duracion, precioDispositivo);
 
     if (cantidad <= 0) {
-        alert("Ingresa una cantidad mayor a 0 para agregar el Insurama a la lista.");
+        mostrarAlerta("Ingresa una cantidad mayor a 0 para agregar el Insurama a la lista.", "warning");
         return;
     }
     if (precioDispositivo <= 0) {
-        alert("Ingresa el precio del dispositivo para calcular el monto del Insurama.");
+        mostrarAlerta("Ingresa el precio del dispositivo para calcular el monto del Insurama.", "warning");
         return;
     }
 
@@ -491,65 +514,98 @@ function renderListaPendiente(tipo) {
     contenedor.innerHTML = html;
 }
 
-// GUARDAR ASESORES
-let modoVenta = 'dia'; // 'dia' | 'semana'
+// ═══════════════════════════════════════════
+// ALERTAS — BURBUJA LIQUID GLASS (reemplaza alert() nativo)
+// ═══════════════════════════════════════════
+const ICONOS_TOAST = { success: "✓", error: "!", warning: "!", info: "i" };
 
-function setModoVenta(modo) {
-    modoVenta = modo;
-    document.getElementById("btnModoDia").classList.toggle("active", modo === 'dia');
-    document.getElementById("btnModoSemana").classList.toggle("active", modo === 'semana');
-    document.getElementById("panelModoDia").style.display    = modo === 'dia'    ? 'flex' : 'none';
-    document.getElementById("panelModoSemana").style.display = modo === 'semana' ? 'flex' : 'none';
-    actualizarResumenIngreso();
+function mostrarAlerta(mensaje, tipo = "info", duracion = 4200) {
+    const cont = document.getElementById("toastContainer");
+    if (!cont) { window.alert(mensaje); return; }
+
+    const toast = document.createElement("div");
+    toast.className = `toast-bubble toast-${tipo}`;
+    toast.innerHTML = `
+        <span class="toast-icon">${ICONOS_TOAST[tipo] || ICONOS_TOAST.info}</span>
+        <span class="toast-message"></span>
+        <button type="button" class="toast-close" aria-label="Cerrar">✕</button>
+    `;
+    toast.querySelector(".toast-message").textContent = mensaje;
+
+    const cerrar = () => {
+        if (!toast.isConnected) return;
+        toast.classList.add("toast-out");
+        setTimeout(() => toast.remove(), 360);
+    };
+
+    toast.querySelector(".toast-close").addEventListener("click", cerrar);
+    cont.appendChild(toast);
+
+    setTimeout(cerrar, duracion);
 }
+
+// ═══════════════════════════════════════════
+// MODAL DE FECHA — BURBUJA LIQUID GLASS (reemplaza prompt() nativo)
+// ═══════════════════════════════════════════
+function pedirFecha(titulo, fechaDefault) {
+    return new Promise((resolve) => {
+        const overlay = document.createElement("div");
+        overlay.className = "modal-overlay";
+        overlay.innerHTML = `
+            <div class="modal-glass">
+                <h3 class="modal-title"></h3>
+                <div class="form-group" style="margin-bottom:20px;">
+                    <label for="modalFechaInput">Fecha</label>
+                    <input type="date" id="modalFechaInput">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn modal-btn-cancel">Cancelar</button>
+                    <button type="button" class="modal-btn modal-btn-confirm">Confirmar</button>
+                </div>
+            </div>`;
+        overlay.querySelector(".modal-title").textContent = titulo;
+        overlay.querySelector("#modalFechaInput").value = fechaDefault || new Date().toISOString().slice(0, 10);
+
+        document.body.appendChild(overlay);
+        requestAnimationFrame(() => overlay.classList.add("modal-open"));
+
+        const cerrar = (valor) => {
+            overlay.classList.remove("modal-open");
+            overlay.classList.add("modal-out");
+            setTimeout(() => overlay.remove(), 280);
+            resolve(valor);
+        };
+
+        overlay.querySelector(".modal-btn-cancel").addEventListener("click", () => cerrar(null));
+        overlay.querySelector(".modal-btn-confirm").addEventListener("click", () => {
+            const valor = overlay.querySelector("#modalFechaInput").value;
+            cerrar(valor || null);
+        });
+        overlay.addEventListener("click", (e) => { if (e.target === overlay) cerrar(null); });
+        overlay.querySelector("#modalFechaInput").addEventListener("keydown", (e) => {
+            if (e.key === "Enter") overlay.querySelector(".modal-btn-confirm").click();
+        });
+    });
+}
+
+
+
+
+
+
 
 function actualizarResumenIngreso() {
     const monto = parseFloat(document.getElementById("inputVentaSemanal").value) || 0;
-
-    if (modoVenta === 'dia') {
-        const fecha = document.getElementById("inputVentaFechaDia").value;
-        const resumen = document.getElementById("resumenDia");
-        if (monto > 0 && fecha) {
-            const [y,m,d] = fecha.split("-");
-            document.getElementById("resumenDiaMonto").textContent = `$${monto.toLocaleString()}`;
-            document.getElementById("resumenDiaFecha").textContent = `${d}/${m}/${y}`;
-            resumen.style.display = "block";
-        } else {
-            resumen.style.display = "none";
-        }
+    const fecha = document.getElementById("inputVentaFechaDia").value;
+    const resumen = document.getElementById("resumenDia");
+    if (monto > 0 && fecha) {
+        const [y,m,d] = fecha.split("-");
+        document.getElementById("resumenDiaMonto").textContent = `$${monto.toLocaleString()}`;
+        document.getElementById("resumenDiaFecha").textContent = `${d}/${m}/${y}`;
+        resumen.style.display = "block";
     } else {
-        const desde = document.getElementById("inputVentaFechaDesde").value;
-        const hasta = document.getElementById("inputVentaFechaHasta").value;
-        const resumen = document.getElementById("resumenSemana");
-        if (monto > 0 && desde && hasta && desde <= hasta) {
-            const dias = calcularDiasEntre(desde, hasta);
-            const porDia = (monto / dias).toFixed(2);
-            const [dy,dm,dd] = desde.split("-");
-            const [hy,hm,hd] = hasta.split("-");
-            resumen.innerHTML = `Se dividirán <strong>$${monto.toLocaleString()}</strong> entre <strong>${dias} día${dias>1?'s':''}</strong> → <strong>$${porDia}/día</strong> &nbsp;·&nbsp; Del ${dd}/${dm}/${dy} al ${hd}/${hm}/${hy}`;
-            resumen.style.display = "block";
-        } else {
-            resumen.style.display = "none";
-        }
+        resumen.style.display = "none";
     }
-}
-
-function calcularDiasEntre(desdeISO, hastaISO) {
-    const d1 = new Date(desdeISO + "T00:00:00");
-    const d2 = new Date(hastaISO + "T00:00:00");
-    return Math.round((d2 - d1) / 86400000) + 1;
-}
-
-// Genera array de fechas ISO entre dos fechas inclusive
-function generarRangoFechas(desdeISO, hastaISO) {
-    const fechas = [];
-    const d = new Date(desdeISO + "T00:00:00");
-    const fin = new Date(hastaISO + "T00:00:00");
-    while (d <= fin) {
-        fechas.push(d.toISOString().slice(0, 10));
-        d.setDate(d.getDate() + 1);
-    }
-    return fechas;
 }
 
 function guardarDatosAsesor() {
@@ -557,51 +613,24 @@ function guardarDatosAsesor() {
     const nombreAsesor = appData.asesores[key].nombre;
     const monto = parseFloat(document.getElementById("inputVentaSemanal").value) || 0;
 
-    // Validar fechas según modo
-    if (modoVenta === 'dia') {
-        const fecha = document.getElementById("inputVentaFechaDia").value;
-        if (monto > 0 && !fecha) {
-            alert("Por favor ingresa la fecha de la venta.");
-            return;
-        }
-        if (monto > 0 && fecha) {
-            // Guardar evento en el calendario (recordatoriosData lo usamos como fuente de ventas)
-            ventasCalendario.push({
-                id: Date.now(),
-                fecha,
-                label: `💰 ${nombreAsesor}: $${monto.toLocaleString()}`,
-                tipo: "venta",
-                monto,
-                asesorKey: key
-            });
-            guardarVentasCalendario();
-        }
-    } else {
-        const desde = document.getElementById("inputVentaFechaDesde").value;
-        const hasta = document.getElementById("inputVentaFechaHasta").value;
-        if (monto > 0 && (!desde || !hasta)) {
-            alert("Por favor ingresa las fechas de inicio y fin de la semana.");
-            return;
-        }
-        if (monto > 0 && desde && hasta) {
-            if (desde > hasta) { alert("La fecha de inicio no puede ser posterior a la de fin."); return; }
-            const fechas = generarRangoFechas(desde, hasta);
-            const montoPorDia = monto / fechas.length;
-            const grupoSemanaId = "grp_" + Date.now();
-            fechas.forEach((f, i) => {
-                ventasCalendario.push({
-                    id: Date.now() + i,
-                    fecha: f,
-                    label: `💰 ${nombreAsesor}: $${montoPorDia.toFixed(0)}/día`,
-                    tipo: "venta",
-                    monto: montoPorDia,
-                    asesorKey: key,
-                    grupoId: grupoSemanaId,
-                    montoTotalGrupo: monto
-                });
-            });
-            guardarVentasCalendario();
-        }
+    const fecha = document.getElementById("inputVentaFechaDia").value;
+    const reflejarEnCalendario = document.getElementById("chkReflejarCalendario")?.checked ?? true;
+
+    if (monto > 0 && !fecha) {
+        mostrarAlerta("Por favor ingresa la fecha de la venta.", "warning");
+        return;
+    }
+    if (monto > 0 && fecha && reflejarEnCalendario) {
+        // Guardar evento en el calendario (recordatoriosData lo usamos como fuente de ventas)
+        ventasCalendario.push({
+            id: Date.now(),
+            fecha,
+            label: `💰 ${nombreAsesor}: $${monto.toLocaleString()}`,
+            tipo: "venta",
+            monto,
+            asesorKey: key
+        });
+        guardarVentasCalendario();
     }
 
     appData.asesores[key].meta = parseFloat(document.getElementById("inputMetaAsesor").value) || 0;
@@ -652,17 +681,17 @@ function guardarDatosAsesor() {
      "m_mac","m_ipad","m_iphone","m_watch","m_airpods","m_audio","m_acc_apple","m_acc_terceros",
      "u_mac","u_ipad","u_iphone","u_watch","u_airpods","u_audio",
      "inputGarexCantidad","inputGarexPrecioDispositivo","inputInsuramaCantidad","inputInsuramaPrecioDispositivo",
-     "inputVentaFechaDia","inputVentaFechaDesde","inputVentaFechaHasta","inputFechaProteccion"
+     "inputVentaFechaDia","inputFechaProteccion"
     ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
     document.getElementById("resumenDia").style.display = "none";
-    document.getElementById("resumenSemana").style.display = "none";
+    if (document.getElementById("chkReflejarCalendario")) document.getElementById("chkReflejarCalendario").checked = true;
     actualizarPrecioGarexCalculado();
     actualizarPrecioInsuramaCalculado();
 
     sincronizarYRenderizar();
     actualizarCumplimientoAsesorVisual();
     renderCalendario();
-    alert("Expediente comercial cargado y acumulado con éxito.");
+    mostrarAlerta("Expediente comercial cargado y acumulado con éxito.", "success");
 }
 
 
@@ -705,7 +734,7 @@ function actualizarCumplimientoAsesorVisual() {
 // AGREGAR NOTA BITÁCORA
 function agregarNotaBitacora() {
     const nota = document.getElementById("inputNotaBitacora").value;
-    if (!nota.trim()) return alert("Por favor, escribe una anotación.");
+    if (!nota.trim()) return mostrarAlerta("Por favor, escribe una anotación.", "warning");
 
     const fechaInput = document.getElementById("inputBitacoraFecha").value;
     const agregarCal = document.getElementById("checkBitacoraCalendario").checked;
@@ -715,6 +744,7 @@ function agregarNotaBitacora() {
     const fechaDisplay = `${d}/${m}/${y} ${new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
 
     const nuevaNota = {
+        id: Date.now(),
         texto: nota,
         fecha: fechaDisplay,
         fechaISO: agregarCal ? fechaISO : null
@@ -724,6 +754,14 @@ function agregarNotaBitacora() {
     document.getElementById("inputBitacoraFecha").value = "";
     sincronizarYRenderizar();
     renderCalendario();
+}
+
+function eliminarBitacora(id) {
+    if (!confirm("¿Eliminar esta anotación de la bitácora?")) return;
+    appData.bitacoras = appData.bitacoras.filter((b, i) => (b.id ?? i) !== id);
+    sincronizarYRenderizar();
+    renderCalendario();
+    mostrarAlerta("Anotación eliminada de la bitácora.", "success");
 }
 
 // RENDERS MÚLTIPLES
@@ -886,6 +924,7 @@ function renderTodo() {
     document.getElementById("v_total_qr").textContent = totalQR;
     document.getElementById("v_total_tradein").textContent = totalTradeIn;
     document.getElementById("v_trafico_acumulado").textContent = appData.inicio.trafico.toLocaleString();
+    actualizarLabelTraficoAcumulado();
 
     // Attach rate por dispositivo: % de unidades vendidas de ese dispositivo que llevaron Garex o Seguro
     function calcularAttach(cantidadProteccion, unidadesDispositivo) {
@@ -909,10 +948,13 @@ function renderTodo() {
     renderTablaInsurama("tablaInsuramaContenedor");
 
     // Render Historial Bitácoras
-    document.getElementById("contenedorBitacoras").innerHTML = appData.bitacoras.map(b => `
-        <div style="padding:12px; background:#F5F5F7; border-radius:8px; margin-bottom:10px; border-left:3px solid #0071E3;">
-            <p style="font-size:13px; line-height:1.4; color:#1D1D1F;">${b.texto}</p>
-            <span style="font-size:11px; color:#86868B; display:block; margin-top:4px;">${b.fecha}</span>
+    document.getElementById("contenedorBitacoras").innerHTML = appData.bitacoras.map((b, i) => `
+        <div style="padding:12px; background:#F5F5F7; border-radius:8px; margin-bottom:10px; border-left:3px solid #0071E3; display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+            <div style="flex:1; min-width:0;">
+                <p style="font-size:13px; line-height:1.4; color:#1D1D1F;">${b.texto}</p>
+                <span style="font-size:11px; color:#86868B; display:block; margin-top:4px;">${b.fecha}</span>
+            </div>
+            <button class="r-item-del" onclick="eliminarBitacora(${b.id ?? i})" title="Eliminar">✕</button>
         </div>
     `).join("") || `<p style="color:#86868B; font-style:italic;">No hay comentarios registrados en la bitácora.</p>`;
 
@@ -1082,6 +1124,7 @@ function renderTablaInsurama(idContenedor) {
 
 // Muestra el detalle línea por línea (cobertura/duración/cantidad/incentivo) de cada venta, agrupado por asesor
 // Elimina UNA línea específica de Garex o Insurama (identificada por su id) de un asesor puntual
+
 function eliminarVentaProteccion(tipo, asesorKey, id) {
     const asor = appData.asesores[asesorKey];
     if (!asor) return;
@@ -1223,7 +1266,7 @@ function renderListaAsesoresConfig() {
 function renombrarAsesor(key) {
     const input = document.getElementById(`cfgNombreAsesor_${key}`);
     const nuevoNombre = input ? input.value.trim() : "";
-    if (!nuevoNombre) { alert("El nombre no puede estar vacío."); return; }
+    if (!nuevoNombre) { mostrarAlerta("El nombre no puede estar vacío.", "warning"); return; }
 
     const nombreAnterior = appData.asesores[key].nombre;
     appData.asesores[key].nombre = nuevoNombre;
@@ -1238,13 +1281,13 @@ function renombrarAsesor(key) {
     sincronizarYRenderizar();
     renderListaAsesoresConfig();
     renderCalendario();
-    alert(`Asesor renombrado a "${nuevoNombre}" correctamente.`);
+    mostrarAlerta(`Asesor renombrado a "${nuevoNombre}" correctamente.`, "success");
 }
 
 function agregarNuevoAsesor() {
     const input = document.getElementById("inputNuevoAsesor");
     const nombre = input ? input.value.trim() : "";
-    if (!nombre) { alert("Ingresa un nombre para el nuevo asesor."); return; }
+    if (!nombre) { mostrarAlerta("Ingresa un nombre para el nuevo asesor.", "warning"); return; }
 
     // Generar key única
     const keys = Object.keys(appData.asesores);
@@ -1270,7 +1313,7 @@ function agregarNuevoAsesor() {
 
     sincronizarYRenderizar();
     renderListaAsesoresConfig();
-    alert(`Asesor "${nombre}" agregado correctamente. Se creó una clínica de experiencia para él en la pestaña Recordatorios.`);
+    mostrarAlerta(`Asesor "${nombre}" agregado correctamente. Se creó una clínica de experiencia para él en la pestaña Recordatorios.`, "success");
 }
 
 function eliminarAsesor(key) {
@@ -1324,7 +1367,7 @@ function reiniciarTodoCero() {
         renderCalendario();
         sincronizarYRenderizar();
         actualizarCumplimientoAsesorVisual();
-        alert("Ciclo comercial formateado a cero.");
+        mostrarAlerta("Ciclo comercial formateado a cero.", "success");
     }
 }
 
@@ -1345,7 +1388,7 @@ function borrarGarexSeguros() {
 
         sincronizarYRenderizar();
         actualizarCumplimientoAsesorVisual();
-        alert("Registros de Garex y Seguros borrados correctamente.");
+        mostrarAlerta("Registros de Garex y Seguros borrados correctamente.", "success");
     }
 }
 
@@ -1370,7 +1413,7 @@ function borrarVentas() {
 
         sincronizarYRenderizar();
         actualizarCumplimientoAsesorVisual();
-        alert("Ventas borradas correctamente.");
+        mostrarAlerta("Ventas borradas correctamente.", "success");
     }
 }
 // ═══════════════════════════════════════════
@@ -1397,7 +1440,7 @@ function agregarRecordatorio() {
     const tipo   = document.getElementById("selectRecordatorioTipo").value;
 
     if (!fecha || !texto) {
-        alert("Por favor ingresa la fecha y la descripción del recordatorio.");
+        mostrarAlerta("Por favor ingresa la fecha y la descripción del recordatorio.", "warning");
         return;
     }
 
@@ -1429,7 +1472,7 @@ function renderRecordatorios() {
         return;
     }
 
-    const badgeLabels = { mantenimiento: "🔧 Mantenimiento", reunion: "📅 Reunión", tarea: "✅ Tarea", otro: "📎 Otro" };
+    const badgeLabels = { mantenimiento: "Mantenimiento", reunion: "Reunión", tarea: "Tarea", otro: "Otro" };
 
     cont.innerHTML = recordatoriosData.map(r => {
         const [y, m, d] = r.fecha.split("-");
@@ -1453,7 +1496,7 @@ function agregarClinica() {
     const fecha  = document.getElementById("inputClinicaFecha").value;
 
     if (!nombre) {
-        alert("Por favor ingresa el nombre de la clínica.");
+        mostrarAlerta("Por favor ingresa el nombre de la clínica.", "warning");
         return;
     }
 
@@ -1466,11 +1509,23 @@ function agregarClinica() {
     document.getElementById("inputClinicaFecha").value = "";
 }
 
-function toggleClinica(id) {
+async function toggleClinica(id) {
     const clinica = clinicasData.find(c => c.id === id);
     if (!clinica) return;
-    clinica.realizada = !clinica.realizada;
-    clinica.fechaRealizada = clinica.realizada ? new Date().toISOString().slice(0, 10) : null;
+
+    if (!clinica.realizada) {
+        // Se está marcando como completada: preguntar en qué fecha se realizó
+        const hoy = new Date().toISOString().slice(0, 10);
+        const fechaElegida = await pedirFecha(`¿Cuándo se realizó la clínica "${clinica.nombre}"?`, hoy);
+        if (!fechaElegida) return; // cancelado por el usuario
+        clinica.realizada = true;
+        clinica.fechaRealizada = fechaElegida;
+    } else {
+        // Se está desmarcando: vuelve a pendiente
+        clinica.realizada = false;
+        clinica.fechaRealizada = null;
+    }
+
     guardarClinicas();
     renderClinicas();
     renderCalendario();

@@ -8,6 +8,15 @@
 </head>
 <body>
 
+    <!-- Filtro SVG para el efecto de refracción tipo "Liquid Glass" -->
+    <svg width="0" height="0" style="position:absolute;">
+        <filter id="liquidGlassDistortion" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.012 0.025" numOctaves="2" seed="7" result="noise"/>
+            <feGaussianBlur in="noise" stdDeviation="2" result="blurredNoise"/>
+            <feDisplacementMap in="SourceGraphic" in2="blurredNoise" scale="12" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+    </svg>
+
     <div class="navbar">
         <h2>Control de Ventas</h2>
         <ul>
@@ -59,8 +68,13 @@
             <div class="v-section-label">Tráfico &amp; Notas de la Semana</div>
             <div class="v-glass a-card">
                 <div class="form-group">
-                    <label for="inputTrafico">Tráfico Semanal</label>
+                    <label for="inputTrafico">Tráfico</label>
                     <input type="number" id="inputTrafico" placeholder="Ej: 1200">
+                    <div class="venta-modo-toggle" style="margin-top:8px;">
+                        <button type="button" class="venta-modo-btn active" id="btnTraficoSumar" onclick="setModoTrafico('sumar')">Sumar al acumulado</button>
+                        <button type="button" class="venta-modo-btn" id="btnTraficoReemplazar" onclick="setModoTrafico('reemplazar')">Reemplazar total</button>
+                    </div>
+                    <span style="font-size:11px; color:#86868B; margin-top:6px; display:block;">Acumulado actual: <strong id="lblTraficoAcumulado">0</strong></span>
                 </div>
 
                 <div class="form-group" style="margin-top: 14px;">
@@ -101,35 +115,20 @@
                     </div>
                 </div>
 
-                <!-- Selector Día / Semana -->
+                <!-- Fecha de la venta -->
                 <div class="venta-modo-wrap">
-                    <div class="venta-modo-toggle">
-                        <button class="venta-modo-btn active" id="btnModoDia" onclick="setModoVenta('dia')">Por Día</button>
-                        <button class="venta-modo-btn" id="btnModoSemana" onclick="setModoVenta('semana')">Por Semana</button>
-                    </div>
-
-                    <!-- Modo DÍA -->
                     <div id="panelModoDia" class="venta-fecha-panel">
                         <div class="form-group" style="margin-bottom:0; flex:1;">
                             <label for="inputVentaFechaDia">Fecha de la venta</label>
-                            <input type="date" id="inputVentaFechaDia">
+                            <input type="date" id="inputVentaFechaDia" oninput="actualizarResumenIngreso()">
                         </div>
+                        <label class="cal-checkbox-wrap" for="chkReflejarCalendario">
+                            <input type="checkbox" id="chkReflejarCalendario" checked>
+                            <span>Reflejar en el calendario</span>
+                        </label>
                         <div class="venta-resumen" id="resumenDia" style="display:none;">
                             Se registrará <strong id="resumenDiaMonto">$0</strong> el día <strong id="resumenDiaFecha">—</strong>
                         </div>
-                    </div>
-
-                    <!-- Modo SEMANA -->
-                    <div id="panelModoSemana" class="venta-fecha-panel" style="display:none;">
-                        <div class="form-group" style="margin-bottom:0;">
-                            <label for="inputVentaFechaDesde">Desde</label>
-                            <input type="date" id="inputVentaFechaDesde" oninput="actualizarResumenIngreso()">
-                        </div>
-                        <div class="form-group" style="margin-bottom:0;">
-                            <label for="inputVentaFechaHasta">Hasta</label>
-                            <input type="date" id="inputVentaFechaHasta" oninput="actualizarResumenIngreso()">
-                        </div>
-                        <div class="venta-resumen" id="resumenSemana" style="display:none;"></div>
                     </div>
                 </div>
 
@@ -179,11 +178,13 @@
 
             <!-- GAREX E INSURAMA -->
             <div class="v-section-label">Protecciones &amp; Activación</div>
-            <div class="v-glass a-card" style="margin-bottom:0; border-bottom-left-radius:0; border-bottom-right-radius:0;">
+            <div class="v-glass a-card a-proteccion-fecha-card">
                 <div class="form-group" style="margin-bottom:0;">
                     <label for="inputFechaProteccion">Fecha de venta de protecciones (Garex / Insurama)</label>
-                    <input type="date" id="inputFechaProteccion" style="max-width:220px;">
-                    <span style="font-size:12px; color:#86868B; margin-left:10px;">Deja vacío para usar la fecha de hoy</span>
+                    <div class="a-proteccion-fecha-row">
+                        <input type="date" id="inputFechaProteccion">
+                        <span class="a-proteccion-fecha-hint">Deja vacío para usar la fecha de hoy</span>
+                    </div>
                 </div>
             </div>
             <div class="a-proteccion-grid" style="margin-top:0;">
@@ -487,10 +488,10 @@
                     <div class="form-group" style="flex:0 0 140px; margin-bottom:0;">
                         <label for="selectRecordatorioTipo">Tipo</label>
                         <select id="selectRecordatorioTipo">
-                            <option value="mantenimiento">🔧 Mantenimiento</option>
-                            <option value="reunion">📅 Reunión</option>
-                            <option value="tarea">✅ Tarea</option>
-                            <option value="otro">📎 Otro</option>
+                            <option value="mantenimiento">Mantenimiento</option>
+                            <option value="reunion">Reunión</option>
+                            <option value="tarea">Tarea</option>
+                            <option value="otro">Otro</option>
                         </select>
                     </div>
                     <div class="form-group" style="flex:0 0 160px; margin-bottom:0;">
@@ -587,28 +588,13 @@
                     *Atención: Esta acción borrará de manera irreversible todas las ventas, metas, desgloses por dispositivo, registros de protección e historial de bitácoras guardados localmente. Las metas del Plan SOS no se borran.
                 </p>
 
-                <div style="margin-top: 36px; padding-top: 30px; border-top: 1px solid rgba(0,0,0,0.08); display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-                    <div style="max-width: 260px;">
-                        <button onclick="borrarGarexSeguros()" style="background: #FF9500; color: white; border: none; padding: 14px 24px; font-size: 14px; font-weight: 600; border-radius: 12px; cursor: pointer; transition: background 0.2s; width: 100%;">
-                            Borrar Garex y Seguros
-                        </button>
-                        <p style="margin-top: 10px; font-size: 11px; color: rgba(0,0,0,0.4); line-height: 1.4;">
-                            Borra solo los registros de Garex e Insurama de todos los asesores. No afecta ventas ni metas.
-                        </p>
-                    </div>
-                    <div style="max-width: 260px;">
-                        <button onclick="borrarVentas()" style="background: #FF9500; color: white; border: none; padding: 14px 24px; font-size: 14px; font-weight: 600; border-radius: 12px; cursor: pointer; transition: background 0.2s; width: 100%;">
-                            Borrar Ventas
-                        </button>
-                        <p style="margin-top: 10px; font-size: 11px; color: rgba(0,0,0,0.4); line-height: 1.4;">
-                            Borra montos, unidades, QR, Trade-In y el historial de ventas del calendario. No afecta Garex ni Seguros.
-                        </p>
-                    </div>
-                </div>
             </div>
         </div>
 
     </div>
+
+    <!-- Contenedor de alertas tipo burbuja liquid glass -->
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
     <script src="script.js"></script>
 </body>

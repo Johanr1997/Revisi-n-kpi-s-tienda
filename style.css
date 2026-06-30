@@ -1,6 +1,30 @@
 /* =================================================== */
 /* COMPLEMENTOS PARA EL DISEÑO DEL SISTEMA             */
 /* =================================================== */
+:root {
+    /* Controla la intensidad (opacidad) de las manchas de color difuminadas del fondo.
+       Editable desde la pestaña Configuración. 0 = fondo plano, 1 = máxima intensidad. */
+    --orb-opacity: 0.6;
+
+    /* Color individual de cada mancha de fondo (orb), por pestaña. Editable desde Configuración. */
+    --orb-sos-green: rgba(134,239,172,0.7);
+    --orb-sos-rose: rgba(253,164,175,0.65);
+    --orb-asesores-blue: rgba(147,197,253,0.7);
+    --orb-asesores-yellow: rgba(253,224,138,0.65);
+    --orb-ventas-purple: rgba(196,181,253,0.7);
+    --orb-ventas-teal: rgba(153,246,228,0.65);
+    --orb-garex-green: rgba(134,239,172,0.7);
+    --orb-garex-blue: rgba(147,197,253,0.6);
+    --orb-insurama-indigo: rgba(165,180,252,0.7);
+    --orb-insurama-pink: rgba(253,164,175,0.6);
+    --orb-bitacora-amber: rgba(252,211,77,0.6);
+    --orb-bitacora-blue: rgba(147,197,253,0.6);
+    --orb-calendario-gray: rgba(199,210,254,0.55);
+    --orb-calendario-red: rgba(254,202,202,0.5);
+    --orb-metas-orange: rgba(253,186,116,0.6);
+    --orb-metas-purple: rgba(196,181,253,0.6);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -16,13 +40,19 @@ body {
     padding-top: 90px;
 }
 
+/* ═══════════════════════════════════════════
+   NAVBAR — efecto "Liquid Glass" (cristal líquido refractante)
+   La navbar completa actúa como la burbuja: fondo casi transparente,
+   blur bajo + distorsión SVG (refracción real de lo que hay detrás)
+   y un borde con leve aberración cromática iridiscente.
+   ═══════════════════════════════════════════ */
 .navbar {
     width: calc(100% - 60px);
     max-width: 1600px;
-    background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(3px) saturate(180%) url(#liquidGlassDistortion);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.65);
     padding: 0 28px;
     position: fixed;
     top: 16px;
@@ -36,8 +66,10 @@ body {
     border-radius: 999px;
     overflow: hidden;
     box-shadow:
-        0 8px 30px rgba(0,0,0,0.08),
-        inset 0 1px 0 rgba(255,255,255,0.9);
+        0 8px 30px rgba(0,0,0,0.10),
+        0 1px 2px rgba(0,0,0,0.06),
+        inset 0 1px 1px rgba(255,255,255,0.9),
+        inset 0 -1px 6px rgba(255,255,255,0.35);
 }
 
 /* Reflejo especular sutil, igual que las tarjetas .v-glass */
@@ -46,16 +78,37 @@ body {
     position: absolute;
     top: 0; left: 12%; right: 12%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95) 40%, rgba(255,255,255,0.95) 60%, transparent);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9) 40%, rgba(255,255,255,0.9) 60%, transparent);
     pointer-events: none;
     border-radius: inherit;
+    z-index: 3;
 }
 
-.navbar h2 { font-size: 16px; font-weight: 600; }
-.navbar ul { display: flex; list-style: none; gap: 22px; align-items: center; }
+/* Borde con leve aberración cromática, como el reflejo iridiscente del video de referencia */
+.navbar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(from 180deg,
+        rgba(255,255,255,0.9), rgba(173,216,255,0.55),
+        rgba(255,255,255,0.9), rgba(216,180,255,0.5),
+        rgba(255,255,255,0.9));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.55;
+    z-index: 3;
+}
+
+.navbar h2 { position: relative; z-index: 2; font-size: 16px; font-weight: 600; }
+.navbar ul { display: flex; list-style: none; gap: 22px; align-items: center; position: relative; z-index: 2; }
 .navbar ul li { font-size: 13px; font-weight: 500; color: #515154; cursor: pointer; padding: 7px 14px; border-radius: 999px; transition: background 0.2s, color 0.2s; }
-.navbar ul li:hover { background: rgba(0,0,0,0.05); }
-.navbar ul li.active { color: #1D1D1F; font-weight: 600; background: rgba(255,255,255,0.85); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.navbar ul li:hover { background: rgba(255,255,255,0.25); }
+.navbar ul li.active { color: #1D1D1F; font-weight: 600; background: rgba(255,255,255,0.55); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
 
 /* Tab de Configuración: solo ícono, redondo */
 .tab-icon-only {
@@ -153,16 +206,16 @@ body {
     pointer-events: none;
     z-index: -1;
     filter: blur(50px);
-    opacity: 0.6;
+    opacity: var(--orb-opacity);
 }
 .v-orb-green {
     width: 380px; height: 380px;
-    background: radial-gradient(circle, rgba(134,239,172,0.7) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--orb-sos-green) 0%, transparent 70%);
     bottom: 60px; left: 60px;
 }
 .v-orb-rose {
     width: 320px; height: 320px;
-    background: radial-gradient(circle, rgba(253,164,175,0.65) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--orb-sos-rose) 0%, transparent 70%);
     bottom: 40px; right: 80px;
 }
 
@@ -478,16 +531,16 @@ body {
     pointer-events: none;
     z-index: -1;
     filter: blur(50px);
-    opacity: 0.6;
+    opacity: var(--orb-opacity);
 }
 .a-orb-blue {
     width: 480px; height: 480px;
-    background: radial-gradient(circle, rgba(147,197,253,0.7) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--orb-asesores-blue) 0%, transparent 70%);
     top: -100px; right: -80px;
 }
 .a-orb-yellow {
     width: 360px; height: 360px;
-    background: radial-gradient(circle, rgba(253,224,138,0.65) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--orb-asesores-yellow) 0%, transparent 70%);
     bottom: 20px; left: -60px;
 }
 
@@ -628,32 +681,32 @@ body {
     pointer-events: none;
     z-index: -1;
     filter: blur(50px);
-    opacity: 0.6;
+    opacity: var(--orb-opacity);
 }
 
 /* Plan SOS — violeta / verde agua */
-.s-orb-purple { width: 460px; height: 460px; background: radial-gradient(circle, rgba(196,181,253,0.7) 0%, transparent 70%); top: -110px; left: -90px; }
-.s-orb-teal   { width: 380px; height: 380px; background: radial-gradient(circle, rgba(153,246,228,0.65) 0%, transparent 70%); bottom: 30px; right: -60px; }
+.s-orb-purple { width: 460px; height: 460px; background: radial-gradient(circle, var(--orb-ventas-purple) 0%, transparent 70%); top: -110px; left: -90px; }
+.s-orb-teal   { width: 380px; height: 380px; background: radial-gradient(circle, var(--orb-ventas-teal) 0%, transparent 70%); bottom: 30px; right: -60px; }
 
 /* Garex — verde / azul (incentivo positivo) */
-.g-orb-green { width: 460px; height: 460px; background: radial-gradient(circle, rgba(134,239,172,0.7) 0%, transparent 70%); top: -100px; right: -90px; }
-.g-orb-blue  { width: 360px; height: 360px; background: radial-gradient(circle, rgba(147,197,253,0.6) 0%, transparent 70%); bottom: 20px; left: -60px; }
+.g-orb-green { width: 460px; height: 460px; background: radial-gradient(circle, var(--orb-garex-green) 0%, transparent 70%); top: -100px; right: -90px; }
+.g-orb-blue  { width: 360px; height: 360px; background: radial-gradient(circle, var(--orb-garex-blue) 0%, transparent 70%); bottom: 20px; left: -60px; }
 
 /* Insurama — índigo / rosa */
-.g-orb-indigo { width: 460px; height: 460px; background: radial-gradient(circle, rgba(165,180,252,0.7) 0%, transparent 70%); top: -100px; left: -90px; }
-.g-orb-pink   { width: 360px; height: 360px; background: radial-gradient(circle, rgba(253,164,175,0.6) 0%, transparent 70%); bottom: 20px; right: -60px; }
+.g-orb-indigo { width: 460px; height: 460px; background: radial-gradient(circle, var(--orb-insurama-indigo) 0%, transparent 70%); top: -100px; left: -90px; }
+.g-orb-pink   { width: 360px; height: 360px; background: radial-gradient(circle, var(--orb-insurama-pink) 0%, transparent 70%); bottom: 20px; right: -60px; }
 
 /* Bitácoras — ámbar / azul */
-.b-orb-amber { width: 440px; height: 440px; background: radial-gradient(circle, rgba(252,211,77,0.6) 0%, transparent 70%); top: -100px; right: -80px; }
-.b-orb-blue  { width: 360px; height: 360px; background: radial-gradient(circle, rgba(147,197,253,0.6) 0%, transparent 70%); bottom: 30px; left: -60px; }
+.b-orb-amber { width: 440px; height: 440px; background: radial-gradient(circle, var(--orb-bitacora-amber) 0%, transparent 70%); top: -100px; right: -80px; }
+.b-orb-blue  { width: 360px; height: 360px; background: radial-gradient(circle, var(--orb-bitacora-blue) 0%, transparent 70%); bottom: 30px; left: -60px; }
 
 /* Configuración — gris neutro / rojo de advertencia (sutil) */
-.c-orb-gray { width: 440px; height: 440px; background: radial-gradient(circle, rgba(199,210,254,0.55) 0%, transparent 70%); top: -100px; left: -90px; }
-.c-orb-red  { width: 320px; height: 320px; background: radial-gradient(circle, rgba(254,202,202,0.5) 0%, transparent 70%); bottom: 10px; right: -50px; }
+.c-orb-gray { width: 440px; height: 440px; background: radial-gradient(circle, var(--orb-calendario-gray) 0%, transparent 70%); top: -100px; left: -90px; }
+.c-orb-red  { width: 320px; height: 320px; background: radial-gradient(circle, var(--orb-calendario-red) 0%, transparent 70%); bottom: 10px; right: -50px; }
 
 /* Recordatorios — naranja cálido / púrpura */
-.r-orb-orange { width: 450px; height: 450px; background: radial-gradient(circle, rgba(253,186,116,0.6) 0%, transparent 70%); top: -110px; right: -80px; }
-.r-orb-purple { width: 370px; height: 370px; background: radial-gradient(circle, rgba(196,181,253,0.6) 0%, transparent 70%); bottom: 20px; left: -60px; }
+.r-orb-orange { width: 450px; height: 450px; background: radial-gradient(circle, var(--orb-metas-orange) 0%, transparent 70%); top: -110px; right: -80px; }
+.r-orb-purple { width: 370px; height: 370px; background: radial-gradient(circle, var(--orb-metas-purple) 0%, transparent 70%); bottom: 20px; left: -60px; }
 
 .r-orb {
     position: fixed;
@@ -661,7 +714,7 @@ body {
     pointer-events: none;
     z-index: -1;
     filter: blur(50px);
-    opacity: 0.6;
+    opacity: var(--orb-opacity);
 }
 
 /* Fila de formulario de recordatorios */
@@ -973,6 +1026,24 @@ body {
     flex-wrap: wrap;
 }
 
+.cal-checkbox-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #1D1D1F;
+    cursor: pointer;
+    padding-bottom: 10px;
+    user-select: none;
+}
+.cal-checkbox-wrap input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    accent-color: #0071E3;
+    cursor: pointer;
+}
+
 .venta-resumen {
     background: rgba(0,113,227,0.07);
     border: 1px solid rgba(0,113,227,0.18);
@@ -985,3 +1056,247 @@ body {
 }
 .venta-resumen strong { color: #0071E3; }
 .cal-pill-venta { background: rgba(52,199,89,0.13); color: #1a6e35; }
+/* ═══════════════════════════════════════════════════════ */
+/* ALERTAS / TOASTS — BURBUJA LIQUID GLASS                 */
+/* ═══════════════════════════════════════════════════════ */
+
+.toast-container {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    pointer-events: none;
+    width: min(420px, calc(100% - 32px));
+}
+
+.toast-bubble {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.85);
+    box-shadow:
+        0 8px 30px rgba(0,0,0,0.12),
+        0 1px 2px rgba(0,0,0,0.06),
+        inset 0 1px 0 rgba(255,255,255,0.92);
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-16px) scale(0.96);
+    animation: toastIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.toast-bubble.toast-out {
+    animation: toastOut 0.35s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes toastIn {
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastOut {
+    to { opacity: 0; transform: translateY(-12px) scale(0.96); }
+}
+
+/* Reflejo especular superior, igual que .v-glass */
+.toast-bubble::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95) 40%, rgba(255,255,255,0.95) 60%, transparent);
+    pointer-events: none;
+}
+
+/* Gradiente interno de luz */
+.toast-bubble::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(145deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.05) 55%, transparent 100%);
+    pointer-events: none;
+}
+
+.toast-icon {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
+}
+
+.toast-message {
+    flex: 1;
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: #1D1D1F;
+    position: relative;
+    z-index: 1;
+}
+
+.toast-close {
+    flex: 0 0 auto;
+    background: none;
+    border: none;
+    color: rgba(0,0,0,0.32);
+    font-size: 15px;
+    cursor: pointer;
+    padding: 2px 4px;
+    line-height: 1;
+    position: relative;
+    z-index: 1;
+}
+.toast-close:hover { color: rgba(0,0,0,0.6); }
+
+.toast-success .toast-icon { background: rgba(52,199,89,0.18); color: #1f8a3d; }
+.toast-success { border-color: rgba(52,199,89,0.35); }
+
+.toast-error .toast-icon { background: rgba(255,59,48,0.18); color: #c92f25; }
+.toast-error { border-color: rgba(255,59,48,0.35); }
+
+.toast-warning .toast-icon { background: rgba(255,149,0,0.2); color: #b26a00; }
+.toast-warning { border-color: rgba(255,149,0,0.35); }
+
+.toast-info .toast-icon { background: rgba(0,113,227,0.18); color: #0071E3; }
+.toast-info { border-color: rgba(0,113,227,0.35); }
+
+/* ═══════════════════════════════════════════════════════ */
+/* MODAL DE FECHA — BURBUJA LIQUID GLASS                    */
+/* ═══════════════════════════════════════════════════════ */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.18);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    padding: 20px;
+}
+.modal-overlay.modal-open { opacity: 1; }
+.modal-overlay.modal-out { opacity: 0; }
+
+.modal-glass {
+    width: min(360px, 100%);
+    padding: 26px 26px 22px;
+    border-radius: 24px;
+    background: rgba(255,255,255,0.65);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.9);
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.18),
+        0 1px 2px rgba(0,0,0,0.06),
+        inset 0 1px 0 rgba(255,255,255,0.95);
+    position: relative;
+    overflow: hidden;
+    transform: scale(0.92) translateY(10px);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-overlay.modal-open .modal-glass { transform: scale(1) translateY(0); }
+
+.modal-glass::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95) 40%, rgba(255,255,255,0.95) 60%, transparent);
+    pointer-events: none;
+}
+.modal-glass::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(145deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.05) 55%, transparent 100%);
+    pointer-events: none;
+}
+
+.modal-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1D1D1F;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+    line-height: 1.4;
+}
+
+.modal-glass .form-group { position: relative; z-index: 1; }
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    position: relative;
+    z-index: 1;
+}
+
+.modal-btn {
+    border: none;
+    padding: 10px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+}
+.modal-btn-cancel {
+    background: rgba(0,0,0,0.06);
+    color: #1D1D1F;
+}
+.modal-btn-cancel:hover { background: rgba(0,0,0,0.1); }
+.modal-btn-confirm {
+    background: #0071E3;
+    color: #fff;
+}
+.modal-btn-confirm:hover { background: #0077ED; }
+
+/* ═══════════════════════════════════════════════════════ */
+/* FECHA DE PROTECCIÓN (GAREX/INSURAMA) — integrada al glass */
+/* ═══════════════════════════════════════════════════════ */
+
+.a-proteccion-fecha-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.a-proteccion-fecha-row input[type="date"] {
+    max-width: 200px;
+    background: rgba(255,255,255,0.75);
+    border: 1px solid rgba(0,0,0,0.08);
+    color: #1D1D1F;
+}
+.a-proteccion-fecha-row input[type="date"]:focus {
+    background: rgba(255,255,255,0.95);
+}
+
+.a-proteccion-fecha-hint {
+    font-size: 12px;
+    color: #86868B;
+}
