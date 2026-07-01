@@ -337,12 +337,12 @@ function aplicarModoOscuro(activar) {
 
     const btnNav = document.getElementById("btnThemeToggle");
     if (btnNav) {
-        btnNav.textContent = activar ? "☼" : "☽";
+        btnNav.textContent = activar ? "☀" : "☾";
         btnNav.title = activar ? "Cambiar a modo claro" : "Cambiar a modo oscuro";
     }
     const btnCfg = document.getElementById("btnThemeToggleConfig");
     if (btnCfg) {
-        btnCfg.textContent = activar ? "☼ Activar modo claro" : "☽ Activar modo oscuro";
+        btnCfg.textContent = activar ? "☀ Activar modo claro" : "☾ Activar modo oscuro";
     }
     const chkAuto = document.getElementById("chkModoOscuroAuto");
     if (chkAuto) chkAuto.checked = localStorage.getItem("modoOscuroAuto") !== "0";
@@ -1077,6 +1077,29 @@ function renderTodo() {
                 </div>`;
         }).join("");
 
+        // Meta de UNIDADES por dispositivo del asesor: % asignado x meta de unidades de tienda,
+        // siempre redondeada hacia arriba (ej. 2.1 -> 3 unidades), para no exigir menos de lo justo.
+        const categoriasUnidades = [
+            { label: "Mac",     key: "mac" },
+            { label: "iPad",    key: "ipad" },
+            { label: "iPhone",  key: "iphone" },
+            { label: "Watch",   key: "watch" },
+            { label: "AirPods", key: "airpods" }
+        ];
+        const filasMetaUnidades = categoriasUnidades.map(c => {
+            const metaUnidCat = Math.ceil((porcentajeAsor / 100) * (METAS_TIENDA.unidades[c.key] || 0));
+            const llevaUnidCat = u[c.key] || 0;
+            const pctUnidCat = metaUnidCat > 0 ? Math.min((llevaUnidCat / metaUnidCat) * 100, 100) : 0;
+            return `
+                <div class="ra-meta-cat-row">
+                    <div class="ra-meta-cat-head">
+                        <span>${c.label}</span>
+                        <span class="ra-muted">${llevaUnidCat} / ${metaUnidCat} uds</span>
+                    </div>
+                    <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno" style="width:${pctUnidCat}%;"></div></div>
+                </div>`;
+        }).join("");
+
         htmlResumenAsesores += `
             <div class="ra-card">
                 <div class="ra-header">
@@ -1092,6 +1115,12 @@ function renderTodo() {
                     Venta: $${asor.ventaSemanal.toLocaleString()} | Meta: $${Math.round(metaAsor).toLocaleString()}<br>
                     QR Colocados: ${asor.qr} | Trade-In: ${asor.tradeIn}
                 </p>
+                <div class="ra-section">
+                    <p class="ra-section-title">Meta de Unidades por Dispositivo — <span class="ra-accent-blue">${porcentajeAsor}% de la meta de tienda</span></p>
+                    <div class="ra-meta-cat-grid">
+                        ${filasMetaUnidades}
+                    </div>
+                </div>
                 <div class="ra-section">
                     <p class="ra-section-title">Meta por Dispositivo y Accesorios — <span class="ra-accent-blue">${porcentajeAsor}% de la meta de tienda</span></p>
                     <div class="ra-meta-cat-grid">
@@ -1219,10 +1248,10 @@ function renderTodo() {
 
     // Render Historial Bitácoras
     document.getElementById("contenedorBitacoras").innerHTML = appData.bitacoras.map((b, i) => `
-        <div style="padding:12px; background:#F5F5F7; border-radius:8px; margin-bottom:10px; border-left:3px solid #0071E3; display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
-            <div style="flex:1; min-width:0;">
-                <p style="font-size:13px; line-height:1.4; color:#1D1D1F;">${b.texto}</p>
-                <span style="font-size:11px; color:#86868B; display:block; margin-top:4px;">${b.fecha}</span>
+        <div class="bitacora-item">
+            <div class="bitacora-item-contenido">
+                <p class="bitacora-item-texto">${b.texto}</p>
+                <span class="bitacora-item-fecha">${b.fecha}</span>
             </div>
             <button class="r-item-del" onclick="eliminarBitacora(${b.id ?? i})" title="Eliminar">✕</button>
         </div>

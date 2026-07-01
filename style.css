@@ -823,6 +823,25 @@ body.dark-mode .a-monto-total-label { color: rgba(255,255,255,0.5); }
 }
 .r-item-del:hover { color: #FF3B30; background: rgba(255,59,48,0.08); }
 
+/* Tarjeta de anotación en el Historial de Bitácoras */
+.bitacora-item {
+    padding: 12px;
+    background: #F5F5F7;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border-left: 3px solid #0071E3;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+.bitacora-item-contenido { flex: 1; min-width: 0; }
+.bitacora-item-texto { font-size: 13px; line-height: 1.4; color: #1D1D1F; margin: 0; }
+.bitacora-item-fecha { font-size: 11px; color: #86868B; display: block; margin-top: 4px; }
+body.dark-mode .bitacora-item { background: rgba(255,255,255,0.06); border-left-color: #0A84FF; }
+body.dark-mode .bitacora-item-texto { color: #F2F2F7; }
+body.dark-mode .bitacora-item-fecha { color: rgba(255,255,255,0.6); }
+
 /* Ítem de clínica */
 .c-item {
     display: flex;
@@ -1360,8 +1379,8 @@ body.dark-mode .a-monto-total-label { color: rgba(255,255,255,0.5); }
 
 /* Botón flotante de cambio de tema (sol/luna) en la navbar */
 .theme-toggle-btn {
-    background: rgba(255,255,255,0.25);
-    border: 1px solid rgba(255,255,255,0.5);
+    background: transparent;
+    border: 1.5px solid rgba(0,0,0,0.35);
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -1369,12 +1388,21 @@ body.dark-mode .a-monto-total-label { color: rgba(255,255,255,0.5); }
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
+    font-size: 16px;
     color: #1D1D1F;
     transition: background 0.2s, transform 0.2s;
     flex-shrink: 0;
 }
-.theme-toggle-btn:hover { background: rgba(255,255,255,0.45); transform: scale(1.06); }
+.theme-toggle-btn:hover { background: rgba(0,0,0,0.06); transform: scale(1.06); }
+
+/* Separador visual entre las pestañas y el botón de modo oscuro/claro */
+.navbar-divider {
+    width: 1px;
+    height: 22px;
+    background: rgba(0,0,0,0.12);
+    flex-shrink: 0;
+}
+body.dark-mode .navbar-divider { background: rgba(255,255,255,0.15); }
 
 body.dark-mode {
     background: #000000;
@@ -1416,11 +1444,11 @@ body.dark-mode .navbar ul li.active {
     background: rgba(255,255,255,0.14);
 }
 body.dark-mode .theme-toggle-btn {
-    background: rgba(255,255,255,0.10);
-    border-color: rgba(255,255,255,0.18);
-    color: #FFD60A;
+    background: transparent;
+    border-color: rgba(255,255,255,0.35);
+    color: #F2F2F7;
 }
-body.dark-mode .theme-toggle-btn:hover { background: rgba(255,255,255,0.18); }
+body.dark-mode .theme-toggle-btn:hover { background: rgba(255,255,255,0.10); }
 
 /* Tarjetas tipo "vidrio" (Liquid Glass) y tarjetas simples */
 body.dark-mode .v-glass,
@@ -1569,6 +1597,11 @@ body.dark-mode .c-item-nombre.realizada { color: rgba(255,255,255,0.77) !importa
 body.dark-mode .c-item-fecha { color: rgba(255,255,255,0.83) !important; }
 body.dark-mode .c-item-del { color: rgba(255,255,255,0.65) !important; }
 body.dark-mode .cal-titulo { color: #F2F2F7 !important; }
+body.dark-mode .cal-pill-recordatorio { background: rgba(10,132,255,0.22); color: #7BBBFF; }
+body.dark-mode .cal-pill-clinica-p    { background: rgba(255,159,10,0.22); color: #FFC067; }
+body.dark-mode .cal-pill-clinica-r    { background: rgba(48,209,88,0.22); color: #7EE29D; }
+body.dark-mode .cal-pill-bitacora     { background: rgba(142,142,147,0.25); color: #E5E5EA; }
+body.dark-mode .cal-pill-venta        { background: rgba(48,209,88,0.22); color: #7EE29D; }
 body.dark-mode .cal-nav-btn { color: #F2F2F7 !important; }
 body.dark-mode .cal-dias-semana span { color: rgba(255,255,255,0.8) !important; }
 body.dark-mode .cal-dia-num { color: #F2F2F7 !important; }
@@ -1929,4 +1962,17 @@ body.dark-mode .ra-acc-badge {
 @media (max-width: 380px) {
     .navbar ul li { font-size: 11px; padding: 6px 9px; }
     .v-pill-row { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════ */
+/* QUITAR FLECHITAS (spinners) DE TODOS LOS CAMPOS NUMÉRICOS */
+/* ═══════════════════════════════════════════════════════ */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
 }
