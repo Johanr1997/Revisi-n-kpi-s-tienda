@@ -1606,7 +1606,7 @@ body.dark-mode .navbar ul li.active {
 /* Fila de edición de asesor en Configuración */
 .asesor-config-row {
     display: grid;
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: 1.4fr 1fr auto auto;
     gap: 8px;
     align-items: center;
     padding: 10px 12px;

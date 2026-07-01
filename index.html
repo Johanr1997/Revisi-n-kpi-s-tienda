@@ -105,16 +105,12 @@
             <div class="a-orb a-orb-blue"></div>
             <div class="a-orb a-orb-yellow"></div>
 
-            <!-- HERO: selector de asesor + meta + venta semanal -->
+            <!-- HERO: selector de asesor + venta semanal -->
             <div class="v-glass a-hero">
-                <div class="a-hero-row">
+                <div class="a-hero-row" style="grid-template-columns: 1fr;">
                     <div class="form-group a-select-group">
                         <label for="selectAsesor">Asesor Responsable</label>
                         <select id="selectAsesor"></select>
-                    </div>
-                    <div class="form-group a-select-group">
-                        <label for="inputMetaAsesor">Meta Mensual de Ventas ($)</label>
-                        <input type="number" id="inputMetaAsesor" value="0">
                     </div>
                 </div>
                 <input type="hidden" id="inputVentaSemanal" value="0" oninput="actualizarResumenIngreso()">
@@ -547,7 +543,7 @@
             <!-- Panel: Gestión de Asesores -->
             <div class="v-section-label">👥 Gestión de Asesores</div>
             <div class="v-glass a-card">
-                <p style="font-size: 13px; color: rgba(0,0,0,0.45); margin-bottom: 20px;">Agrega nuevos asesores o edita los nombres existentes. Los datos acumulados de cada asesor se conservan al renombrar.</p>
+                <p style="font-size: 13px; color: rgba(0,0,0,0.45); margin-bottom: 20px;">Agrega nuevos asesores, edita sus nombres y ajusta su meta mensual de ventas. Los datos acumulados de cada asesor se conservan al renombrar.</p>
 
                 <div id="listaAsesoresConfig" style="margin-bottom: 16px;"></div>
 

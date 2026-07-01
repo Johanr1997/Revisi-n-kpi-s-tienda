@@ -282,7 +282,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (selInicial) selInicial.addEventListener("change", onSelectAsesorChange);
 
     // Mostrar el cumplimiento del asesor seleccionado por defecto al cargar
-    document.getElementById("inputMetaAsesor").value = appData.asesores[document.getElementById("selectAsesor").value]?.meta || 0;
     actualizarCumplimientoAsesorVisual();
     renderListaPendiente("garex");
     renderListaPendiente("insurama");
@@ -316,7 +315,6 @@ function onSelectAsesorChange() {
     }
     const key = this.value;
     this.dataset.previo = key;
-    document.getElementById("inputMetaAsesor").value = appData.asesores[key]?.meta || 0;
     actualizarCumplimientoAsesorVisual();
 }
 
@@ -335,26 +333,6 @@ function configurarNavegacionPestañas() {
         });
     });
 
-    // Previsualizar cumplimiento mientras se edita la meta mensual (antes de guardar)
-    const inputMeta = document.getElementById("inputMetaAsesor");
-    if (inputMeta) {
-        inputMeta.addEventListener("input", function () {
-            const key = document.getElementById("selectAsesor").value;
-            const metaPrevia = parseFloat(this.value) || 0;
-            const ventaActual = appData.asesores[key].ventaSemanal;
-            const contenedor = document.getElementById("cumplimientoAsesorBox");
-            const cumplimiento = metaPrevia > 0 ? ((ventaActual / metaPrevia) * 100).toFixed(1) : 0;
-            contenedor.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                    <span style="font-size:13px; font-weight:600; color:#1D1D1F;">Cumplimiento de meta mensual</span>
-                    <span style="font-size:18px; font-weight:700; color:#0071E3;">${cumplimiento}%</span>
-                </div>
-                <div class="barra-progreso"><div class="progreso-relleno" style="width:${Math.min(cumplimiento, 100)}%;"></div></div>
-                <p style="font-size:12px; margin-top:8px; color:#6E6E73;">
-                    Venta acumulada: $${ventaActual.toLocaleString()} | Meta mensual: $${metaPrevia.toLocaleString()}
-                </p>`;
-        });
-    }
 }
 
 // CONFIGURAR SELECTS DEPENDIENTES DE GAREX E INSURAMA (según reglas de negocio)
@@ -722,7 +700,6 @@ function guardarDatosAsesor() {
         guardarVentasCalendario();
     }
 
-    appData.asesores[key].meta = parseFloat(document.getElementById("inputMetaAsesor").value) || 0;
     appData.asesores[key].ventaSemanal += monto;
     appData.asesores[key].qr += parseInt(document.getElementById("inputQR").value) || 0;
     appData.asesores[key].tradeIn += parseInt(document.getElementById("inputTradeIn").value) || 0;
@@ -1385,7 +1362,9 @@ function renderListaAsesoresConfig() {
     contenedor.innerHTML = keys.map((key, i) => `
         <div class="asesor-config-row">
             <input type="text" id="cfgNombreAsesor_${key}" value="${appData.asesores[key].nombre}"
-                class="asesor-config-input">
+                class="asesor-config-input" placeholder="Nombre">
+            <input type="number" id="cfgMetaAsesor_${key}" value="${appData.asesores[key].meta || 0}"
+                class="asesor-config-input" placeholder="Meta mensual ($)">
             <button onclick="renombrarAsesor('${key}')" class="asesor-config-save">
                 Guardar
             </button>
@@ -1398,34 +1377,45 @@ function renderListaAsesoresConfig() {
 
 function renombrarAsesor(key) {
     const input = document.getElementById(`cfgNombreAsesor_${key}`);
+    const inputMeta = document.getElementById(`cfgMetaAsesor_${key}`);
     const nuevoNombre = input ? input.value.trim() : "";
     if (!nuevoNombre) { mostrarAlerta("El nombre no puede estar vacío.", "warning"); return; }
 
     const nombreAnterior = appData.asesores[key].nombre;
+    const nombreCambio = nombreAnterior !== nuevoNombre;
     appData.asesores[key].nombre = nuevoNombre;
+    appData.asesores[key].meta = inputMeta ? (parseFloat(inputMeta.value) || 0) : appData.asesores[key].meta;
 
-    // Actualizar también las entradas del calendario que tengan el nombre anterior
-    ventasCalendario = ventasCalendario.map(v => ({
-        ...v,
-        label: v.label.replace(`💰 ${nombreAnterior}:`, `💰 ${nuevoNombre}:`)
-    }));
-    guardarVentasCalendario();
+    if (nombreCambio) {
+        // Actualizar también las entradas del calendario que tengan el nombre anterior
+        ventasCalendario = ventasCalendario.map(v => ({
+            ...v,
+            label: v.label.replace(`💰 ${nombreAnterior}:`, `💰 ${nuevoNombre}:`)
+        }));
+        guardarVentasCalendario();
 
-    // Crear clínica de experiencia automática para el asesor con su nombre actualizado
-    clinicasData.push({
-        id: Date.now(),
-        nombre: `Clínica de experiencia — ${nuevoNombre}`,
-        fecha: "",
-        realizada: false,
-        fechaRealizada: null
-    });
-    guardarClinicas();
-    renderClinicas();
+        // Crear clínica de experiencia automática para el asesor con su nombre actualizado
+        clinicasData.push({
+            id: Date.now(),
+            nombre: `Clínica de experiencia — ${nuevoNombre}`,
+            fecha: "",
+            realizada: false,
+            fechaRealizada: null
+        });
+        guardarClinicas();
+        renderClinicas();
+    }
 
     sincronizarYRenderizar();
     renderListaAsesoresConfig();
     renderCalendario();
-    mostrarAlerta(`Asesor renombrado a "${nuevoNombre}" correctamente. Se creó una clínica de experiencia para él en la pestaña Recordatorios.`, "success");
+    actualizarCumplimientoAsesorVisual();
+    mostrarAlerta(
+        nombreCambio
+            ? `Asesor renombrado a "${nuevoNombre}" correctamente. Se creó una clínica de experiencia para él en la pestaña Recordatorios.`
+            : `Datos de "${nuevoNombre}" actualizados correctamente.`,
+        "success"
+    );
 }
 
 function agregarNuevoAsesor() {
@@ -1471,7 +1461,6 @@ function eliminarAsesor(key) {
     const primerKey = Object.keys(appData.asesores)[0];
     if (sel && primerKey) {
         sel.value = primerKey;
-        document.getElementById("inputMetaAsesor").value = appData.asesores[primerKey].meta || 0;
         actualizarCumplimientoAsesorVisual();
     }
 }
