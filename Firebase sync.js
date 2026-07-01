@@ -18,6 +18,10 @@ let usuarioActualUID = null;
 let cargaInicialCompleta = false; // evita guardar en la nube antes de haber cargado los datos del usuario
 let timeoutGuardadoNube = null;
 
+// ── DOMINIO OBLIGATORIO ────────────────────────────────────────
+// Solo se permite iniciar sesión con un correo que termine en @ishopgroup.com
+const DOMINIO_PERMITIDO = "@ishopgroup.com";
+
 // ── LOGIN ──────────────────────────────────────────────────────
 function iniciarSesionFirebase() {
     const email = document.getElementById("loginEmail").value.trim();
@@ -28,6 +32,11 @@ function iniciarSesionFirebase() {
     errorEl.style.display = "none";
     if (!email || !pass) {
         errorEl.textContent = "Ingresa tu correo y contraseña.";
+        errorEl.style.display = "block";
+        return;
+    }
+    if (!email.toLowerCase().endsWith(DOMINIO_PERMITIDO)) {
+        errorEl.textContent = `Solo se permite iniciar sesión con un correo ${DOMINIO_PERMITIDO}`;
         errorEl.style.display = "block";
         return;
     }
@@ -54,8 +63,12 @@ function iniciarSesionFirebase() {
         });
 }
 
-// Permite iniciar sesión presionando Enter en los campos de login
+// Enlaza el botón de login por addEventListener (respaldo por si el onclick en línea
+// del HTML no se ejecuta por algún motivo) y permite iniciar sesión con Enter.
 document.addEventListener("DOMContentLoaded", () => {
+    const btnLogin = document.getElementById("btnLoginSubmit");
+    if (btnLogin) btnLogin.addEventListener("click", iniciarSesionFirebase);
+
     ["loginEmail", "loginPassword"].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener("keydown", e => { if (e.key === "Enter") iniciarSesionFirebase(); });
