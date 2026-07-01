@@ -543,7 +543,8 @@
             <!-- Panel: Gestión de Asesores -->
             <div class="v-section-label">👥 Gestión de Asesores</div>
             <div class="v-glass a-card">
-                <p style="font-size: 13px; color: rgba(0,0,0,0.45); margin-bottom: 20px;">Agrega nuevos asesores, edita sus nombres y ajusta su meta mensual de ventas. Los datos acumulados de cada asesor se conservan al renombrar.</p>
+                <p style="font-size: 13px; color: rgba(0,0,0,0.45); margin-bottom: 20px;">Agrega nuevos asesores, edita sus nombres y asígnales el % de la Meta Mensual de la Tienda que les corresponde; la meta en $ de cada uno se calcula automáticamente. Los datos acumulados de cada asesor se conservan al renombrar.</p>
+                <p style="font-size: 12px; color: rgba(0,0,0,0.4); margin-top: -12px; margin-bottom: 20px;">💡 Define primero la Meta Mensual de la Tienda más abajo — de lo contrario, el % no tendrá una base sobre la cual calcular.</p>
 
                 <div id="listaAsesoresConfig" style="margin-bottom: 16px;"></div>
 
@@ -579,6 +580,52 @@
                     </div>
                 </div>
                 <button class="btn-primary" onclick="guardarMetasSOS()">Guardar Metas del Plan SOS</button>
+            </div>
+
+            <!-- Panel: Meta Mensual de la Tienda -->
+            <div class="v-section-label">🎯 Meta Mensual de la Tienda</div>
+            <div class="v-glass a-card">
+                <p style="font-size: 13px; color: rgba(0,0,0,0.45); margin-bottom: 20px;">Define la meta mensual de la tienda, desglosada por categoría. Estos valores son independientes de la meta individual de cada asesor.</p>
+
+                <h3 class="a-card-title">Meta de Venta por Categoría ($)</h3>
+                <div class="a-grid-categorias" style="margin-bottom: 22px;">
+                    <div class="form-group"><label>Mac</label><input type="number" id="cfgMetaTiendaVenta_mac" min="0" value="0"></div>
+                    <div class="form-group"><label>iPad</label><input type="number" id="cfgMetaTiendaVenta_ipad" min="0" value="0"></div>
+                    <div class="form-group"><label>iPhone</label><input type="number" id="cfgMetaTiendaVenta_iphone" min="0" value="0"></div>
+                    <div class="form-group"><label>Watch</label><input type="number" id="cfgMetaTiendaVenta_watch" min="0" value="0"></div>
+                    <div class="form-group"><label>AirPods</label><input type="number" id="cfgMetaTiendaVenta_airpods" min="0" value="0"></div>
+                    <div class="form-group"><label>Acc. Apple</label><input type="number" id="cfgMetaTiendaVenta_acc_apple" min="0" value="0"></div>
+                    <div class="form-group"><label>Acc. Terceros</label><input type="number" id="cfgMetaTiendaVenta_acc_terceros" min="0" value="0"></div>
+                    <div class="form-group"><label>Audio</label><input type="number" id="cfgMetaTiendaVenta_audio" min="0" value="0"></div>
+                    <div class="form-group"><label>Demos</label><input type="number" id="cfgMetaTiendaVenta_demos" min="0" value="0"></div>
+                    <div class="form-group"><label>Garex</label><input type="number" id="cfgMetaTiendaVenta_garex" min="0" value="0"></div>
+                </div>
+
+                <h3 class="a-card-title">Meta de Unidades (Dispositivos)</h3>
+                <div class="a-grid-categorias" style="margin-bottom: 22px;">
+                    <div class="form-group"><label>Unidades de Mac</label><input type="number" id="cfgMetaTiendaUnidad_mac" min="0" value="0"></div>
+                    <div class="form-group"><label>Unidades de iPad</label><input type="number" id="cfgMetaTiendaUnidad_ipad" min="0" value="0"></div>
+                    <div class="form-group"><label>Unidades de iPhone</label><input type="number" id="cfgMetaTiendaUnidad_iphone" min="0" value="0"></div>
+                    <div class="form-group"><label>Unidades de Watch</label><input type="number" id="cfgMetaTiendaUnidad_watch" min="0" value="0"></div>
+                    <div class="form-group"><label>Unidades de AirPods</label><input type="number" id="cfgMetaTiendaUnidad_airpods" min="0" value="0"></div>
+                </div>
+
+                <h3 class="a-card-title">Meta de Microsoft Office ($)</h3>
+                <div class="a-grid-categorias" style="grid-template-columns: 1fr 1fr; margin-bottom: 22px;">
+                    <div class="form-group"><label>Personal 365</label><input type="number" id="cfgMetaTiendaOfficePersonal365" min="0" value="0"></div>
+                    <div class="form-group"><label>Home and Student</label><input type="number" id="cfgMetaTiendaOfficeHomeStudent" min="0" value="0"></div>
+                </div>
+
+                <h3 class="a-card-title">Servicio Técnico</h3>
+                <label class="cal-checkbox-wrap" for="chkServicioTecnicoTienda" style="margin-bottom: 14px;">
+                    <input type="checkbox" id="chkServicioTecnicoTienda" onchange="toggleServicioTecnicoTienda()">
+                    <span>Esta tienda tiene servicio técnico</span>
+                </label>
+                <div class="a-grid-categorias" style="grid-template-columns: 1fr;">
+                    <div class="form-group"><label>Meta de Servicio Técnico ($)</label><input type="number" id="cfgMetaTiendaServicioTecnico" min="0" value="0" disabled></div>
+                </div>
+
+                <button class="btn-primary" onclick="guardarMetaTienda()">Guardar Meta Mensual de la Tienda</button>
             </div>
 
             <!-- Panel: Apariencia -->

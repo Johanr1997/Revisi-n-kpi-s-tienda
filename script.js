@@ -27,9 +27,120 @@ function guardarMetasSOS() {
     mostrarAlerta("Metas del Plan SOS actualizadas correctamente.", "success");
 }
 
-// ===================================================================
-// TABLAS DE INCENTIVOS (Fuente: Control_de_seguros_e_incentivos.xlsx)
-// ===================================================================
+// META MENSUAL DE LA TIENDA — cargada desde localStorage (editable en Configuración)
+// Independiente de la meta individual de cada asesor. Se usa como referencia de la meta
+// total de la tienda, desglosada por categoría de venta, unidades, Office y servicio técnico.
+const METAS_TIENDA_DEFAULT = {
+    ventas: { mac: 0, ipad: 0, iphone: 0, watch: 0, airpods: 0, acc_apple: 0, acc_terceros: 0, audio: 0, demos: 0, garex: 0 },
+    unidades: { mac: 0, ipad: 0, iphone: 0, watch: 0, airpods: 0 },
+    office: { personal365: 0, homeStudent: 0 },
+    servicioTecnico: { activo: false, meta: 0 }
+};
+
+function clonarMetasTiendaDefault() {
+    return JSON.parse(JSON.stringify(METAS_TIENDA_DEFAULT));
+}
+
+let METAS_TIENDA = JSON.parse(localStorage.getItem("metasTienda")) || clonarMetasTiendaDefault();
+// Compatibilidad: completa cualquier campo faltante de datos guardados en una versión anterior
+(function migrarMetasTienda() {
+    const base = clonarMetasTiendaDefault();
+    METAS_TIENDA.ventas = { ...base.ventas, ...(METAS_TIENDA.ventas || {}) };
+    METAS_TIENDA.unidades = { ...base.unidades, ...(METAS_TIENDA.unidades || {}) };
+    METAS_TIENDA.office = { ...base.office, ...(METAS_TIENDA.office || {}) };
+    METAS_TIENDA.servicioTecnico = { ...base.servicioTecnico, ...(METAS_TIENDA.servicioTecnico || {}) };
+})();
+
+// Carga los valores guardados de METAS_TIENDA en los inputs del panel de Configuración
+function cargarMetaTiendaEnInputs() {
+    document.getElementById("cfgMetaTiendaVenta_mac").value          = METAS_TIENDA.ventas.mac;
+    document.getElementById("cfgMetaTiendaVenta_ipad").value         = METAS_TIENDA.ventas.ipad;
+    document.getElementById("cfgMetaTiendaVenta_iphone").value       = METAS_TIENDA.ventas.iphone;
+    document.getElementById("cfgMetaTiendaVenta_watch").value        = METAS_TIENDA.ventas.watch;
+    document.getElementById("cfgMetaTiendaVenta_airpods").value      = METAS_TIENDA.ventas.airpods;
+    document.getElementById("cfgMetaTiendaVenta_acc_apple").value    = METAS_TIENDA.ventas.acc_apple;
+    document.getElementById("cfgMetaTiendaVenta_acc_terceros").value = METAS_TIENDA.ventas.acc_terceros;
+    document.getElementById("cfgMetaTiendaVenta_audio").value        = METAS_TIENDA.ventas.audio;
+    document.getElementById("cfgMetaTiendaVenta_demos").value        = METAS_TIENDA.ventas.demos;
+    document.getElementById("cfgMetaTiendaVenta_garex").value        = METAS_TIENDA.ventas.garex;
+
+    document.getElementById("cfgMetaTiendaUnidad_mac").value     = METAS_TIENDA.unidades.mac;
+    document.getElementById("cfgMetaTiendaUnidad_ipad").value    = METAS_TIENDA.unidades.ipad;
+    document.getElementById("cfgMetaTiendaUnidad_iphone").value  = METAS_TIENDA.unidades.iphone;
+    document.getElementById("cfgMetaTiendaUnidad_watch").value   = METAS_TIENDA.unidades.watch;
+    document.getElementById("cfgMetaTiendaUnidad_airpods").value = METAS_TIENDA.unidades.airpods;
+
+    document.getElementById("cfgMetaTiendaOfficePersonal365").value  = METAS_TIENDA.office.personal365;
+    document.getElementById("cfgMetaTiendaOfficeHomeStudent").value  = METAS_TIENDA.office.homeStudent;
+
+    document.getElementById("chkServicioTecnicoTienda").checked = METAS_TIENDA.servicioTecnico.activo;
+    document.getElementById("cfgMetaTiendaServicioTecnico").value    = METAS_TIENDA.servicioTecnico.meta;
+    document.getElementById("cfgMetaTiendaServicioTecnico").disabled = !METAS_TIENDA.servicioTecnico.activo;
+}
+
+// Habilita o deshabilita el campo de meta de servicio técnico según el checkbox
+function toggleServicioTecnicoTienda() {
+    const activo = document.getElementById("chkServicioTecnicoTienda").checked;
+    const input = document.getElementById("cfgMetaTiendaServicioTecnico");
+    input.disabled = !activo;
+    if (!activo) input.value = 0;
+}
+
+// Lee todos los inputs del panel, valida y guarda la Meta Mensual de la Tienda
+function guardarMetaTienda() {
+    const idsVenta = ["mac", "ipad", "iphone", "watch", "airpods", "acc_apple", "acc_terceros", "audio", "demos", "garex"];
+    const idsUnidad = ["mac", "ipad", "iphone", "watch", "airpods"];
+
+    const nuevasVentas = {};
+    for (const cat of idsVenta) {
+        const val = parseFloat(document.getElementById(`cfgMetaTiendaVenta_${cat}`).value);
+        if (isNaN(val) || val < 0) {
+            mostrarAlerta("Por favor ingresa valores válidos (0 o mayores) en las metas de venta por categoría.", "warning");
+            return;
+        }
+        nuevasVentas[cat] = val;
+    }
+
+    const nuevasUnidades = {};
+    for (const cat of idsUnidad) {
+        const val = parseFloat(document.getElementById(`cfgMetaTiendaUnidad_${cat}`).value);
+        if (isNaN(val) || val < 0) {
+            mostrarAlerta("Por favor ingresa valores válidos (0 o mayores) en las metas de unidades.", "warning");
+            return;
+        }
+        nuevasUnidades[cat] = val;
+    }
+
+    const personal365 = parseFloat(document.getElementById("cfgMetaTiendaOfficePersonal365").value);
+    const homeStudent = parseFloat(document.getElementById("cfgMetaTiendaOfficeHomeStudent").value);
+    if (isNaN(personal365) || personal365 < 0 || isNaN(homeStudent) || homeStudent < 0) {
+        mostrarAlerta("Por favor ingresa valores válidos (0 o mayores) en las metas de Microsoft Office.", "warning");
+        return;
+    }
+
+    const servicioActivo = document.getElementById("chkServicioTecnicoTienda").checked;
+    const servicioMeta = parseFloat(document.getElementById("cfgMetaTiendaServicioTecnico").value) || 0;
+    if (servicioActivo && (isNaN(servicioMeta) || servicioMeta < 0)) {
+        mostrarAlerta("Por favor ingresa un valor válido (0 o mayor) en la meta de Servicio Técnico.", "warning");
+        return;
+    }
+
+    METAS_TIENDA = {
+        ventas: nuevasVentas,
+        unidades: nuevasUnidades,
+        office: { personal365: personal365, homeStudent: homeStudent },
+        servicioTecnico: { activo: servicioActivo, meta: servicioActivo ? servicioMeta : 0 }
+    };
+    localStorage.setItem("metasTienda", JSON.stringify(METAS_TIENDA));
+
+    // La meta ($) de cada asesor se calcula a partir de su % sobre esta meta de tienda: hay que refrescar todo
+    renderTodo();
+    actualizarCumplimientoAsesorVisual();
+
+    mostrarAlerta("Meta Mensual de la Tienda actualizada correctamente.", "success");
+}
+
+
 
 // GAREX (Garantía Extendida): Mac/iPad/Watch/AirPods/Audio a 36 Meses; iPhone a 12 y 24 Meses
 const TABLA_GAREX = {
@@ -161,7 +272,7 @@ function calcularPrecioInsuramaCliente(dispositivo, cobertura, duracion, precioD
 function nuevoAsesor(nombre) {
     return {
         nombre: nombre,
-        meta: 0,
+        porcentajeMeta: 0, // % de la Meta Mensual de la Tienda asignado a este asesor (la meta en $ se calcula automáticamente)
         ventaSemanal: 0,
         qr: 0,
         tradeIn: 0,
@@ -191,7 +302,26 @@ Object.keys(appData.asesores).forEach(key => {
     // Migrar registros antiguos que no tengan montoVenta (precio al cliente)
     a.ventasGarex.forEach(v => { if (v.montoVenta === undefined) v.montoVenta = 0; if (v.id === undefined) v.id = "migrado_" + (_migracionContadorId++); });
     a.ventasInsurama.forEach(v => { if (v.montoVenta === undefined) v.montoVenta = 0; if (v.id === undefined) v.id = "migrado_" + (_migracionContadorId++); });
+    // Migrar la meta fija en $ (versión anterior) al nuevo modelo por porcentaje de la Meta de la Tienda
+    if (a.porcentajeMeta === undefined) a.porcentajeMeta = 0;
 });
+
+// Suma las 10 categorías de "Meta de Venta por Categoría" más la meta de Servicio Técnico
+// (si está activo) para obtener la Meta Total de la Tienda ($)
+function calcularMetaTotalTienda() {
+    const v = METAS_TIENDA.ventas;
+    const st = METAS_TIENDA.servicioTecnico;
+    const totalVentas = (v.mac || 0) + (v.ipad || 0) + (v.iphone || 0) + (v.watch || 0) + (v.airpods || 0) +
+           (v.acc_apple || 0) + (v.acc_terceros || 0) + (v.audio || 0) + (v.demos || 0) + (v.garex || 0);
+    const totalServicioTecnico = (st && st.activo) ? (st.meta || 0) : 0;
+    return totalVentas + totalServicioTecnico;
+}
+
+// Calcula la meta mensual ($) de un asesor según el % de la Meta de la Tienda que se le asignó
+function calcularMetaAsesor(asor) {
+    const porcentaje = asor.porcentajeMeta || 0;
+    return (porcentaje / 100) * calcularMetaTotalTienda();
+}
 
 // LÍNEAS PENDIENTES DE AGREGAR (estado temporal en memoria, no se guarda hasta presionar "Actualizar Asesor")
 let lineasGarexPendientes = [];
@@ -299,6 +429,9 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("metaVisualAcc").textContent   = `${METAS_SOS.accesorizacion.toFixed(1)}%`;
     document.getElementById("metaVisualTick").textContent  = `$${METAS_SOS.ticket.toLocaleString()}`;
     document.getElementById("metaVisualQR").textContent    = `${METAS_SOS.qr}`;
+
+    // Cargar la Meta Mensual de la Tienda en los inputs de Configuración
+    cargarMetaTiendaEnInputs();
 });
 
 function onSelectAsesorChange() {
@@ -787,7 +920,7 @@ function actualizarCumplimientoAsesorVisual() {
     if (!asor || !contenedor) return;
 
     const ventaAcumulada = asor.ventaSemanal || 0;
-    const meta = asor.meta || 0;
+    const meta = calcularMetaAsesor(asor);
     const cumplimiento = meta > 0 ? ((ventaAcumulada / meta) * 100).toFixed(1) : 0;
     const accesorizacionAsesor = calcularAccesorizacion(asor.montos).toFixed(1);
 
@@ -798,7 +931,7 @@ function actualizarCumplimientoAsesorVisual() {
         </div>
         <div class="barra-progreso"><div class="progreso-relleno" style="width:${Math.min(cumplimiento, 100)}%;"></div></div>
         <p style="font-size:12px; margin-top:8px; color:#6E6E73;">
-            Venta acumulada: $${ventaAcumulada.toLocaleString()} | Meta mensual: $${meta.toLocaleString()}
+            Venta acumulada: $${ventaAcumulada.toLocaleString()} | Meta mensual: $${Math.round(meta).toLocaleString()}
         </p>
         <div class="cumplimiento-acc-row">
             <span style="font-size:12px; font-weight:600; color:#1D1D1F;">Accesorización (auto)</span>
@@ -844,7 +977,9 @@ function renderTodo() {
     renderSelectAsesor();
     renderListaAsesoresConfig();
     let acumuladoTotalVentas = 0;
-    let metaTotalTienda = 0;
+    // La meta total de la tienda viene directo de lo configurado en "Meta Mensual de la Tienda",
+    // no de la suma de los % asignados a cada asesor (que podrían no sumar exactamente 100%).
+    const metaTotalTienda = calcularMetaTotalTienda();
     let totalGarex = 0;
     let totalSeguros = 0;
     let totalQR = 0;
@@ -862,10 +997,10 @@ function renderTodo() {
     let htmlResumenAsesores = "";
     Object.keys(appData.asesores).forEach(key => {
         const asor = appData.asesores[key];
+        const metaAsor = calcularMetaAsesor(asor);
         acumuladoTotalVentas += asor.ventaSemanal;
         acumuladoTotalVentas += sumarMontoVenta(asor.ventasGarex);
         // Insurama (seguros) NO se suma a la meta de ventas: solo se contabiliza para sus propios reportes/incentivos.
-        metaTotalTienda += asor.meta;
         totalGarex += sumarCantidad(asor.ventasGarex);
         totalSeguros += sumarCantidad(asor.ventasInsurama);
         totalQR += asor.qr;
@@ -895,7 +1030,7 @@ function renderTodo() {
             if (segurosPorDispositivo[v.dispositivo] !== undefined) segurosPorDispositivo[v.dispositivo] += v.cantidad;
         });
 
-        const cumplimiento = asor.meta > 0 ? ((asor.ventaSemanal / asor.meta) * 100).toFixed(1) : 0;
+        const cumplimiento = metaAsor > 0 ? ((asor.ventaSemanal / metaAsor) * 100).toFixed(1) : 0;
         const u = asor.unidades;
         const m = asor.montos;
         const totalUnidades = u.mac + u.ipad + u.iphone + u.watch + u.airpods + u.audio;
@@ -927,7 +1062,7 @@ function renderTodo() {
                 </div>
                 <div class="barra-progreso"><div class="progreso-relleno" style="width:${Math.min(cumplimiento,100)}%;"></div></div>
                 <p class="ra-sub">
-                    Venta: $${asor.ventaSemanal.toLocaleString()} | Meta: $${asor.meta.toLocaleString()}<br>
+                    Venta: $${asor.ventaSemanal.toLocaleString()} | Meta: $${Math.round(metaAsor).toLocaleString()}<br>
                     QR Colocados: ${asor.qr} | Trade-In: ${asor.tradeIn}
                 </p>
                 <div class="ra-section">
@@ -1359,32 +1494,86 @@ function renderListaAsesoresConfig() {
     const keys = Object.keys(appData.asesores);
     if (keys.length === 0) { contenedor.innerHTML = "<p style='color:#86868B; font-size:13px;'>No hay asesores registrados.</p>"; return; }
 
-    contenedor.innerHTML = keys.map((key, i) => `
-        <div class="asesor-config-row">
-            <input type="text" id="cfgNombreAsesor_${key}" value="${appData.asesores[key].nombre}"
-                class="asesor-config-input" placeholder="Nombre">
-            <input type="number" id="cfgMetaAsesor_${key}" value="${appData.asesores[key].meta || 0}"
-                class="asesor-config-input" placeholder="Meta mensual ($)">
-            <button onclick="renombrarAsesor('${key}')" class="asesor-config-save">
-                Guardar
-            </button>
-            ${keys.length > 1 ? `<button onclick="eliminarAsesor('${key}')" class="asesor-config-del">
-                ✕
-            </button>` : `<div></div>`}
-        </div>`
-    ).join("");
+    const metaTotalTienda = calcularMetaTotalTienda();
+
+    contenedor.innerHTML = keys.map((key, i) => {
+        const asor = appData.asesores[key];
+        const porcentaje = asor.porcentajeMeta || 0;
+        const metaCalculada = calcularMetaAsesor(asor);
+        return `
+        <div class="asesor-config-block">
+            <div class="asesor-config-row">
+                <input type="text" id="cfgNombreAsesor_${key}" value="${asor.nombre}"
+                    class="asesor-config-input" placeholder="Nombre">
+                <input type="number" id="cfgPorcentajeAsesor_${key}" value="${porcentaje}" min="0" max="100" step="0.1"
+                    class="asesor-config-input" placeholder="% de meta"
+                    oninput="previsualizarMetaAsesor('${key}')">
+                <button onclick="renombrarAsesor('${key}')" class="asesor-config-save">
+                    Guardar
+                </button>
+                ${keys.length > 1 ? `<button onclick="eliminarAsesor('${key}')" class="asesor-config-del">
+                    ✕
+                </button>` : `<div></div>`}
+            </div>
+            <p class="asesor-meta-calculada" id="metaCalculada_${key}">
+                Meta calculada: <strong>$${Math.round(metaCalculada).toLocaleString()}</strong>
+                (${porcentaje}% de la meta de tienda de $${Math.round(metaTotalTienda).toLocaleString()})
+            </p>
+        </div>`;
+    }).join("");
+}
+
+// Previsualiza en vivo la meta ($) calculada mientras el usuario escribe el % (sin guardar todavía)
+function previsualizarMetaAsesor(key) {
+    const inputPorcentaje = document.getElementById(`cfgPorcentajeAsesor_${key}`);
+    const texto = document.getElementById(`metaCalculada_${key}`);
+    if (!inputPorcentaje || !texto) return;
+
+    const porcentaje = parseFloat(inputPorcentaje.value) || 0;
+    const metaTotalTienda = calcularMetaTotalTienda();
+    const metaCalculada = (porcentaje / 100) * metaTotalTienda;
+
+    const sumaOtros = Object.keys(appData.asesores)
+        .filter(k => k !== key)
+        .reduce((acc, k) => acc + (appData.asesores[k].porcentajeMeta || 0), 0);
+    const sumaTotal = sumaOtros + porcentaje;
+    const excedeAlerta = sumaTotal > 100
+        ? `<br><span style="color:#FF3B30;">⚠ La suma entre asesores sería ${sumaTotal.toFixed(1)}% (supera el 100%). Máximo disponible para este asesor: ${(100 - sumaOtros).toFixed(1)}%.</span>`
+        : "";
+
+    texto.innerHTML = `Meta calculada: <strong>$${Math.round(metaCalculada).toLocaleString()}</strong>
+        (${porcentaje}% de la meta de tienda de $${Math.round(metaTotalTienda).toLocaleString()})${excedeAlerta}`;
 }
 
 function renombrarAsesor(key) {
     const input = document.getElementById(`cfgNombreAsesor_${key}`);
-    const inputMeta = document.getElementById(`cfgMetaAsesor_${key}`);
+    const inputPorcentaje = document.getElementById(`cfgPorcentajeAsesor_${key}`);
     const nuevoNombre = input ? input.value.trim() : "";
     if (!nuevoNombre) { mostrarAlerta("El nombre no puede estar vacío.", "warning"); return; }
+
+    const porcentaje = inputPorcentaje ? parseFloat(inputPorcentaje.value) : NaN;
+    if (inputPorcentaje && (isNaN(porcentaje) || porcentaje < 0 || porcentaje > 100)) {
+        mostrarAlerta("El % de meta debe ser un número entre 0 y 100.", "warning");
+        return;
+    }
+
+    // Verificar que la suma de % de TODOS los asesores (incluyendo este con su nuevo valor)
+    // no supere el 100%. Ej: si un asesor tiene 80%, otro no puede tener 21%.
+    if (inputPorcentaje) {
+        const sumaOtros = Object.keys(appData.asesores)
+            .filter(k => k !== key)
+            .reduce((acc, k) => acc + (appData.asesores[k].porcentajeMeta || 0), 0);
+        const sumaTotal = sumaOtros + porcentaje;
+        if (sumaTotal > 100) {
+            mostrarAlerta(`La suma de los % de meta entre todos los asesores no puede superar el 100%. Actualmente los demás asesores suman ${sumaOtros}%, por lo que este asesor puede tener como máximo ${(100 - sumaOtros).toFixed(1)}%.`, "warning");
+            return;
+        }
+    }
 
     const nombreAnterior = appData.asesores[key].nombre;
     const nombreCambio = nombreAnterior !== nuevoNombre;
     appData.asesores[key].nombre = nuevoNombre;
-    appData.asesores[key].meta = inputMeta ? (parseFloat(inputMeta.value) || 0) : appData.asesores[key].meta;
+    appData.asesores[key].porcentajeMeta = inputPorcentaje ? porcentaje : appData.asesores[key].porcentajeMeta;
 
     if (nombreCambio) {
         // Actualizar también las entradas del calendario que tengan el nombre anterior

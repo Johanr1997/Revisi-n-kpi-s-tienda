@@ -137,6 +137,7 @@ body {
 .form-group label { font-size: 12px; font-weight: 600; color: #1D1D1F; }
 .form-group input, .form-group select, .form-group textarea { padding: 10px; font-size: 14px; border-radius: 8px; border: 1px solid #D2D2D7; outline: none; }
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #0071E3; box-shadow: 0 0 0 3px rgba(0,113,227,0.15); }
+.form-group input:disabled { opacity: 0.4; cursor: not-allowed; background: rgba(0,0,0,0.03); }
 .form-group textarea { min-height: 70px; }
 
 /* REJILLA AVANZADA FORMULARIO ASESORES */
@@ -1461,6 +1462,7 @@ body.dark-mode .form-group textarea:focus {
     border-color: #0A84FF;
     box-shadow: 0 0 0 3px rgba(10,132,255,0.22);
 }
+body.dark-mode .form-group input:disabled { opacity: 0.35; background: rgba(255,255,255,0.03); }
 body.dark-mode .a-proteccion-fecha-row input[type="date"] {
     background: rgba(255,255,255,0.08);
     border-color: rgba(255,255,255,0.15);
@@ -1604,6 +1606,9 @@ body.dark-mode .navbar ul li.active {
 }
 
 /* Fila de edición de asesor en Configuración */
+.asesor-config-block {
+    margin-bottom: 8px;
+}
 .asesor-config-row {
     display: grid;
     grid-template-columns: 1.4fr 1fr auto auto;
@@ -1612,7 +1617,12 @@ body.dark-mode .navbar ul li.active {
     padding: 10px 12px;
     background: #F5F5F7;
     border-radius: 8px;
-    margin-bottom: 8px;
+    margin-bottom: 0;
+}
+.asesor-meta-calculada {
+    font-size: 11px;
+    color: #6E6E73;
+    padding: 6px 12px 0;
 }
 .asesor-config-input {
     font-size: 14px;
@@ -1646,6 +1656,9 @@ body.dark-mode .navbar ul li.active {
 /* Modo oscuro: fila de edición de asesor */
 body.dark-mode .asesor-config-row {
     background: rgba(255,255,255,0.06);
+}
+body.dark-mode .asesor-meta-calculada {
+    color: rgba(255,255,255,0.5);
 }
 body.dark-mode .asesor-config-input {
     background: rgba(255,255,255,0.08);
