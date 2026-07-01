@@ -551,7 +551,7 @@ body {
 }
 .a-hero-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 16px;
 }
 .a-select-group label {
@@ -635,6 +635,58 @@ body {
     background: rgba(255,255,255,0.6);
     border: 1px solid rgba(255,255,255,0.85);
 }
+
+.a-acc-manual-aviso {
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: rgba(255,149,0,0.1);
+    border: 1px solid rgba(255,149,0,0.3);
+    border-radius: 10px;
+    font-size: 12px;
+    color: #B36200;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.a-acc-manual-aviso button {
+    background: rgba(255,149,0,0.18);
+    border: 1px solid rgba(255,149,0,0.4);
+    border-radius: 8px;
+    color: #B36200;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 10px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.a-acc-manual-aviso button:hover { background: rgba(255,149,0,0.28); }
+body.dark-mode .a-acc-manual-aviso { background: rgba(255,159,10,0.12); border-color: rgba(255,159,10,0.35); color: #FFB454; }
+body.dark-mode .a-acc-manual-aviso button { color: #FFB454; }
+
+.a-monto-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(0,0,0,0.08);
+}
+.a-monto-total-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(0,0,0,0.4);
+}
+.a-monto-total-val {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0071E3;
+}
+body.dark-mode .a-monto-total-row { border-top-color: rgba(255,255,255,0.1); }
+body.dark-mode .a-monto-total-label { color: rgba(255,255,255,0.5); }
 
 .a-proteccion-grid {
     display: grid;
@@ -1674,4 +1726,40 @@ body.dark-mode #chkModoOscuroAuto {
 }
 body.dark-mode label[for="chkModoOscuroAuto"] {
     border-top-color: rgba(255,255,255,0.1) !important;
+}
+
+/* Campos de solo lectura calculados automáticamente (Monto de Ventas, Accesorización) */
+body.dark-mode #inputVentaSemanal,
+body.dark-mode #inputAccesorizacion {
+    background: rgba(10,132,255,0.14) !important;
+    color: #4DA3FF !important;
+}
+
+/* Fila de accesorización automática dentro del box de cumplimiento del asesor */
+.cumplimiento-acc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0,0,0,0.07);
+}
+body.dark-mode .cumplimiento-acc-row {
+    border-top-color: rgba(255,255,255,0.1);
+}
+
+/* Badge de accesorización automática en el resumen de cada asesor */
+.ra-acc-badge {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(0,113,227,0.12);
+    color: #0071E3;
+    padding: 2px 9px;
+    border-radius: 999px;
+}
+body.dark-mode .ra-acc-badge {
+    background: rgba(10,132,255,0.18);
+    color: #4DA3FF;
 }

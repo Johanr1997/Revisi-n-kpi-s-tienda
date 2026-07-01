@@ -173,7 +173,7 @@ function nuevoAsesor(nombre) {
 }
 
 let appData = JSON.parse(localStorage.getItem("controlVentasData")) || {
-    inicio: { conversion: 0, accesorizacion: 0, ticket: 0, trafico: 0, comentarios: "", oportunidades: "" },
+    inicio: { conversion: 0, accesorizacion: 0, accesorizacionManual: false, accesorizacionManualValor: null, ticket: 0, trafico: 0, comentarios: "", oportunidades: "" },
     bitacoras: [],
     asesores: {
         asesor0: nuevoAsesor("Asesor 1"),
@@ -271,7 +271,6 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // Cargar datos en inputs de Inicio si ya existen
     document.getElementById("inputConversion").value = appData.inicio.conversion || "";
-    document.getElementById("inputAccesorizacion").value = appData.inicio.accesorizacion || "";
     document.getElementById("inputTicket").value = appData.inicio.ticket || "";
     document.getElementById("inputComentarios").value = appData.inicio.comentarios || "";
     document.getElementById("inputOportunidades").value = appData.inicio.oportunidades || "";
@@ -460,10 +459,32 @@ function actualizarLabelTraficoAcumulado() {
     if (lbl) lbl.textContent = (appData.inicio.trafico || 0).toLocaleString();
 }
 
+// Descarta el valor manual de accesorización y vuelve a que se calcule automáticamente
+function restaurarAccesorizacionAutomatica() {
+    appData.inicio.accesorizacionManual = false;
+    appData.inicio.accesorizacionManualValor = null;
+    sincronizarYRenderizar();
+    mostrarAlerta("La accesorización volvió a calcularse automáticamente.", "success");
+}
+
 function guardarDatosReunion() {
     appData.inicio.conversion = parseFloat(document.getElementById("inputConversion").value) || 0;
-    appData.inicio.accesorizacion = parseFloat(document.getElementById("inputAccesorizacion").value) || 0;
     appData.inicio.ticket = parseFloat(document.getElementById("inputTicket").value) || 0;
+
+    // Accesorización: por defecto se calcula automáticamente en renderTodo() a partir de los
+    // montos de dispositivos y accesorios. Si el usuario ingresa un valor aquí, se le pregunta
+    // si desea reemplazar el porcentaje calculado automáticamente por el valor ingresado.
+    const inputAccManualEl = document.getElementById("inputAccesorizacionManual");
+    const valorAccManual = inputAccManualEl && inputAccManualEl.value !== "" ? parseFloat(inputAccManualEl.value) : null;
+    if (valorAccManual !== null && !isNaN(valorAccManual)) {
+        const actual = appData.inicio.accesorizacion || 0;
+        const reemplazar = confirm(`Actualmente se muestra ${actual.toFixed(1)}% de accesorización (calculado automáticamente). ¿Deseas reemplazarlo por ${valorAccManual.toFixed(1)}% ingresado manualmente?`);
+        if (reemplazar) {
+            appData.inicio.accesorizacionManual = true;
+            appData.inicio.accesorizacionManualValor = valorAccManual;
+        }
+        inputAccManualEl.value = "";
+    }
 
     const inputTraficoEl = document.getElementById("inputTrafico");
     if (inputTraficoEl.value !== "") {
@@ -752,6 +773,8 @@ function guardarDatosAsesor() {
      "inputVentaFechaDia","inputFechaProteccion"
     ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
     document.getElementById("resumenDia").style.display = "none";
+    const lblTotalReset = document.getElementById("lblMontoVentaTotal");
+    if (lblTotalReset) lblTotalReset.textContent = "$0";
     if (document.getElementById("chkReflejarCalendario")) document.getElementById("chkReflejarCalendario").checked = true;
     actualizarPrecioGarexCalculado();
     actualizarPrecioInsuramaCalculado();
@@ -775,6 +798,8 @@ function recalcularMontoVentaTotal() {
         inputVenta.value = total > 0 ? total : "";
         actualizarResumenIngreso();
     }
+    const lblTotal = document.getElementById("lblMontoVentaTotal");
+    if (lblTotal) lblTotal.textContent = `$${total.toLocaleString()}`;
 }
 
 // MOSTRAR % DE CUMPLIMIENTO DE META MENSUAL DEL ASESOR SELECCIONADO (EN VIVO)
@@ -787,6 +812,7 @@ function actualizarCumplimientoAsesorVisual() {
     const ventaAcumulada = asor.ventaSemanal || 0;
     const meta = asor.meta || 0;
     const cumplimiento = meta > 0 ? ((ventaAcumulada / meta) * 100).toFixed(1) : 0;
+    const accesorizacionAsesor = calcularAccesorizacion(asor.montos).toFixed(1);
 
     contenedor.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
@@ -796,7 +822,11 @@ function actualizarCumplimientoAsesorVisual() {
         <div class="barra-progreso"><div class="progreso-relleno" style="width:${Math.min(cumplimiento, 100)}%;"></div></div>
         <p style="font-size:12px; margin-top:8px; color:#6E6E73;">
             Venta acumulada: $${ventaAcumulada.toLocaleString()} | Meta mensual: $${meta.toLocaleString()}
-        </p>`;
+        </p>
+        <div class="cumplimiento-acc-row">
+            <span style="font-size:12px; font-weight:600; color:#1D1D1F;">Accesorización (auto)</span>
+            <span style="font-size:15px; font-weight:700; color:#34C759;">${accesorizacionAsesor}%</span>
+        </div>`;
 }
 
 // AGREGAR NOTA BITÁCORA
@@ -848,13 +878,16 @@ function renderTodo() {
     const garexPorDispositivo = { Mac: 0, iPad: 0, iPhone: 0, Watch: 0 };
     const segurosPorDispositivo = { Mac: 0, iPad: 0, iPhone: 0, Watch: 0 };
 
+    // Acumuladores para la accesorización automática de toda la tienda
+    const montosTienda = { mac: 0, ipad: 0, iphone: 0, watch: 0, airpods: 0, audio: 0, acc_apple: 0, acc_terceros: 0 };
+
     // Procesar Datos Globales de Asesores
     let htmlResumenAsesores = "";
     Object.keys(appData.asesores).forEach(key => {
         const asor = appData.asesores[key];
         acumuladoTotalVentas += asor.ventaSemanal;
         acumuladoTotalVentas += sumarMontoVenta(asor.ventasGarex);
-        acumuladoTotalVentas += sumarMontoVenta(asor.ventasInsurama);
+        // Insurama (seguros) NO se suma a la meta de ventas: solo se contabiliza para sus propios reportes/incentivos.
         metaTotalTienda += asor.meta;
         totalGarex += sumarCantidad(asor.ventasGarex);
         totalSeguros += sumarCantidad(asor.ventasInsurama);
@@ -866,6 +899,16 @@ function renderTodo() {
         unidadesPorDispositivo.ipad   += asor.unidades.ipad;
         unidadesPorDispositivo.iphone += asor.unidades.iphone;
         unidadesPorDispositivo.watch  += asor.unidades.watch;
+
+        // Montos por dispositivo y accesorio (base para la accesorización automática de tienda)
+        montosTienda.mac          += asor.montos.mac;
+        montosTienda.ipad         += asor.montos.ipad;
+        montosTienda.iphone       += asor.montos.iphone;
+        montosTienda.watch        += asor.montos.watch;
+        montosTienda.airpods      += asor.montos.airpods;
+        montosTienda.audio        += asor.montos.audio;
+        montosTienda.acc_apple    += asor.montos.acc_apple;
+        montosTienda.acc_terceros += asor.montos.acc_terceros;
 
         // Garex e Insurama colocados por dispositivo
         asor.ventasGarex.forEach(v => {
@@ -893,6 +936,7 @@ function renderTodo() {
         const incentivoGarex   = sumarIncentivo(asor.ventasGarex);
         const incentivoInsurama = sumarIncentivo(asor.ventasInsurama);
         const incentivoTotal    = incentivoGarex + incentivoInsurama;
+        const accesorizacionAsor = calcularAccesorizacion(m).toFixed(1);
 
         htmlResumenAsesores += `
             <div class="ra-card">
@@ -900,6 +944,7 @@ function renderTodo() {
                     <div>
                         <strong>${asor.nombre}</strong>
                         <span class="ra-incentivo">💰 Incentivos: $${incentivoTotal.toFixed(2)}</span>
+                        <span class="ra-acc-badge">🔌 Accesorización: ${accesorizacionAsor}%</span>
                     </div>
                     <span class="ra-cumplimiento">${cumplimiento}% de cumplimiento</span>
                 </div>
@@ -970,8 +1015,20 @@ function renderTodo() {
 
     // KPIs Plan SOS
     document.getElementById("conversionReal").textContent = `${appData.inicio.conversion.toFixed(1)}%`;
+
+    // Accesorización de tienda: por defecto se calcula automáticamente sumando montos de
+    // accesorios y dispositivos de todos los asesores. Si el usuario fijó un valor manual,
+    // ese valor se muestra en su lugar hasta que decida volver al cálculo automático.
+    if (appData.inicio.accesorizacionManual) {
+        appData.inicio.accesorizacion = appData.inicio.accesorizacionManualValor || 0;
+    } else {
+        appData.inicio.accesorizacion = calcularAccesorizacion(montosTienda);
+    }
     document.getElementById("accesorizacionReal").textContent = `${appData.inicio.accesorizacion.toFixed(1)}%`;
     document.getElementById("ticketReal").textContent = `$${appData.inicio.ticket.toLocaleString()}`;
+
+    const avisoAccManual = document.getElementById("v_accManualAviso");
+    if (avisoAccManual) avisoAccManual.style.display = appData.inicio.accesorizacionManual ? "flex" : "none";
 
     evaluarSemaforoApple("cardConversion", appData.inicio.conversion, METAS_SOS.conversion);
     evaluarSemaforoApple("cardAccesorizacion", appData.inicio.accesorizacion, METAS_SOS.accesorizacion);
@@ -1050,10 +1107,10 @@ function renderTopVendedores() {
         `).join("");
     }
 
-    // Top Ventas (venta semanal + monto cobrado por Garex/Seguros, igual que el acumulado de tienda)
+    // Top Ventas (venta semanal + monto cobrado por Garex, igual que el acumulado de tienda usado en la meta)
     pintarTop("v_top_ventas", asesoresArr.map(a => ({
         nombre: a.nombre,
-        valor: a.ventaSemanal + sumarMontoVenta(a.ventasGarex) + sumarMontoVenta(a.ventasInsurama)
+        valor: a.ventaSemanal + sumarMontoVenta(a.ventasGarex)
     })), v => `$${v.toLocaleString()}`);
 
     // Top Garex (unidades colocadas)
@@ -1080,6 +1137,16 @@ function sumarIncentivo(listaVentas) {
 // Suma el monto de venta al cliente en una lista de ventas
 function sumarMontoVenta(listaVentas) {
     return listaVentas.reduce((acc, v) => acc + (v.montoVenta || 0), 0);
+}
+
+// ACCESORIZACIÓN AUTOMÁTICA
+// Fórmula: (monto vendido en accesorios) / (monto vendido en dispositivos) × 100
+// Dispositivos: Mac, iPad, iPhone, Watch — Accesorios: AirPods, Audio, Acc. Apple, Acc. Terceros
+function calcularAccesorizacion(montos) {
+    const montoDispositivos = (montos.mac || 0) + (montos.ipad || 0) + (montos.iphone || 0) + (montos.watch || 0);
+    const montoAccesorios = (montos.airpods || 0) + (montos.audio || 0) + (montos.acc_apple || 0) + (montos.acc_terceros || 0);
+    if (montoDispositivos <= 0) return 0;
+    return (montoAccesorios / montoDispositivos) * 100;
 }
 
 // TABLA GAREX: desglose por asesor y dispositivo, con incentivo real ganado
@@ -1423,7 +1490,7 @@ function reiniciarTodoCero() {
         localStorage.removeItem("ventasCalendario");
         // Las metas SOS se conservan intencionalmente; solo se borran datos de ventas
         appData = {
-            inicio: { conversion: 0, accesorizacion: 0, ticket: 0, trafico: 0, comentarios: "", oportunidades: "" },
+            inicio: { conversion: 0, accesorizacion: 0, accesorizacionManual: false, accesorizacionManualValor: null, ticket: 0, trafico: 0, comentarios: "", oportunidades: "" },
             bitacoras: [],
             asesores: {
                 asesor0: nuevoAsesor("Asesor 1"),

@@ -58,13 +58,17 @@
                         <input type="number" id="inputConversion" step="0.01" placeholder="Ej: 23.5">
                     </div>
                     <div class="form-group">
-                        <label for="inputAccesorizacion">Accesorización Semanal (%)</label>
-                        <input type="number" id="inputAccesorizacion" step="0.01" placeholder="Ej: 29.1">
+                        <label for="inputAccesorizacionManual">Accesorización Semanal (%) <span style="font-size:11px; color:#86868B;">(opcional, reemplaza el cálculo automático)</span></label>
+                        <input type="number" id="inputAccesorizacionManual" step="0.01" placeholder="Ej: 29.4">
                     </div>
                     <div class="form-group">
                         <label for="inputTicket">Ticket Promedio Semanal ($)</label>
                         <input type="number" id="inputTicket" placeholder="Ej: 265">
                     </div>
+                </div>
+                <div id="v_accManualAviso" class="a-acc-manual-aviso" style="display:none;">
+                    Se está mostrando un valor de accesorización ingresado manualmente en lugar del cálculo automático.
+                    <button type="button" onclick="restaurarAccesorizacionAutomatica()">Volver a cálculo automático</button>
                 </div>
             </div>
 
@@ -112,11 +116,8 @@
                         <label for="inputMetaAsesor">Meta Mensual de Ventas ($)</label>
                         <input type="number" id="inputMetaAsesor" value="0">
                     </div>
-                    <div class="form-group a-select-group">
-                        <label for="inputVentaSemanal">Monto de Ventas ($) <span style="font-size:11px; color:#86868B;">(suma automática)</span></label>
-                        <input type="number" id="inputVentaSemanal" value="0" readonly style="background:rgba(0,113,227,0.06); color:#0071E3; font-weight:600;" oninput="actualizarResumenIngreso()">
-                    </div>
                 </div>
+                <input type="hidden" id="inputVentaSemanal" value="0" oninput="actualizarResumenIngreso()">
 
                 <!-- Fecha de la venta -->
                 <div class="venta-modo-wrap">
@@ -164,6 +165,10 @@
                     <div class="form-group"><label>Audio</label><input type="number" id="m_audio" value="0" oninput="recalcularMontoVentaTotal()"></div>
                     <div class="form-group"><label>Acc. Apple</label><input type="number" id="m_acc_apple" value="0" oninput="recalcularMontoVentaTotal()"></div>
                     <div class="form-group"><label>Acc. Terceros</label><input type="number" id="m_acc_terceros" value="0" oninput="recalcularMontoVentaTotal()"></div>
+                </div>
+                <div class="a-monto-total-row">
+                    <span class="a-monto-total-label">Total de la venta</span>
+                    <span class="a-monto-total-val" id="lblMontoVentaTotal">$0</span>
                 </div>
             </div>
 
