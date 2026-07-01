@@ -105,6 +105,12 @@ body {
 }
 
 .navbar h2 { position: relative; z-index: 2; font-size: 16px; font-weight: 600; }
+.nombre-tienda-nav {
+    font-weight: 500;
+    color: #0071E3;
+    margin-left: 2px;
+}
+body.dark-mode .nombre-tienda-nav { color: #4DA3FF; }
 .navbar ul { display: flex; list-style: none; gap: 22px; align-items: center; position: relative; z-index: 2; }
 .navbar ul li { font-size: 13px; font-weight: 500; color: #515154; cursor: pointer; padding: 7px 14px; border-radius: 999px; transition: background 0.2s, color 0.2s; }
 .navbar ul li:hover { background: rgba(255,255,255,0.25); }
