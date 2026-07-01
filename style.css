@@ -1790,3 +1790,124 @@ body.dark-mode .ra-acc-badge {
     background: rgba(10,132,255,0.18);
     color: #4DA3FF;
 }
+/* ═══════════════════════════════════════════════════════ */
+/* TABLAS CON SCROLL HORIZONTAL (evita que se rompan en móvil) */
+/* ═══════════════════════════════════════════════════════ */
+.tabla-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.tabla-scroll table { min-width: 560px; }
+
+/* ═══════════════════════════════════════════════════════ */
+/* COMPATIBILIDAD COMPLETA CON PANTALLAS DE CELULAR          */
+/* ═══════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+    /* Evita que el navegador haga zoom automático al enfocar inputs en iOS */
+    .form-group input,
+    .form-group select,
+    .form-group textarea,
+    .asesor-config-input,
+    input[type="number"],
+    input[type="text"],
+    input[type="date"],
+    select {
+        font-size: 16px;
+    }
+
+    body { padding-top: 74px; }
+
+    /* Navbar: se convierte en una barra deslizable horizontalmente */
+    .navbar {
+        width: calc(100% - 16px);
+        left: 8px;
+        right: 8px;
+        top: 8px;
+        transform: none;
+        border-radius: 20px;
+        height: auto;
+        padding: 10px 12px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    .navbar h2 { display: none; }
+    .navbar > div {
+        justify-content: space-between;
+        width: 100%;
+    }
+    .navbar ul {
+        gap: 6px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        flex: 1;
+        scrollbar-width: none;
+        justify-content: flex-start;
+    }
+    .navbar ul::-webkit-scrollbar { display: none; }
+    .navbar ul li {
+        white-space: nowrap;
+        font-size: 12px;
+        padding: 7px 11px;
+        flex-shrink: 0;
+    }
+    .theme-toggle-btn { flex-shrink: 0; }
+
+    /* Contenido general */
+    .contenido { padding: 16px 14px 40px 14px; }
+    .header { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 22px; }
+    .header h1 { font-size: 22px; }
+
+    /* Rejillas de dos columnas -> una sola columna */
+    .grid-2-col,
+    .seccion-inferior,
+    .a-grid-categorias,
+    .ra-grid-3,
+    .ra-grid-4,
+    .a-proteccion-grid .grid-2-col {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Tarjetas resumen (SOS, top vendedores) ya se ajustan a 1 col a los 780px,
+       pero achicamos paddings para que respiren mejor en pantallas angostas */
+    .v-hero, .v-glass, .a-card, .card, .formulario {
+        padding: 18px 16px;
+    }
+
+    .v-pill-row { grid-template-columns: repeat(2, 1fr); }
+
+    /* Fila de edición de asesor: nombre y % apilados, botones en fila propia */
+    .asesor-config-row {
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "nombre nombre"
+            "porcentaje porcentaje"
+            "guardar borrar";
+        row-gap: 8px;
+    }
+    #listaAsesoresConfig input[id^="cfgNombreAsesor_"] { grid-area: nombre; }
+    #listaAsesoresConfig input[id^="cfgPorcentajeAsesor_"] { grid-area: porcentaje; max-width: 100px; }
+    #listaAsesoresConfig button.asesor-config-save { grid-area: guardar; }
+    #listaAsesoresConfig button.asesor-config-del { grid-area: borrar; }
+
+    /* Calendario: celdas más compactas para que quepan las 7 columnas */
+    .cal-grid { gap: 3px; }
+    .cal-celda { padding: 4px; min-height: 56px; }
+    .cal-dia-num { font-size: 11px; }
+    .cal-evento-pill { font-size: 9px; padding: 1px 4px; }
+    .cal-titulo { font-size: 14px; }
+
+    /* Tablas: texto un poco más pequeño dentro del contenedor con scroll */
+    .tabla-scroll table { font-size: 11px !important; }
+
+    /* Botones de acción a ancho completo se ven mejor apilados en vertical */
+    .modal-actions { flex-direction: column-reverse; }
+    .modal-btn { width: 100%; }
+}
+
+@media (max-width: 380px) {
+    .navbar ul li { font-size: 11px; padding: 6px 9px; }
+    .v-pill-row { grid-template-columns: 1fr; }
+}
