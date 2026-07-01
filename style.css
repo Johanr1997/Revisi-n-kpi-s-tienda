@@ -1553,6 +1553,14 @@ body.dark-mode .a-pill-input { color: #F2F2F7 !important; }
 body.dark-mode .a-card-title { color: #F2F2F7 !important; }
 body.dark-mode .a-grid-categorias .form-group label { color: rgba(255,255,255,0.85) !important; }
 body.dark-mode .a-precio-calculado { color: #F2F2F7 !important; }
+body.dark-mode .a-linea-pendiente,
+body.dark-mode .a-linea-pendiente span,
+body.dark-mode .a-linea-pendiente strong {
+    color: #1D1D1F !important;
+}
+body.dark-mode .a-linea-pendiente span span {
+    color: #86868B !important;
+}
 body.dark-mode .r-item-fecha { color: rgba(255,255,255,0.83) !important; }
 body.dark-mode .r-item-texto { color: #F2F2F7 !important; }
 body.dark-mode .r-item-del { color: rgba(255,255,255,0.65) !important; }
@@ -1611,13 +1619,19 @@ body.dark-mode .navbar ul li.active {
 }
 .asesor-config-row {
     display: grid;
-    grid-template-columns: 1.4fr 1fr auto auto;
+    grid-template-columns: 1.4fr 0.6fr auto auto;
     gap: 8px;
     align-items: center;
     padding: 10px 12px;
     background: #F5F5F7;
     border-radius: 8px;
     margin-bottom: 0;
+}
+.asesor-config-input-porcentaje {
+    max-width: 64px;
+    text-align: center;
+    padding: 8px 6px;
+    justify-self: start;
 }
 .asesor-meta-calculada {
     font-size: 11px;

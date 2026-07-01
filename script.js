@@ -701,10 +701,10 @@ function renderListaPendiente(tipo) {
     let html = "";
     lista.forEach((v, i) => {
         html += `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#FFFFFF; border-radius:8px; padding:8px 10px; margin-bottom:6px; font-size:12px;">
-                <span>
-                    <strong>${v.dispositivo}</strong>${v.cobertura ? " · " + v.cobertura : ""} · ${v.duracion} · x${v.cantidad}
-                    <br><span style="color:#86868B;">Incentivo: $${v.incentivoTotal.toFixed(2)} | Venta: $${v.montoVenta.toFixed(2)}</span>
+            <div class="a-linea-pendiente" style="display:flex; justify-content:space-between; align-items:center; background:#FFFFFF; border-radius:8px; padding:8px 10px; margin-bottom:6px; font-size:12px; color:#1D1D1F !important;">
+                <span style="color:#1D1D1F !important;">
+                    <strong style="color:#1D1D1F !important;">${v.dispositivo}</strong>${v.cobertura ? " · " + v.cobertura : ""} · ${v.duracion} · x${v.cantidad}
+                    <br><span style="color:#86868B !important;">Incentivo: $${v.incentivoTotal.toFixed(2)} | Venta: $${v.montoVenta.toFixed(2)}</span>
                 </span>
                 <button type="button" onclick="quitarLineaPendiente('${tipo}', ${i})" style="background:none; border:none; color:#FF3B30; font-size:16px; cursor:pointer; padding:0 4px;">✕</button>
             </div>`;
@@ -1506,7 +1506,7 @@ function renderListaAsesoresConfig() {
                 <input type="text" id="cfgNombreAsesor_${key}" value="${asor.nombre}"
                     class="asesor-config-input" placeholder="Nombre">
                 <input type="number" id="cfgPorcentajeAsesor_${key}" value="${porcentaje}" min="0" max="100" step="0.1"
-                    class="asesor-config-input" placeholder="% de meta"
+                    class="asesor-config-input asesor-config-input-porcentaje" placeholder="%"
                     oninput="previsualizarMetaAsesor('${key}')">
                 <button onclick="renombrarAsesor('${key}')" class="asesor-config-save">
                     Guardar
