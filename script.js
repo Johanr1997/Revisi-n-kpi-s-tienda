@@ -16,6 +16,7 @@ function guardarMetasSOS() {
 
     METAS_SOS = { conversion: conv, accesorizacion: acc, ticket: tick, qr: qr };
     localStorage.setItem("metasSOS", JSON.stringify(METAS_SOS));
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
 
     // Actualizar los badges de meta en la pestaña Ventas
     document.getElementById("metaVisualConv").textContent  = `${conv.toFixed(1)}%`;
@@ -132,6 +133,7 @@ function guardarMetaTienda() {
         servicioTecnico: { activo: servicioActivo, meta: servicioActivo ? servicioMeta : 0 }
     };
     localStorage.setItem("metasTienda", JSON.stringify(METAS_TIENDA));
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
 
     // La meta ($) de cada asesor se calcula a partir de su % sobre esta meta de tienda: hay que refrescar todo
     renderTodo();
@@ -1718,6 +1720,7 @@ function eliminarAsesor(key) {
 
 function sincronizarYRenderizar() {
     localStorage.setItem("controlVentasData", JSON.stringify(appData));
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
     renderTodo();
 }
 
@@ -1812,12 +1815,15 @@ let ventasCalendario = JSON.parse(localStorage.getItem("ventasCalendario")) || [
 
 function guardarRecordatorios() {
     localStorage.setItem("recordatoriosData", JSON.stringify(recordatoriosData));
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
 }
 function guardarClinicas() {
     localStorage.setItem("clinicasData", JSON.stringify(clinicasData));
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
 }
 function guardarVentasCalendario() {
     localStorage.setItem("ventasCalendario", JSON.stringify(ventasCalendario));
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
 }
 
 function agregarRecordatorio() {

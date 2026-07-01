@@ -32,6 +32,26 @@
         </ul>
         <div class="navbar-divider"></div>
         <button type="button" class="theme-toggle-btn" id="btnThemeToggle" onclick="toggleModoOscuro()" title="Cambiar a modo oscuro">☾</button>
+        <button type="button" class="theme-toggle-btn" id="btnCerrarSesion" onclick="cerrarSesionFirebase()" title="Cerrar sesión" style="display:none;">⏻</button>
+        </div>
+    </div>
+
+    <!-- ═══════════ PANTALLA DE INICIO DE SESIÓN (Firebase Auth) ═══════════ -->
+    <div id="loginOverlay" class="login-overlay visible">
+        <div class="login-box">
+            <h2>Control de Ventas</h2>
+            <p class="login-sub">Inicia sesión con el correo y contraseña que te asignó tu administrador.</p>
+            <div class="form-group">
+                <label for="loginEmail">Correo electrónico</label>
+                <input type="email" id="loginEmail" placeholder="nombre@empresa.com" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Contraseña</label>
+                <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+            </div>
+            <p id="loginError" class="login-error" style="display:none;"></p>
+            <button type="button" class="btn-primary" id="btnLoginSubmit" onclick="iniciarSesionFirebase()">Iniciar sesión</button>
+            <p class="login-foot">¿No tienes cuenta? Pídele a tu administrador que la cree desde el panel de Firebase.</p>
         </div>
     </div>
 
@@ -663,6 +683,13 @@
 
     <!-- Contenedor de alertas tipo burbuja liquid glass -->
     <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <!-- Firebase (Auth + Firestore) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="firebase-sync.js"></script>
 
     <script src="script.js"></script>
 </body>
