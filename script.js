@@ -1959,7 +1959,7 @@ function renderClinicas() {
 
 // Garantiza que siempre exista la clínica fija "Fábrica — Interna", sin importar reinicios
 function asegurarClinicaInterna() {
-    const existe = clinicasData.some(c => c.nombre === "Fábrica — Interna");
+    const existe = clinicasData.some(c => c.nombre === "Clínica de experiencia — Interna");
     if (!existe) {
         clinicasData.unshift({
             id: Date.now(),
