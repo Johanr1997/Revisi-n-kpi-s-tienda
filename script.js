@@ -1050,6 +1050,33 @@ function renderTodo() {
         const incentivoTotal    = incentivoGarex + incentivoInsurama;
         const accesorizacionAsor = calcularAccesorizacion(m).toFixed(1);
 
+        // Meta por categoría (dispositivo/accesorio) del asesor: % asignado x meta de esa
+        // categoría en la Meta Mensual de la Tienda. "Llevan" es lo realmente vendido (m.*).
+        const porcentajeAsor = asor.porcentajeMeta || 0;
+        const categoriasMeta = [
+            { label: "Mac",              key: "mac" },
+            { label: "iPad",             key: "ipad" },
+            { label: "iPhone",           key: "iphone" },
+            { label: "Watch",            key: "watch" },
+            { label: "AirPods",          key: "airpods" },
+            { label: "Audio",            key: "audio" },
+            { label: "Accesorios Apple", key: "acc_apple" },
+            { label: "Acc. Terceros",    key: "acc_terceros" }
+        ];
+        const filasMetaCategoria = categoriasMeta.map(c => {
+            const metaCat = (porcentajeAsor / 100) * (METAS_TIENDA.ventas[c.key] || 0);
+            const llevaCat = m[c.key] || 0;
+            const pctCat = metaCat > 0 ? Math.min((llevaCat / metaCat) * 100, 100) : 0;
+            return `
+                <div class="ra-meta-cat-row">
+                    <div class="ra-meta-cat-head">
+                        <span>${c.label}</span>
+                        <span class="ra-muted">$${Math.round(llevaCat).toLocaleString()} / $${Math.round(metaCat).toLocaleString()}</span>
+                    </div>
+                    <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno" style="width:${pctCat}%;"></div></div>
+                </div>`;
+        }).join("");
+
         htmlResumenAsesores += `
             <div class="ra-card">
                 <div class="ra-header">
@@ -1065,6 +1092,12 @@ function renderTodo() {
                     Venta: $${asor.ventaSemanal.toLocaleString()} | Meta: $${Math.round(metaAsor).toLocaleString()}<br>
                     QR Colocados: ${asor.qr} | Trade-In: ${asor.tradeIn}
                 </p>
+                <div class="ra-section">
+                    <p class="ra-section-title">Meta por Dispositivo y Accesorios — <span class="ra-accent-blue">${porcentajeAsor}% de la meta de tienda</span></p>
+                    <div class="ra-meta-cat-grid">
+                        ${filasMetaCategoria}
+                    </div>
+                </div>
                 <div class="ra-section">
                     <p class="ra-section-title">Unidades acumuladas — <span class="ra-accent-blue">${totalUnidades} total</span></p>
                     <div class="ra-grid ra-grid-3">
@@ -1266,7 +1299,7 @@ function renderTablaGarex(idContenedor) {
     const dispositivos = Object.keys(TABLA_GAREX); // Mac, iPad, iPhone, Watch, AirPods, Audio
 
     let html = `
-        <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;">
+        <div class="tabla-scroll"><table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;">
             <thead>
                 <tr class="tabla-header-row">
                     <th style="padding:10px;">Asesor</th>
@@ -1306,7 +1339,7 @@ function renderTablaGarex(idContenedor) {
             </tr>`;
     });
 
-    html += `</tbody></table>
+    html += `</tbody></table></div>
     <div style="margin-top:15px; text-align:right; font-weight:600; font-size:14px;">
         Total Unidades: ${granTotalUnidades} &nbsp;|&nbsp; Total Vendido: $${granTotalMonto.toFixed(2)} &nbsp;|&nbsp; Total Incentivo Tienda: <span style="color:#34C759;">$${granTotalIncentivo.toFixed(2)}</span>
     </div>`;
@@ -1320,7 +1353,7 @@ function renderTablaInsurama(idContenedor) {
     const dispositivos = Object.keys(TABLA_INSURAMA); // Mac, iPad, iPhone, Watch
 
     let html = `
-        <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;">
+        <div class="tabla-scroll"><table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;">
             <thead>
                 <tr class="tabla-header-row">
                     <th style="padding:10px;">Asesor</th>
@@ -1360,7 +1393,7 @@ function renderTablaInsurama(idContenedor) {
             </tr>`;
     });
 
-    html += `</tbody></table>
+    html += `</tbody></table></div>
     <div style="margin-top:15px; text-align:right; font-weight:600; font-size:14px;">
         Total Unidades: ${granTotalUnidades} &nbsp;|&nbsp; Total Vendido: $${granTotalMonto.toFixed(2)} &nbsp;|&nbsp; Total Incentivo Tienda: <span style="color:#34C759;">$${granTotalIncentivo.toFixed(2)}</span>
     </div>`;
@@ -1405,7 +1438,7 @@ function renderDetalleVentas(tipo, idContenedorTabla) {
         hayDatos = true;
 
         html += `<p style="font-size:13px; font-weight:600; margin:14px 0 6px; color:#0071E3;">${asor.nombre}</p>
-        <table style="width:100%; border-collapse:collapse; text-align:left; font-size:12px; margin-bottom:10px;">
+        <div class="tabla-scroll"><table style="width:100%; border-collapse:collapse; text-align:left; font-size:12px; margin-bottom:10px;">
             <thead>
                 <tr class="tabla-header-row">
                     <th style="padding:8px;">Dispositivo</th>
@@ -1436,7 +1469,7 @@ function renderDetalleVentas(tipo, idContenedorTabla) {
                 </tr>`;
         });
 
-        html += `</tbody></table>`;
+        html += `</tbody></table></div>`;
     });
 
     if (!hayDatos) {

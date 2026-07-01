@@ -1720,6 +1720,23 @@ body.dark-mode .asesor-config-del {
 .ra-grid-4 { grid-template-columns: repeat(4, 1fr); }
 .ra-muted { color: #86868B; }
 
+/* Meta por Dispositivo y Accesorios (desglose por categoría dentro de cada asesor) */
+.ra-meta-cat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 16px;
+}
+.ra-meta-cat-row { display: flex; flex-direction: column; gap: 4px; }
+.ra-meta-cat-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 12px;
+    color: #1D1D1F;
+}
+.ra-meta-cat-head span:first-child { font-weight: 600; }
+.ra-mini-bar { height: 5px; }
+
 /* Modo oscuro: resumen de desempeño por asesor */
 body.dark-mode .ra-card { background: rgba(255,255,255,0.06); }
 body.dark-mode .ra-incentivo { background: rgba(48,209,88,0.16); color: #30D158; }
@@ -1731,6 +1748,7 @@ body.dark-mode .ra-accent-blue { color: #0A84FF; }
 body.dark-mode .ra-accent-green { color: #30D158; }
 body.dark-mode .ra-grid { color: #D1D1D6; }
 body.dark-mode .ra-muted { color: #8E8E93; }
+body.dark-mode .ra-meta-cat-head { color: #F2F2F7; }
 
 /* Encabezado de tablas (Garex / Insurama / detalle de protección) */
 .tabla-header-row {
@@ -1866,6 +1884,7 @@ body.dark-mode .ra-acc-badge {
     .a-grid-categorias,
     .ra-grid-3,
     .ra-grid-4,
+    .ra-meta-cat-grid,
     .a-proteccion-grid .grid-2-col {
         grid-template-columns: 1fr !important;
     }
