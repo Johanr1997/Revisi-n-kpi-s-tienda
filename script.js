@@ -1130,17 +1130,6 @@ function renderTodo() {
                     </div>
                 </div>
                 <div class="ra-section">
-                    <p class="ra-section-title">Unidades acumuladas — <span class="ra-accent-blue">${totalUnidades} total</span></p>
-                    <div class="ra-grid ra-grid-3">
-                        <div>Unidades de Mac: <strong>${u.mac}</strong> <span class="ra-muted">($${m.mac.toLocaleString()})</span></div>
-                        <div>Unidades de iPad: <strong>${u.ipad}</strong> <span class="ra-muted">($${m.ipad.toLocaleString()})</span></div>
-                        <div>Unidades de iPhone: <strong>${u.iphone}</strong> <span class="ra-muted">($${m.iphone.toLocaleString()})</span></div>
-                        <div>Unidades de Watch: <strong>${u.watch}</strong> <span class="ra-muted">($${m.watch.toLocaleString()})</span></div>
-                        <div>Unidades de AirPods: <strong>${u.airpods}</strong> <span class="ra-muted">($${m.airpods.toLocaleString()})</span></div>
-                        <div>Unidades de Audio: <strong>${u.audio}</strong> <span class="ra-muted">($${m.audio.toLocaleString()})</span></div>
-                    </div>
-                </div>
-                <div class="ra-section">
                     <p class="ra-section-title">Garex colocados — <span class="ra-accent-green">${sumarCantidad(asor.ventasGarex)} total</span></p>
                     <div class="ra-grid ra-grid-3">
                         <div>Mac: <strong>${garexAsorPorDispositivo.Mac}</strong></div>
