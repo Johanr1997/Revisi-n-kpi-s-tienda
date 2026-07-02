@@ -1759,6 +1759,52 @@ body.dark-mode .asesor-config-del {
 .ra-grid-4 { grid-template-columns: repeat(4, 1fr); }
 .ra-muted { color: #86868B; }
 
+/* Franja compacta de estadísticas clave (Venta / Meta / QR / Trade-In) */
+.ra-stat-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px 10px;
+    margin-top: 10px;
+    padding: 8px 10px;
+    background: rgba(0,0,0,0.03);
+    border-radius: 8px;
+}
+.ra-stat { display: flex; flex-direction: column; gap: 2px; }
+.ra-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.03em; color: #86868B; }
+.ra-stat-value { font-size: 13px; font-weight: 600; color: #1D1D1F; }
+body.dark-mode .ra-stat-strip { background: rgba(255,255,255,0.05); }
+body.dark-mode .ra-stat-label { color: #8E8E93; }
+body.dark-mode .ra-stat-value { color: #F2F2F7; }
+
+/* Pestañas dentro de cada tarjeta de resumen de asesor */
+.ra-tabs {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+    border-bottom: 1px solid #E5E5EA;
+}
+.ra-tab-btn {
+    appearance: none;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: #86868B;
+    padding: 8px 4px;
+    margin-bottom: -1px;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+.ra-tab-btn:hover { color: #1D1D1F; }
+.ra-tab-btn.active { color: #0071E3; border-bottom-color: #0071E3; }
+.ra-tab-panel { display: none; }
+.ra-tab-panel.active { display: block; }
+body.dark-mode .ra-tabs { border-bottom-color: rgba(255,255,255,0.1); }
+body.dark-mode .ra-tab-btn { color: #8E8E93; }
+body.dark-mode .ra-tab-btn:hover { color: #F2F2F7; }
+body.dark-mode .ra-tab-btn.active { color: #0A84FF; border-bottom-color: #0A84FF; }
+
 /* Meta por Dispositivo y Accesorios (desglose por categoría dentro de cada asesor) */
 .ra-meta-cat-grid {
     display: grid;

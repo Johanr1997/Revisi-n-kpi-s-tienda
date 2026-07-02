@@ -1113,40 +1113,64 @@ function renderTodo() {
                     <span class="ra-cumplimiento">${cumplimiento}% de cumplimiento</span>
                 </div>
                 <div class="barra-progreso"><div class="progreso-relleno" style="width:${Math.min(cumplimiento,100)}%;"></div></div>
-                <p class="ra-sub">
-                    Venta: $${asor.ventaSemanal.toLocaleString()} | Meta: $${Math.round(metaAsor).toLocaleString()}<br>
-                    QR Colocados: ${asor.qr} | Trade-In: ${asor.tradeIn}
-                </p>
-                <div class="ra-section">
-                    <p class="ra-section-title">Meta de Unidades por Dispositivo — <span class="ra-accent-blue">${porcentajeAsor}% de la meta de tienda</span></p>
-                    <div class="ra-meta-cat-grid">
-                        ${filasMetaUnidades}
+                <div class="ra-stat-strip">
+                    <div class="ra-stat"><span class="ra-stat-label">Venta</span><span class="ra-stat-value">$${asor.ventaSemanal.toLocaleString()}</span></div>
+                    <div class="ra-stat"><span class="ra-stat-label">Meta</span><span class="ra-stat-value">$${Math.round(metaAsor).toLocaleString()}</span></div>
+                    <div class="ra-stat"><span class="ra-stat-label">QR Colocados</span><span class="ra-stat-value">${asor.qr}</span></div>
+                    <div class="ra-stat"><span class="ra-stat-label">Trade-In</span><span class="ra-stat-value">${asor.tradeIn}</span></div>
+                </div>
+
+                <div class="ra-tabs" role="tablist">
+                    <button type="button" class="ra-tab-btn active" onclick="cambiarTabAsesor('${key}','metas',this)">Metas por Categoría</button>
+                    <button type="button" class="ra-tab-btn" onclick="cambiarTabAsesor('${key}','acumulados',this)">Acumulados</button>
+                </div>
+
+                <div class="ra-tab-panel active" id="raTab-${key}-metas">
+                    <div class="ra-section" style="margin-top:0; padding-top:0; border-top:none;">
+                        <p class="ra-section-title">Unidades por Dispositivo — <span class="ra-accent-blue">${porcentajeAsor}% de la meta de tienda</span></p>
+                        <div class="ra-meta-cat-grid">
+                            ${filasMetaUnidades}
+                        </div>
+                    </div>
+                    <div class="ra-section">
+                        <p class="ra-section-title">Dispositivos y Accesorios — <span class="ra-accent-blue">${porcentajeAsor}% de la meta de tienda</span></p>
+                        <div class="ra-meta-cat-grid">
+                            ${filasMetaCategoria}
+                        </div>
                     </div>
                 </div>
-                <div class="ra-section">
-                    <p class="ra-section-title">Meta por Dispositivo y Accesorios — <span class="ra-accent-blue">${porcentajeAsor}% de la meta de tienda</span></p>
-                    <div class="ra-meta-cat-grid">
-                        ${filasMetaCategoria}
+
+                <div class="ra-tab-panel" id="raTab-${key}-acumulados">
+                    <div class="ra-section" style="margin-top:0; padding-top:0; border-top:none;">
+                        <p class="ra-section-title">Unidades acumuladas — <span class="ra-accent-blue">${totalUnidades} total</span></p>
+                        <div class="ra-grid ra-grid-3">
+                            <div>Mac: <strong>${u.mac}</strong> <span class="ra-muted">($${m.mac.toLocaleString()})</span></div>
+                            <div>iPad: <strong>${u.ipad}</strong> <span class="ra-muted">($${m.ipad.toLocaleString()})</span></div>
+                            <div>iPhone: <strong>${u.iphone}</strong> <span class="ra-muted">($${m.iphone.toLocaleString()})</span></div>
+                            <div>Watch: <strong>${u.watch}</strong> <span class="ra-muted">($${m.watch.toLocaleString()})</span></div>
+                            <div>AirPods: <strong>${u.airpods}</strong> <span class="ra-muted">($${m.airpods.toLocaleString()})</span></div>
+                            <div>Audio: <strong>${u.audio}</strong> <span class="ra-muted">($${m.audio.toLocaleString()})</span></div>
+                        </div>
                     </div>
-                </div>
-                <div class="ra-section">
-                    <p class="ra-section-title">Garex colocados — <span class="ra-accent-green">${sumarCantidad(asor.ventasGarex)} total</span></p>
-                    <div class="ra-grid ra-grid-3">
-                        <div>Mac: <strong>${garexAsorPorDispositivo.Mac}</strong></div>
-                        <div>iPad: <strong>${garexAsorPorDispositivo.iPad}</strong></div>
-                        <div>iPhone: <strong>${garexAsorPorDispositivo.iPhone}</strong></div>
-                        <div>Watch: <strong>${garexAsorPorDispositivo.Watch}</strong></div>
-                        <div>AirPods: <strong>${garexAsorPorDispositivo.AirPods}</strong></div>
-                        <div>Audio: <strong>${garexAsorPorDispositivo.Audio}</strong></div>
+                    <div class="ra-section">
+                        <p class="ra-section-title">Garex colocados — <span class="ra-accent-green">${sumarCantidad(asor.ventasGarex)} total</span></p>
+                        <div class="ra-grid ra-grid-3">
+                            <div>Mac: <strong>${garexAsorPorDispositivo.Mac}</strong></div>
+                            <div>iPad: <strong>${garexAsorPorDispositivo.iPad}</strong></div>
+                            <div>iPhone: <strong>${garexAsorPorDispositivo.iPhone}</strong></div>
+                            <div>Watch: <strong>${garexAsorPorDispositivo.Watch}</strong></div>
+                            <div>AirPods: <strong>${garexAsorPorDispositivo.AirPods}</strong></div>
+                            <div>Audio: <strong>${garexAsorPorDispositivo.Audio}</strong></div>
+                        </div>
                     </div>
-                </div>
-                <div class="ra-section">
-                    <p class="ra-section-title">Seguros colocados — <span class="ra-accent-green">${sumarCantidad(asor.ventasInsurama)} total</span></p>
-                    <div class="ra-grid ra-grid-4">
-                        <div>Mac: <strong>${segurosAsorPorDispositivo.Mac}</strong></div>
-                        <div>iPad: <strong>${segurosAsorPorDispositivo.iPad}</strong></div>
-                        <div>iPhone: <strong>${segurosAsorPorDispositivo.iPhone}</strong></div>
-                        <div>Watch: <strong>${segurosAsorPorDispositivo.Watch}</strong></div>
+                    <div class="ra-section">
+                        <p class="ra-section-title">Seguros colocados — <span class="ra-accent-green">${sumarCantidad(asor.ventasInsurama)} total</span></p>
+                        <div class="ra-grid ra-grid-4">
+                            <div>Mac: <strong>${segurosAsorPorDispositivo.Mac}</strong></div>
+                            <div>iPad: <strong>${segurosAsorPorDispositivo.iPad}</strong></div>
+                            <div>iPhone: <strong>${segurosAsorPorDispositivo.iPhone}</strong></div>
+                            <div>Watch: <strong>${segurosAsorPorDispositivo.Watch}</strong></div>
+                        </div>
                     </div>
                 </div>
             </div>`;
@@ -1230,7 +1254,7 @@ function renderTodo() {
     document.getElementById("v_attach_seguros_ipad").textContent   = `${calcularAttach(segurosPorDispositivo.iPad, unidadesPorDispositivo.ipad)}%`;
     document.getElementById("v_attach_seguros_watch").textContent  = `${calcularAttach(segurosPorDispositivo.Watch, unidadesPorDispositivo.watch)}%`;
 
-    document.getElementById("txtDashboardComentarios").textContent = appData.inicio.comentarios || "Sin comentarios registrados en la semana.";
+    document.getElementById("txtDashboardComentarios").textContent = appData.inicio.comentarios || "Sin comentarios registrados.";
     document.getElementById("txtDashboardOportunidades").textContent = appData.inicio.oportunidades || "Sin oportunidades de mejora detectadas.";
 
     // Render Pestaña Garex e Insurama (incentivos reales según tabla del Excel)
@@ -1707,6 +1731,18 @@ function eliminarAsesor(key) {
     }
 }
 
+// Cambia entre las pestañas "Metas por Categoría" / "Acumulados" dentro de la
+// tarjeta de resumen de un asesor específico (pestaña Ventas).
+function cambiarTabAsesor(key, tab, btnEl) {
+    const card = btnEl.closest(".ra-card");
+    if (!card) return;
+    card.querySelectorAll(".ra-tab-btn").forEach(b => b.classList.remove("active"));
+    card.querySelectorAll(".ra-tab-panel").forEach(p => p.classList.remove("active"));
+    btnEl.classList.add("active");
+    const panel = document.getElementById(`raTab-${key}-${tab}`);
+    if (panel) panel.classList.add("active");
+}
+
 function sincronizarYRenderizar() {
     localStorage.setItem("controlVentasData", JSON.stringify(appData));
     if (typeof programarGuardadoNube === "function") programarGuardadoNube();
@@ -1744,6 +1780,9 @@ function reiniciarTodoCero() {
         renderClinicas();
         renderCalendario();
         sincronizarYRenderizar();
+        // Guardado inmediato (sin esperar el debounce normal) para que el borrado
+        // quede reflejado en la nube incluso si la página se recarga enseguida.
+        if (typeof guardarNubeInmediato === "function") guardarNubeInmediato();
         actualizarCumplimientoAsesorVisual();
         mostrarAlerta("Ciclo comercial formateado a cero.", "success");
     }
@@ -1765,6 +1804,7 @@ function borrarGarexSeguros() {
         renderListaPendiente("insurama");
 
         sincronizarYRenderizar();
+        if (typeof guardarNubeInmediato === "function") guardarNubeInmediato();
         actualizarCumplimientoAsesorVisual();
         mostrarAlerta("Registros de Garex y Seguros borrados correctamente.", "success");
     }
@@ -1790,6 +1830,7 @@ function borrarVentas() {
         renderCalendario();
 
         sincronizarYRenderizar();
+        if (typeof guardarNubeInmediato === "function") guardarNubeInmediato();
         actualizarCumplimientoAsesorVisual();
         mostrarAlerta("Ventas borradas correctamente.", "success");
     }
@@ -1948,7 +1989,7 @@ function renderClinicas() {
 
 // Garantiza que siempre exista la clínica fija "Fábrica — Interna", sin importar reinicios
 function asegurarClinicaInterna() {
-    const existe = clinicasData.some(c => c.nombre === "Clínica de experiencia — Interna");
+    const existe = clinicasData.some(c => c.nombre === "Fábrica — Interna");
     if (!existe) {
         clinicasData.unshift({
             id: Date.now(),
@@ -2146,8 +2187,8 @@ function calClickDia(fecha) {
 
 // Elimina una venta puntual del calendario, y resta el monto correspondiente
 // del total acumulado del asesor (asor.ventaSemanal) para mantener todo consistente.
-// Si la venta pertenece a un rango de semana repartido en varios días, pregunta
-// si se desea eliminar solo ese día o el rango semanal completo.
+// Si la venta pertenece a un rango de días repartido en varios días, pregunta
+// si se desea eliminar solo ese día o el rango completo.
 function eliminarVentaCalendario(id, fecha) {
     const entrada = ventasCalendario.find(v => v.id === id);
     if (!entrada) return;
@@ -2157,8 +2198,8 @@ function eliminarVentaCalendario(id, fecha) {
     if (entrada.grupoId) {
         const diasDelGrupo = ventasCalendario.filter(v => v.grupoId === entrada.grupoId);
         const borrarTodo = confirm(
-            `Esta venta forma parte de un rango semanal repartido en ${diasDelGrupo.length} día(s) (total $${(entrada.montoTotalGrupo || 0).toLocaleString()}).\n\n` +
-            `Presiona "Aceptar" para eliminar TODO el rango semanal, o "Cancelar" para elegir entre eliminar solo este día.`
+            `Esta venta forma parte de un rango repartido en ${diasDelGrupo.length} día(s) (total $${(entrada.montoTotalGrupo || 0).toLocaleString()}).\n\n` +
+            `Presiona "Aceptar" para eliminar TODO el rango, o "Cancelar" para elegir entre eliminar solo este día.`
         );
 
         if (borrarTodo) {
