@@ -1207,16 +1207,17 @@ function renderTodo() {
     // así que baja automáticamente conforme se va vendiendo, y sube si un día se vende
     // menos de lo necesario.
     const elMetaDiaria = document.getElementById("v_metaDiaria");
-    if (elMetaDiaria) {
+    const elMetaDiariaDias = document.getElementById("v_metaDiariaDias");
+    const elSub = document.getElementById("v_metaDiariaSub");
+    if (elMetaDiaria && elMetaDiariaDias && elSub) {
         const hoy = new Date();
         const diasEnMesActual = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
         const diasRestantes = Math.max(1, diasEnMesActual - hoy.getDate() + 1);
         const faltante = Math.max(0, metaTotalTienda - acumuladoTotalVentas);
         const metaDiaria = faltante / diasRestantes;
 
-        document.getElementById("v_metaDiariaDias").textContent = `${diasRestantes} día${diasRestantes === 1 ? "" : "s"} restante${diasRestantes === 1 ? "" : "s"}`;
+        elMetaDiariaDias.textContent = `${diasRestantes} día${diasRestantes === 1 ? "" : "s"} restante${diasRestantes === 1 ? "" : "s"}`;
 
-        const elSub = document.getElementById("v_metaDiariaSub");
         if (faltante <= 0) {
             elMetaDiaria.textContent = "$0.00";
             elSub.textContent = "¡Meta del mes alcanzada!";
