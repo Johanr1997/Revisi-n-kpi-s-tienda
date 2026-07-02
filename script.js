@@ -1193,13 +1193,37 @@ function renderTodo() {
         arcCircle.style.transition = "stroke-dashoffset 0.8s cubic-bezier(.4,0,.2,1), stroke 0.4s";
     }
 
-    // Barra de progreso de meta semanal
+    // Barra de progreso de meta
     const fillProgreso = document.getElementById("v_progresoMetaFill");
     if (fillProgreso) {
         const pctBarra = metaTotalTienda > 0 ? Math.min((acumuladoTotalVentas / metaTotalTienda) * 100, 100) : 0;
         fillProgreso.style.width = `${pctBarra}%`;
         document.getElementById("v_progresoMetaTexto").textContent =
             `$${acumuladoTotalVentas.toLocaleString()} de $${metaTotalTienda.toLocaleString()}`;
+    }
+
+    // Meta diaria: lo que falta por vender repartido entre los días que quedan del mes
+    // actual (incluyendo hoy). Se recalcula cada vez que cambian las ventas acumuladas,
+    // así que baja automáticamente conforme se va vendiendo, y sube si un día se vende
+    // menos de lo necesario.
+    const elMetaDiaria = document.getElementById("v_metaDiaria");
+    if (elMetaDiaria) {
+        const hoy = new Date();
+        const diasEnMesActual = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
+        const diasRestantes = Math.max(1, diasEnMesActual - hoy.getDate() + 1);
+        const faltante = Math.max(0, metaTotalTienda - acumuladoTotalVentas);
+        const metaDiaria = faltante / diasRestantes;
+
+        document.getElementById("v_metaDiariaDias").textContent = `${diasRestantes} día${diasRestantes === 1 ? "" : "s"} restante${diasRestantes === 1 ? "" : "s"}`;
+
+        const elSub = document.getElementById("v_metaDiariaSub");
+        if (faltante <= 0) {
+            elMetaDiaria.textContent = "$0.00";
+            elSub.textContent = "¡Meta del mes alcanzada!";
+        } else {
+            elMetaDiaria.textContent = `$${metaDiaria.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            elSub.textContent = `Faltan $${faltante.toLocaleString()} para la meta`;
+        }
     }
 
     // KPIs Plan SOS
@@ -1751,22 +1775,22 @@ function sincronizarYRenderizar() {
 
 // FORMATEAR MODULO A 0 TOTAL
 function reiniciarTodoCero() {
-    if (confirm("⚠️ ¿Estás completamente seguro de restaurar el ecosistema comercial? Se eliminarán todos los acumulados, recordatorios, clínicas y bitácoras.")) {
+    if (confirm("⚠️ ¿Estás completamente seguro de restaurar el ecosistema comercial? Se eliminarán todos los acumulados y clínicas. Las bitácoras y los recordatorios mensuales NO se verán afectados.")) {
         localStorage.removeItem("controlVentasData");
-        localStorage.removeItem("recordatoriosData");
         localStorage.removeItem("clinicasData");
         localStorage.removeItem("ventasCalendario");
-        // Las metas SOS se conservan intencionalmente; solo se borran datos de ventas
+        // Las metas SOS se conservan intencionalmente; solo se borran datos de ventas.
+        // Las bitácoras (appData.bitacoras) se conservan tal cual estaban.
         appData = {
             inicio: { conversion: 0, accesorizacion: 0, accesorizacionManual: false, accesorizacionManualValor: null, ticket: 0, trafico: 0, comentarios: "", oportunidades: "" },
-            bitacoras: [],
+            bitacoras: appData.bitacoras || [],
             asesores: {
                 asesor0: nuevoAsesor("Asesor 1"),
                 asesor1: nuevoAsesor("Asesor 2"),
                 asesor2: nuevoAsesor("Asesor 3")
             }
         };
-        recordatoriosData = [];
+        // Los recordatorios mensuales (recordatoriosData) NO se tocan.
         // Siempre se recrea una clínica fija "Interna" para Fábrica, sin importar cuántas veces se reinicie
         clinicasData = [];
         asegurarClinicaInterna();
