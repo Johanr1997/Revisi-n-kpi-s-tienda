@@ -1265,8 +1265,8 @@ function renderTodo() {
             elMetaDiaria.textContent = "$0.00";
             elSub.textContent = "¡Meta del mes alcanzada!";
         } else {
-            elMetaDiaria.textContent = `$${metaDiaria.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            elSub.textContent = `Faltan $${faltante.toLocaleString()} para la meta`;
+            elMetaDiaria.textContent = `$${conIVA(metaDiaria).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            elSub.textContent = `Faltan $${conIVA(faltante).toLocaleString()} para la meta`;
         }
     }
 
