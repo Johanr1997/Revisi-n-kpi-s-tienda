@@ -1,4 +1,38 @@
 // METAS SOS — cargadas desde localStorage (editables en Configuración)
+// ═══════════════════════════════════════════════════════════════
+// TOGGLE 13% (IVA) SOBRE MONTOS DE VENTA
+// ═══════════════════════════════════════════════════════════════
+// Cuando está activo, suma 13% a los montos que se MUESTRAN en pantalla:
+// venta total (del formulario), venta acumulada (tienda y por asesor) y
+// dispositivos/accesorios. Garex e Insurama NUNCA se ven afectados, ya
+// que sus precios/incentivos vienen de tablas fijas aparte.
+// Es una preferencia visual guardada en este navegador (no se sube a la
+// nube), y NO modifica los datos guardados, solo lo que se despliega.
+let iva13Activo = localStorage.getItem("iva13Activo") === "1";
+
+// Aplica el 13% a un monto si el toggle está activo; si no, lo deja igual.
+function conIVA(monto) {
+    const n = monto || 0;
+    return iva13Activo ? n * 1.13 : n;
+}
+
+// Se llama desde el checkbox en la pantalla de Ventas
+function toggleIVA13() {
+    const chk = document.getElementById("checkIVA13");
+    iva13Activo = !!(chk && chk.checked);
+    localStorage.setItem("iva13Activo", iva13Activo ? "1" : "0");
+    // Refresca todos los montos visibles con/sin el 13%
+    if (typeof recalcularMontoVentaTotal === "function") recalcularMontoVentaTotal();
+    if (typeof renderTodo === "function") renderTodo();
+    if (typeof actualizarCumplimientoAsesorVisual === "function") actualizarCumplimientoAsesorVisual();
+}
+
+// Sincroniza el estado visual del checkbox con el valor guardado (al cargar la página)
+document.addEventListener("DOMContentLoaded", () => {
+    const chk = document.getElementById("checkIVA13");
+    if (chk) chk.checked = iva13Activo;
+});
+
 const METAS_SOS_DEFAULT = { conversion: 0, accesorizacion: 0, ticket: 0, qr: 0 };
 let METAS_SOS = JSON.parse(localStorage.getItem("metasSOS")) || { ...METAS_SOS_DEFAULT };
 if (METAS_SOS.qr === undefined) METAS_SOS.qr = 0; // Compatibilidad con datos guardados antes de este campo
@@ -910,8 +944,10 @@ function recalcularMontoVentaTotal() {
         inputVenta.value = total > 0 ? total : "";
         actualizarResumenIngreso();
     }
+    // El total guardado (arriba) siempre es el monto real, sin 13%. Lo que se
+    // MUESTRA aquí sí incluye el 13% si el toggle está activo.
     const lblTotal = document.getElementById("lblMontoVentaTotal");
-    if (lblTotal) lblTotal.textContent = `$${total.toLocaleString()}`;
+    if (lblTotal) lblTotal.textContent = `$${conIVA(total).toLocaleString()}`;
 }
 
 // MOSTRAR % DE CUMPLIMIENTO DE META MENSUAL DEL ASESOR SELECCIONADO (EN VIVO)
@@ -933,7 +969,7 @@ function actualizarCumplimientoAsesorVisual() {
         </div>
         <div class="barra-progreso"><div class="progreso-relleno" style="width:${Math.min(cumplimiento, 100)}%;"></div></div>
         <p style="font-size:12px; margin-top:8px; color:#6E6E73;">
-            Venta acumulada: $${ventaAcumulada.toLocaleString()} | Meta mensual: $${Math.round(meta).toLocaleString()}
+            Venta acumulada: $${conIVA(ventaAcumulada).toLocaleString()} | Meta mensual: $${Math.round(meta).toLocaleString()}
         </p>
         <div class="cumplimiento-acc-row">
             <span style="font-size:12px; font-weight:600; color:#1D1D1F;">Accesorización (auto)</span>
@@ -979,6 +1015,8 @@ function renderTodo() {
     renderSelectAsesor();
     renderListaAsesoresConfig();
     let acumuladoTotalVentas = 0;
+    let acumuladoVentaSemanalSolo = 0; // solo venta de dispositivos/accesorios (SÍ lleva 13% si el toggle está activo)
+    let acumuladoGarexMontoSolo = 0;   // monto cobrado por Garex (NUNCA lleva 13%)
     // La meta total de la tienda viene directo de lo configurado en "Meta Mensual de la Tienda",
     // no de la suma de los % asignados a cada asesor (que podrían no sumar exactamente 100%).
     const metaTotalTienda = calcularMetaTotalTienda();
@@ -1002,6 +1040,8 @@ function renderTodo() {
         const metaAsor = calcularMetaAsesor(asor);
         acumuladoTotalVentas += asor.ventaSemanal;
         acumuladoTotalVentas += sumarMontoVenta(asor.ventasGarex);
+        acumuladoVentaSemanalSolo += asor.ventaSemanal;
+        acumuladoGarexMontoSolo += sumarMontoVenta(asor.ventasGarex);
         // Insurama (seguros) NO se suma a la meta de ventas: solo se contabiliza para sus propios reportes/incentivos.
         totalGarex += sumarCantidad(asor.ventasGarex);
         totalSeguros += sumarCantidad(asor.ventasInsurama);
@@ -1073,7 +1113,7 @@ function renderTodo() {
                 <div class="ra-meta-cat-row">
                     <div class="ra-meta-cat-head">
                         <span>${c.label}</span>
-                        <span class="ra-muted">$${Math.round(llevaCat).toLocaleString()} / $${Math.round(metaCat).toLocaleString()}</span>
+                        <span class="ra-muted">$${Math.round(conIVA(llevaCat)).toLocaleString()} / $${Math.round(metaCat).toLocaleString()}</span>
                     </div>
                     <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno" style="width:${pctCat}%;"></div></div>
                 </div>`;
@@ -1114,7 +1154,7 @@ function renderTodo() {
                 </div>
                 <div class="barra-progreso"><div class="progreso-relleno" style="width:${Math.min(cumplimiento,100)}%;"></div></div>
                 <div class="ra-stat-strip">
-                    <div class="ra-stat"><span class="ra-stat-label">Venta</span><span class="ra-stat-value">$${asor.ventaSemanal.toLocaleString()}</span></div>
+                    <div class="ra-stat"><span class="ra-stat-label">Venta</span><span class="ra-stat-value">$${conIVA(asor.ventaSemanal).toLocaleString()}</span></div>
                     <div class="ra-stat"><span class="ra-stat-label">Meta</span><span class="ra-stat-value">$${Math.round(metaAsor).toLocaleString()}</span></div>
                     <div class="ra-stat"><span class="ra-stat-label">QR Colocados</span><span class="ra-stat-value">${asor.qr}</span></div>
                     <div class="ra-stat"><span class="ra-stat-label">Trade-In</span><span class="ra-stat-value">${asor.tradeIn}</span></div>
@@ -1144,12 +1184,12 @@ function renderTodo() {
                     <div class="ra-section" style="margin-top:0; padding-top:0; border-top:none;">
                         <p class="ra-section-title">Unidades acumuladas — <span class="ra-accent-blue">${totalUnidades} total</span></p>
                         <div class="ra-grid ra-grid-3">
-                            <div>Mac: <strong>${u.mac}</strong> <span class="ra-muted">($${m.mac.toLocaleString()})</span></div>
-                            <div>iPad: <strong>${u.ipad}</strong> <span class="ra-muted">($${m.ipad.toLocaleString()})</span></div>
-                            <div>iPhone: <strong>${u.iphone}</strong> <span class="ra-muted">($${m.iphone.toLocaleString()})</span></div>
-                            <div>Watch: <strong>${u.watch}</strong> <span class="ra-muted">($${m.watch.toLocaleString()})</span></div>
-                            <div>AirPods: <strong>${u.airpods}</strong> <span class="ra-muted">($${m.airpods.toLocaleString()})</span></div>
-                            <div>Audio: <strong>${u.audio}</strong> <span class="ra-muted">($${m.audio.toLocaleString()})</span></div>
+                            <div>Mac: <strong>${u.mac}</strong> <span class="ra-muted">($${conIVA(m.mac).toLocaleString()})</span></div>
+                            <div>iPad: <strong>${u.ipad}</strong> <span class="ra-muted">($${conIVA(m.ipad).toLocaleString()})</span></div>
+                            <div>iPhone: <strong>${u.iphone}</strong> <span class="ra-muted">($${conIVA(m.iphone).toLocaleString()})</span></div>
+                            <div>Watch: <strong>${u.watch}</strong> <span class="ra-muted">($${conIVA(m.watch).toLocaleString()})</span></div>
+                            <div>AirPods: <strong>${u.airpods}</strong> <span class="ra-muted">($${conIVA(m.airpods).toLocaleString()})</span></div>
+                            <div>Audio: <strong>${u.audio}</strong> <span class="ra-muted">($${conIVA(m.audio).toLocaleString()})</span></div>
                         </div>
                     </div>
                     <div class="ra-section">
@@ -1178,7 +1218,10 @@ function renderTodo() {
     document.getElementById("resumenAsesoresVisual").innerHTML = htmlResumenAsesores;
 
     // Render Pestaña Ventas
-    document.getElementById("ventasAcumuladas").textContent = `$${acumuladoTotalVentas.toLocaleString()}`;
+    // Monto mostrado: venta de dispositivos/accesorios con 13% (si aplica) + Garex SIN 13%.
+    // El % de cumplimiento de meta usa siempre el monto real (acumuladoTotalVentas), sin 13%.
+    const acumuladoTotalVentasMostrado = conIVA(acumuladoVentaSemanalSolo) + acumuladoGarexMontoSolo;
+    document.getElementById("ventasAcumuladas").textContent = `$${acumuladoTotalVentasMostrado.toLocaleString()}`;
     document.getElementById("v_metaTotalTienda").textContent = `$${metaTotalTienda.toLocaleString()}`;
     const porcMetaTienda = metaTotalTienda > 0 ? ((acumuladoTotalVentas / metaTotalTienda) * 100).toFixed(1) : 0;
     document.getElementById("cumplimientoMetaTotal").textContent = `${porcMetaTienda}%`;
@@ -1199,7 +1242,7 @@ function renderTodo() {
         const pctBarra = metaTotalTienda > 0 ? Math.min((acumuladoTotalVentas / metaTotalTienda) * 100, 100) : 0;
         fillProgreso.style.width = `${pctBarra}%`;
         document.getElementById("v_progresoMetaTexto").textContent =
-            `$${acumuladoTotalVentas.toLocaleString()} de $${metaTotalTienda.toLocaleString()}`;
+            `$${acumuladoTotalVentasMostrado.toLocaleString()} de $${metaTotalTienda.toLocaleString()}`;
     }
 
     // Meta diaria: lo que falta por vender repartido entre los días que quedan del mes
