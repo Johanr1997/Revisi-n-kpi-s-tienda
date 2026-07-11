@@ -1152,7 +1152,7 @@ function renderTodo() {
                     <div>
                         <strong>${asor.nombre}</strong>
                         <span class="ra-incentivo">💰 Incentivos: $${incentivoTotal.toFixed(2)}</span>
-                        <span class="ra-acc-badge">🔌 Accesorización: ${accesorizacionAsor}%</span>
+                        <span class="ra-acc-badge">Accesorización: ${accesorizacionAsor}%</span>
                     </div>
                     <span class="ra-cumplimiento">${cumplimiento}% de cumplimiento</span>
                 </div>
@@ -2066,13 +2066,13 @@ function renderClinicas() {
     }).join("");
 }
 
-// Garantiza que siempre exista la clínica fija "Fábrica — Interna", sin importar reinicios
+// Garantiza que siempre exista la clínica fija "Clínica de experiencia — Interna", sin importar reinicios
 function asegurarClinicaInterna() {
-    const existe = clinicasData.some(c => c.nombre === "Fábrica — Interna");
+    const existe = clinicasData.some(c => c.nombre === "Clínica de experiencia — Interna");
     if (!existe) {
         clinicasData.unshift({
             id: Date.now(),
-            nombre: "Fábrica — Interna",
+            nombre: "Clínica de experiencia — Interna",
             fecha: "",
             realizada: false,
             fechaRealizada: null
