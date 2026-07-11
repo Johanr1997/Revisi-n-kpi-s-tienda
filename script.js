@@ -1256,7 +1256,9 @@ function renderTodo() {
         const hoy = new Date();
         const diasEnMesActual = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
         const diasRestantes = Math.max(1, diasEnMesActual - hoy.getDate() + 1);
-        const faltante = Math.max(0, metaTotalTienda - acumuladoTotalVentas);
+        // Usa el acumulado YA ajustado con el 13% (el mismo que se muestra en el hero
+        // "Ventas acumuladas"), no la meta ni el faltante multiplicados por 1.13.
+        const faltante = Math.max(0, metaTotalTienda - acumuladoTotalVentasMostrado);
         const metaDiaria = faltante / diasRestantes;
 
         elMetaDiariaDias.textContent = `${diasRestantes} día${diasRestantes === 1 ? "" : "s"} restante${diasRestantes === 1 ? "" : "s"}`;
@@ -1265,8 +1267,8 @@ function renderTodo() {
             elMetaDiaria.textContent = "$0.00";
             elSub.textContent = "¡Meta del mes alcanzada!";
         } else {
-            elMetaDiaria.textContent = `$${conIVA(metaDiaria).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            elSub.textContent = `Faltan $${conIVA(faltante).toLocaleString()} para la meta`;
+            elMetaDiaria.textContent = `$${metaDiaria.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            elSub.textContent = `Faltan $${faltante.toLocaleString()} para la meta`;
         }
     }
 
