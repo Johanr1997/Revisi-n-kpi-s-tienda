@@ -2332,3 +2332,308 @@ function eliminarVentaCalendario(id, fecha) {
     renderCalendario();
     calClickDia(fecha);
 }
+// Tipos de turno rápidos (chips) + tipo "custom" para texto libre.
+// bg/text ya vienen listos para usarse como estilo inline, siguiendo
+// el mismo patrón de color que las pastillas del calendario.
+const TIPOS_TURNO = {
+    manana:      { label: "Mañana",       emoji: "", bg: "rgba(0,113,227,0.14)",  text: "#0055b3" },
+    tarde:       { label: "Tarde",        emoji: "", bg: "rgba(255,149,0,0.16)",  text: "#8a5000" },
+    completo:    { label: "Todo el día",  emoji: "", bg: "rgba(52,199,89,0.16)",  text: "#1a6e35" },
+    libre:       { label: "Libre",        emoji: "", bg: "rgba(134,134,139,0.14)",text: "#3a3a3c" },
+    incapacidad: { label: "Incap./Vac.",  emoji: "", bg: "rgba(255,59,48,0.14)",  text: "#c92f25" },
+    custom:      { label: "Personalizado",emoji: "", bg: "rgba(175,82,222,0.14)", text: "#7d2a9e" }
+};
+ 
+const DIAS_SEMANA = [
+    { key: "lun", label: "Lun" },
+    { key: "mar", label: "Mar" },
+    { key: "mie", label: "Mié" },
+    { key: "jue", label: "Jue" },
+    { key: "vie", label: "Vie" },
+    { key: "sab", label: "Sáb" },
+    { key: "dom", label: "Dom" }
+];
+ 
+// Datos guardados por semana. Clave = fecha ISO del lunes de esa semana.
+// Estructura: { "2026-07-06": { asesor0: { lun: {tipo,texto}, mar: {...}, ... }, asesor1: {...} } }
+let horarioData = JSON.parse(localStorage.getItem("horarioData")) || {};
+ 
+function guardarHorarioData() {
+    localStorage.setItem("horarioData", JSON.stringify(horarioData));
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
+}
+ 
+// Semana actualmente visible en pantalla (se navega con las flechas ‹ ›)
+let horarioFechaBase = new Date();
+ 
+// Dada cualquier fecha, devuelve el ISO (YYYY-MM-DD) del lunes de esa semana
+function obtenerLunesISO(fecha) {
+    const d = new Date(fecha);
+    const dia = d.getDay(); // 0 = domingo
+    const diff = dia === 0 ? -6 : 1 - dia;
+    d.setDate(d.getDate() + diff);
+    return d.toISOString().slice(0, 10);
+}
+function obtenerLunesActualISO() {
+    return obtenerLunesISO(horarioFechaBase);
+}
+ 
+function horarioNavegar(delta) {
+    horarioFechaBase.setDate(horarioFechaBase.getDate() + delta * 7);
+    renderHorario();
+}
+function horarioIrHoy() {
+    horarioFechaBase = new Date();
+    renderHorario();
+}
+ 
+// Guarda o actualiza el turno de un asesor en un día específico de la semana
+function guardarTurno(asesorKey, diaKey, semanaISO, turno) {
+    if (!horarioData[semanaISO]) horarioData[semanaISO] = {};
+    if (!horarioData[semanaISO][asesorKey]) horarioData[semanaISO][asesorKey] = {};
+    horarioData[semanaISO][asesorKey][diaKey] = turno;
+    guardarHorarioData();
+    renderHorario();
+    mostrarAlerta("Turno actualizado.", "success");
+}
+ 
+// Elimina el turno de un asesor en un día específico
+function quitarTurno(asesorKey, diaKey, semanaISO) {
+    if (horarioData[semanaISO] && horarioData[semanaISO][asesorKey]) {
+        delete horarioData[semanaISO][asesorKey][diaKey];
+    }
+    guardarHorarioData();
+    renderHorario();
+    mostrarAlerta("Turno eliminado.", "success");
+}
+ 
+// Modal para asignar un turno: chips rápidos (guardan y cierran al instante)
+// + campo de texto libre para casos personalizados (requiere presionar "Guardar texto")
+function abrirModalTurno(asesorKey, diaKey, fechaISO, nombreAsesor, diaLabel) {
+    const semanaISO = obtenerLunesActualISO();
+    const turnoActual = (horarioData[semanaISO] && horarioData[semanaISO][asesorKey])
+        ? horarioData[semanaISO][asesorKey][diaKey]
+        : null;
+ 
+    const overlay = document.createElement("div");
+    overlay.className = "modal-overlay";
+    overlay.innerHTML = `
+        <div class="modal-glass horario-modal">
+            <h3 class="modal-title">${nombreAsesor} — ${diaLabel}</h3>
+            <div class="horario-chips">
+                ${Object.entries(TIPOS_TURNO)
+                    .filter(([key]) => key !== "custom")
+                    .map(([key, t]) => `
+                        <button type="button" class="horario-chip" data-tipo="${key}" style="background:${t.bg}; color:${t.text};">
+                            ${t.emoji} ${t.label}
+                        </button>`).join("")}
+            </div>
+            <div class="form-group" style="margin-top:16px;">
+                <label for="horarioTextoLibre">Texto personalizado (opcional)</label>
+                <input type="text" id="horarioTextoLibre" placeholder="Ej: 10am - 6pm, cita médica...">
+            </div>
+            <div class="modal-actions">
+                ${turnoActual ? `<button type="button" class="modal-btn modal-btn-cancel" id="horarioBtnQuitar" style="color:#FF3B30;">Quitar turno</button>` : ""}
+                <button type="button" class="modal-btn modal-btn-cancel" id="horarioBtnCancelar">Cancelar</button>
+                <button type="button" class="modal-btn modal-btn-confirm" id="horarioBtnGuardarTexto">Guardar texto</button>
+            </div>
+        </div>`;
+ 
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add("modal-open"));
+ 
+    const inputTexto = overlay.querySelector("#horarioTextoLibre");
+    if (turnoActual && turnoActual.tipo === "custom" && turnoActual.texto) {
+        inputTexto.value = turnoActual.texto;
+    }
+ 
+    const cerrar = () => {
+        overlay.classList.remove("modal-open");
+        overlay.classList.add("modal-out");
+        setTimeout(() => overlay.remove(), 280);
+    };
+ 
+    // Chips: un clic guarda y cierra de inmediato (flujo rápido)
+    overlay.querySelectorAll(".horario-chip").forEach(btn => {
+        btn.addEventListener("click", () => {
+            guardarTurno(asesorKey, diaKey, semanaISO, { tipo: btn.dataset.tipo, texto: "" });
+            cerrar();
+        });
+    });
+ 
+    // Texto libre: requiere presionar "Guardar texto"
+    overlay.querySelector("#horarioBtnGuardarTexto").addEventListener("click", () => {
+        const texto = inputTexto.value.trim();
+        if (!texto) {
+            mostrarAlerta("Escribe un texto personalizado o elige una opción rápida.", "warning");
+            return;
+        }
+        guardarTurno(asesorKey, diaKey, semanaISO, { tipo: "custom", texto });
+        cerrar();
+    });
+ 
+    const btnQuitar = overlay.querySelector("#horarioBtnQuitar");
+    if (btnQuitar) {
+        btnQuitar.addEventListener("click", () => {
+            quitarTurno(asesorKey, diaKey, semanaISO);
+            cerrar();
+        });
+    }
+ 
+    overlay.querySelector("#horarioBtnCancelar").addEventListener("click", cerrar);
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) cerrar(); });
+    inputTexto.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") overlay.querySelector("#horarioBtnGuardarTexto").click();
+    });
+}
+ 
+// Dibuja la grilla completa de la semana visible
+function renderHorario() {
+    const semanaISO = obtenerLunesActualISO();
+    const lunes = new Date(semanaISO + "T00:00:00");
+ 
+    const domingo = new Date(lunes);
+    domingo.setDate(domingo.getDate() + 6);
+    const rango = `${lunes.toLocaleDateString("es-ES", { day: "numeric", month: "short" })} — ${domingo.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}`;
+ 
+    const tituloEl = document.getElementById("horarioTitulo");
+    if (tituloEl) tituloEl.textContent = rango;
+    const capturaTituloEl = document.getElementById("horarioCapturaTitulo");
+    if (capturaTituloEl) capturaTituloEl.textContent = `Horario semanal · ${rango}`;
+ 
+    const grid = document.getElementById("horarioGrid");
+    if (!grid) return;
+ 
+    let html = `<div class="horario-grid-header">
+        <div class="horario-head-cell horario-head-asesor">Asesor</div>
+        ${DIAS_SEMANA.map((d, i) => {
+            const fecha = new Date(lunes);
+            fecha.setDate(fecha.getDate() + i);
+            return `<div class="horario-head-cell">${d.label}<br><span style="font-weight:400; opacity:.7;">${fecha.getDate()}</span></div>`;
+        }).join("")}
+    </div>`;
+ 
+    Object.keys(appData.asesores).forEach(key => {
+        const asor = appData.asesores[key];
+        const inicial = asor.nombre.trim().charAt(0).toUpperCase() || "?";
+ 
+        html += `<div class="horario-fila">
+            <div class="horario-nombre-cell"><span class="horario-avatar">${inicial}</span>${asor.nombre}</div>
+            ${DIAS_SEMANA.map((d, i) => {
+                const fecha = new Date(lunes);
+                fecha.setDate(fecha.getDate() + i);
+                const fechaISO = fecha.toISOString().slice(0, 10);
+                const turno = horarioData[semanaISO] && horarioData[semanaISO][key]
+                    ? horarioData[semanaISO][key][d.key]
+                    : null;
+ 
+                let contenido;
+                if (turno && turno.tipo === "custom") {
+                    contenido = `<div class="horario-pill" style="background:${TIPOS_TURNO.custom.bg}; color:${TIPOS_TURNO.custom.text};">${turno.texto}</div>`;
+                } else if (turno && TIPOS_TURNO[turno.tipo]) {
+                    const t = TIPOS_TURNO[turno.tipo];
+                    contenido = `<div class="horario-pill" style="background:${t.bg}; color:${t.text};">${t.emoji} ${t.label}</div>`;
+                } else {
+                    contenido = `<span class="horario-celda-vacia">+</span>`;
+                }
+ 
+                const nombreEscapado = asor.nombre.replace(/'/g, "\\'");
+                return `<div class="horario-celda" onclick="abrirModalTurno('${key}','${d.key}','${fechaISO}', '${nombreEscapado}', '${d.label} ${fecha.getDate()}')">${contenido}</div>`;
+            }).join("")}
+        </div>`;
+    });
+ 
+    grid.innerHTML = html;
+ 
+    const leyenda = document.getElementById("horarioLeyenda");
+    if (leyenda) {
+        leyenda.innerHTML = Object.entries(TIPOS_TURNO)
+            .filter(([key]) => key !== "custom")
+            .map(([, t]) => `<span class="horario-leyenda-item"><span class="horario-leyenda-dot" style="background:${t.text};"></span>${t.emoji} ${t.label}</span>`)
+            .join("");
+    }
+}
+ 
+// ═══════════════════════════════════════════
+// COMPARTIR EL HORARIO
+// ═══════════════════════════════════════════
+ 
+// Genera una imagen PNG del horario y ofrece compartirla (Web Share API)
+// o descargarla directamente si el navegador no soporta compartir archivos.
+async function compartirHorarioComoImagen() {
+    const area = document.getElementById("horarioCapturaArea");
+    if (!area) return;
+ 
+    if (typeof html2canvas === "undefined") {
+        mostrarAlerta("No se pudo cargar el generador de imágenes. Puedes tomar una captura de pantalla manualmente.", "warning");
+        return;
+    }
+ 
+    area.classList.add("modo-captura");
+    try {
+        const canvas = await html2canvas(area, { backgroundColor: "#ffffff", scale: 2 });
+        area.classList.remove("modo-captura");
+ 
+        canvas.toBlob(async (blob) => {
+            if (!blob) {
+                mostrarAlerta("No se pudo generar la imagen.", "error");
+                return;
+            }
+            const archivo = new File([blob], "horario-semana.png", { type: "image/png" });
+ 
+            if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
+                try {
+                    await navigator.share({ files: [archivo], title: "Horario de la semana" });
+                    return;
+                } catch (e) {
+                    // Si el usuario cancela el share, seguimos con la descarga directa
+                }
+            }
+            const link = document.createElement("a");
+            link.download = "horario-semana.png";
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+            mostrarAlerta("Imagen del horario descargada.", "success");
+        });
+    } catch (err) {
+        area.classList.remove("modo-captura");
+        console.error(err);
+        mostrarAlerta("Ocurrió un error generando la imagen. Intenta con una captura de pantalla manual.", "error");
+    }
+}
+ 
+// Genera un resumen de texto plano del horario semanal y lo copia al portapapeles
+function copiarHorarioComoTexto() {
+    const semanaISO = obtenerLunesActualISO();
+    const rango = document.getElementById("horarioTitulo")?.textContent || "";
+    let texto = `🗓️ Horario semanal (${rango})\n\n`;
+ 
+    Object.keys(appData.asesores).forEach(key => {
+        const asor = appData.asesores[key];
+        texto += `👤 ${asor.nombre}\n`;
+        DIAS_SEMANA.forEach(d => {
+            const turno = horarioData[semanaISO] && horarioData[semanaISO][key]
+                ? horarioData[semanaISO][key][d.key]
+                : null;
+            let descripcion = "Sin asignar";
+            if (turno && turno.tipo === "custom") {
+                descripcion = turno.texto;
+            } else if (turno && TIPOS_TURNO[turno.tipo]) {
+                descripcion = `${TIPOS_TURNO[turno.tipo].emoji} ${TIPOS_TURNO[turno.tipo].label}`;
+            }
+            texto += `   ${d.label}: ${descripcion}\n`;
+        });
+        texto += `\n`;
+    });
+ 
+    navigator.clipboard.writeText(texto).then(() => {
+        mostrarAlerta("Horario copiado. Ya puedes pegarlo en el chat con tus compañeros.", "success");
+    }).catch(() => {
+        mostrarAlerta("No se pudo copiar automáticamente. Selecciona el texto manualmente.", "warning");
+    });
+}
+ 
+// Inicializar la grilla al cargar la página
+document.addEventListener("DOMContentLoaded", function () {
+    renderHorario();
+});
