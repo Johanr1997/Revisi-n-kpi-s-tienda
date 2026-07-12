@@ -1160,6 +1160,15 @@ body.dark-mode .bitacora-item-fecha { color: rgba(255,255,255,0.6); }
     cursor: pointer;
 }
 
+.cal-checkbox-wrap input[type="checkbox"]:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+
+.cal-checkbox-wrap input[type="checkbox"]:disabled + span {
+    opacity: 0.4;
+}
+
 .venta-resumen {
     background: rgba(0,113,227,0.07);
     border: 1px solid rgba(0,113,227,0.18);
