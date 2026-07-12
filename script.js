@@ -605,6 +605,33 @@ function setModoTrafico(modo) {
     document.getElementById("btnTraficoReemplazar").classList.toggle("active", modo === 'reemplazar');
 }
 
+// MODO DE INGRESO DE VENTA DEL ASESOR: 'categoria' (desglosado por dispositivo) o 'total' (un solo monto)
+let modoMontoVenta = 'categoria';
+
+function setModoMontoVenta(modo) {
+    modoMontoVenta = modo;
+    document.getElementById("btnMontoPorCategoria").classList.toggle("active", modo === 'categoria');
+    document.getElementById("btnMontoTotal").classList.toggle("active", modo === 'total');
+    document.getElementById("panelMontoPorCategoria").style.display = modo === 'categoria' ? '' : 'none';
+    document.getElementById("panelMontoTotal").style.display = modo === 'total' ? '' : 'none';
+    recalcularMontoVentaTotal();
+}
+
+// PERMITE GUARDAR UNA VENTA SIN ESPECIFICAR FECHA (no se refleja en el calendario)
+function toggleSinFecha() {
+    const sinFecha = document.getElementById("chkSinFecha").checked;
+    const inputFecha = document.getElementById("inputVentaFechaDia");
+    const chkCalendario = document.getElementById("chkReflejarCalendario");
+    inputFecha.disabled = sinFecha;
+    if (sinFecha) {
+        inputFecha.value = "";
+        if (chkCalendario) { chkCalendario.checked = false; chkCalendario.disabled = true; }
+    } else {
+        if (chkCalendario) { chkCalendario.disabled = false; chkCalendario.checked = true; }
+    }
+    actualizarResumenIngreso();
+}
+
 function actualizarLabelTraficoAcumulado() {
     const lbl = document.getElementById("lblTraficoAcumulado");
     if (lbl) lbl.textContent = (appData.inicio.trafico || 0).toLocaleString();
@@ -834,8 +861,19 @@ function pedirFecha(titulo, fechaDefault) {
 
 function actualizarResumenIngreso() {
     const monto = parseFloat(document.getElementById("inputVentaSemanal").value) || 0;
+    const sinFecha = document.getElementById("chkSinFecha")?.checked;
     const fecha = document.getElementById("inputVentaFechaDia").value;
     const resumen = document.getElementById("resumenDia");
+    if (sinFecha) {
+        if (monto > 0) {
+            document.getElementById("resumenDiaMonto").textContent = `$${monto.toLocaleString()}`;
+            document.getElementById("resumenDiaFecha").textContent = "sin fecha";
+            resumen.style.display = "block";
+        } else {
+            resumen.style.display = "none";
+        }
+        return;
+    }
     if (monto > 0 && fecha) {
         const [y,m,d] = fecha.split("-");
         document.getElementById("resumenDiaMonto").textContent = `$${monto.toLocaleString()}`;
@@ -851,14 +889,15 @@ function guardarDatosAsesor() {
     const nombreAsesor = appData.asesores[key].nombre;
     const monto = parseFloat(document.getElementById("inputVentaSemanal").value) || 0;
 
+    const sinFecha = document.getElementById("chkSinFecha")?.checked ?? false;
     const fecha = document.getElementById("inputVentaFechaDia").value;
     const reflejarEnCalendario = document.getElementById("chkReflejarCalendario")?.checked ?? true;
 
-    if (monto > 0 && !fecha) {
-        mostrarAlerta("Por favor ingresa la fecha de la venta.", "warning");
+    if (monto > 0 && !fecha && !sinFecha) {
+        mostrarAlerta("Por favor ingresa la fecha de la venta, o marca \"No especificar fecha\".", "warning");
         return;
     }
-    if (monto > 0 && fecha) {
+    if (monto > 0 && fecha && !sinFecha) {
         // Siempre se guarda en el calendario (para poder gestionarla/eliminarla desde ahí),
         // pero si "reflejarEnCalendario" es falso, no se muestra como pastilla en la celda del día.
         ventasCalendario.push({
@@ -897,15 +936,19 @@ function guardarDatosAsesor() {
     renderListaPendiente("garex");
     renderListaPendiente("insurama");
 
-    // Montos
-    appData.asesores[key].montos.mac += parseFloat(document.getElementById("m_mac").value) || 0;
-    appData.asesores[key].montos.ipad += parseFloat(document.getElementById("m_ipad").value) || 0;
-    appData.asesores[key].montos.iphone += parseFloat(document.getElementById("m_iphone").value) || 0;
-    appData.asesores[key].montos.watch += parseFloat(document.getElementById("m_watch").value) || 0;
-    appData.asesores[key].montos.airpods += parseFloat(document.getElementById("m_airpods").value) || 0;
-    appData.asesores[key].montos.audio += parseFloat(document.getElementById("m_audio").value) || 0;
-    appData.asesores[key].montos.acc_apple += parseFloat(document.getElementById("m_acc_apple").value) || 0;
-    appData.asesores[key].montos.acc_terceros += parseFloat(document.getElementById("m_acc_terceros").value) || 0;
+    // Montos por categoría: solo se desglosan si el modo de ingreso es "Por Dispositivo".
+    // En modo "Venta Total" el monto ya se sumó arriba a ventaSemanal, sin desglosarse
+    // por categoría de producto (no se cuenta en los reportes de attach/categoría).
+    if (modoMontoVenta !== 'total') {
+        appData.asesores[key].montos.mac += parseFloat(document.getElementById("m_mac").value) || 0;
+        appData.asesores[key].montos.ipad += parseFloat(document.getElementById("m_ipad").value) || 0;
+        appData.asesores[key].montos.iphone += parseFloat(document.getElementById("m_iphone").value) || 0;
+        appData.asesores[key].montos.watch += parseFloat(document.getElementById("m_watch").value) || 0;
+        appData.asesores[key].montos.airpods += parseFloat(document.getElementById("m_airpods").value) || 0;
+        appData.asesores[key].montos.audio += parseFloat(document.getElementById("m_audio").value) || 0;
+        appData.asesores[key].montos.acc_apple += parseFloat(document.getElementById("m_acc_apple").value) || 0;
+        appData.asesores[key].montos.acc_terceros += parseFloat(document.getElementById("m_acc_terceros").value) || 0;
+    }
 
     // Unidades
     appData.asesores[key].unidades.mac += parseInt(document.getElementById("u_mac").value) || 0;
@@ -918,6 +961,7 @@ function guardarDatosAsesor() {
     // Resetear campos
     ["inputVentaSemanal","inputQR","inputTradeIn",
      "m_mac","m_ipad","m_iphone","m_watch","m_airpods","m_audio","m_acc_apple","m_acc_terceros",
+     "inputMontoVentaTotalManual",
      "u_mac","u_ipad","u_iphone","u_watch","u_airpods","u_audio",
      "inputGarexCantidad","inputGarexPrecioDispositivo","inputInsuramaCantidad","inputInsuramaPrecioDispositivo",
      "inputVentaFechaDia","inputFechaProteccion"
@@ -925,7 +969,9 @@ function guardarDatosAsesor() {
     document.getElementById("resumenDia").style.display = "none";
     const lblTotalReset = document.getElementById("lblMontoVentaTotal");
     if (lblTotalReset) lblTotalReset.textContent = "$0";
-    if (document.getElementById("chkReflejarCalendario")) document.getElementById("chkReflejarCalendario").checked = true;
+    if (document.getElementById("chkReflejarCalendario")) { document.getElementById("chkReflejarCalendario").checked = true; document.getElementById("chkReflejarCalendario").disabled = false; }
+    if (document.getElementById("chkSinFecha")) document.getElementById("chkSinFecha").checked = false;
+    if (document.getElementById("inputVentaFechaDia")) document.getElementById("inputVentaFechaDia").disabled = false;
     actualizarPrecioGarexCalculado();
     actualizarPrecioInsuramaCalculado();
 
@@ -936,13 +982,19 @@ function guardarDatosAsesor() {
 }
 
 
-// Suma los montos por dispositivo y actualiza el campo de Monto de Ventas automáticamente
+// Suma los montos por dispositivo (o toma el monto total manual) y actualiza inputVentaSemanal
 function recalcularMontoVentaTotal() {
-    const ids = ["m_mac","m_ipad","m_iphone","m_watch","m_airpods","m_audio","m_acc_apple","m_acc_terceros"];
-    const total = ids.reduce((acc, id) => {
-        const el = document.getElementById(id);
-        return acc + (parseFloat(el ? el.value : 0) || 0);
-    }, 0);
+    let total = 0;
+    if (modoMontoVenta === 'total') {
+        const elTotal = document.getElementById("inputMontoVentaTotalManual");
+        total = parseFloat(elTotal ? elTotal.value : 0) || 0;
+    } else {
+        const ids = ["m_mac","m_ipad","m_iphone","m_watch","m_airpods","m_audio","m_acc_apple","m_acc_terceros"];
+        total = ids.reduce((acc, id) => {
+            const el = document.getElementById(id);
+            return acc + (parseFloat(el ? el.value : 0) || 0);
+        }, 0);
+    }
     const inputVenta = document.getElementById("inputVentaSemanal");
     if (inputVenta) {
         inputVenta.value = total > 0 ? total : "";
