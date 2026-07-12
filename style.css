@@ -2109,3 +2109,199 @@ body.dark-mode .login-box {
 body.dark-mode .login-box h2 { color: #F2F2F7; }
 body.dark-mode .login-box .form-group label { color: #F2F2F7; }
 body.dark-mode .login-sub, body.dark-mode .login-foot { color: rgba(255,255,255,0.6); }
+ 
+/* Orbes de color de fondo (mismo patrón que el resto de pestañas) */
+.h-orb {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: -1;
+    filter: blur(50px);
+    opacity: var(--orb-opacity);
+}
+.h-orb-blue  { width: 460px; height: 460px; background: radial-gradient(circle, var(--orb-asesores-blue) 0%, transparent 70%); top: -100px; left: -90px; }
+.h-orb-green { width: 360px; height: 360px; background: radial-gradient(circle, var(--orb-garex-green) 0%, transparent 70%); bottom: 20px; right: -60px; }
+ 
+/* Contenedor con scroll horizontal en pantallas angostas (no rompe el diseño en celular) */
+.horario-scroll-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+ 
+/* Área que se captura como imagen: SIEMPRE fondo blanco y texto oscuro,
+   sin importar si la app está en modo oscuro, para que la captura se vea
+   bien y consistente al compartirla con cualquier compañero. */
+.horario-captura-area {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 18px;
+    min-width: 640px;
+}
+.horario-captura-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ECECEE;
+}
+.horario-captura-titulo {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1D1D1F;
+    text-transform: capitalize;
+}
+.horario-captura-marca {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(0,0,0,0.35);
+}
+ 
+/* Grilla: 1 columna de nombre + 7 columnas de días */
+.horario-grid {
+    display: grid;
+    grid-template-columns: 150px repeat(7, 1fr);
+    gap: 6px;
+}
+.horario-grid-header,
+.horario-fila {
+    display: contents;
+}
+.horario-head-cell {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(0,0,0,0.4);
+    text-align: center;
+    padding: 6px 4px 10px;
+    line-height: 1.5;
+}
+.horario-head-asesor { text-align: left; }
+ 
+.horario-nombre-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1D1D1F;
+    padding: 10px 8px;
+    background: #F5F5F7;
+    border-radius: 10px;
+}
+.horario-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #0071E3;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+ 
+.horario-celda {
+    min-height: 56px;
+    border-radius: 10px;
+    padding: 5px;
+    cursor: pointer;
+    background: #F5F5F7;
+    border: 1px solid #ECECEE;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+}
+.horario-celda:hover {
+    background: #EAEAF0;
+    border-color: #D8D8DE;
+}
+.horario-celda-vacia {
+    color: rgba(0,0,0,0.22);
+    font-size: 18px;
+    font-weight: 300;
+}
+ 
+.horario-pill {
+    width: 100%;
+    text-align: center;
+    padding: 7px 4px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+    word-break: break-word;
+}
+ 
+/* Modo captura: oculta el "+" de celdas vacías y quita el hover, para
+   que la imagen generada se vea limpia y sin elementos de edición */
+.modo-captura .horario-celda-vacia { visibility: hidden; }
+.modo-captura .horario-celda { cursor: default; }
+.modo-captura .horario-celda:hover { background: #F5F5F7; border-color: #ECECEE; }
+ 
+/* Leyenda de tipos de turno */
+.horario-leyenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 14px;
+    font-size: 11px;
+    color: rgba(0,0,0,0.45);
+}
+.horario-leyenda-item { display: flex; align-items: center; gap: 5px; }
+.horario-leyenda-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+ 
+/* Botones de acción (compartir / copiar) */
+.horario-acciones {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+.horario-btn-accion { width: auto; padding: 11px 18px; }
+.horario-btn-secundario { background: #6E6E73; }
+.horario-btn-secundario:hover { background: #7D7D82; }
+ 
+/* Modal de edición de turno (reutiliza .modal-overlay / .modal-glass ya existentes) */
+.horario-modal { width: min(420px, 100%); }
+.horario-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+    position: relative;
+    z-index: 1;
+}
+.horario-chip {
+    border: none;
+    border-radius: 999px;
+    padding: 9px 15px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.12s ease, filter 0.12s ease;
+}
+.horario-chip:hover { transform: translateY(-1px); filter: brightness(0.95); }
+ 
+/* ═══════════════════════════════════════════════════════════════
+   MODO OSCURO — pestaña Horario
+   (la grilla capturable se mantiene siempre clara a propósito;
+   solo ajustamos lo que queda fuera del área de captura)
+   ═══════════════════════════════════════════════════════════════ */
+body.dark-mode .horario-leyenda { color: rgba(255,255,255,0.75) !important; }
+body.dark-mode .horario-btn-secundario { background: #48484A; }
+body.dark-mode .horario-btn-secundario:hover { background: #58585A; }
+ 
+/* Responsive: en celular, la grilla mantiene su ancho mínimo y hace scroll
+   horizontal dentro de la tarjeta, en vez de romperse */
+@media (max-width: 640px) {
+    .horario-acciones { flex-direction: column; }
+    .horario-btn-accion { width: 100%; }
+}
+ 
