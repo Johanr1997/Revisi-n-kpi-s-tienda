@@ -617,21 +617,6 @@ function setModoMontoVenta(modo) {
     recalcularMontoVentaTotal();
 }
 
-// PERMITE GUARDAR UNA VENTA SIN ESPECIFICAR FECHA (no se refleja en el calendario)
-function toggleSinFecha() {
-    const sinFecha = document.getElementById("chkSinFecha").checked;
-    const inputFecha = document.getElementById("inputVentaFechaDia");
-    const chkCalendario = document.getElementById("chkReflejarCalendario");
-    inputFecha.disabled = sinFecha;
-    if (sinFecha) {
-        inputFecha.value = "";
-        if (chkCalendario) { chkCalendario.checked = false; chkCalendario.disabled = true; }
-    } else {
-        if (chkCalendario) { chkCalendario.disabled = false; chkCalendario.checked = true; }
-    }
-    actualizarResumenIngreso();
-}
-
 function actualizarLabelTraficoAcumulado() {
     const lbl = document.getElementById("lblTraficoAcumulado");
     if (lbl) lbl.textContent = (appData.inicio.trafico || 0).toLocaleString();
@@ -861,19 +846,8 @@ function pedirFecha(titulo, fechaDefault) {
 
 function actualizarResumenIngreso() {
     const monto = parseFloat(document.getElementById("inputVentaSemanal").value) || 0;
-    const sinFecha = document.getElementById("chkSinFecha")?.checked;
     const fecha = document.getElementById("inputVentaFechaDia").value;
     const resumen = document.getElementById("resumenDia");
-    if (sinFecha) {
-        if (monto > 0) {
-            document.getElementById("resumenDiaMonto").textContent = `$${monto.toLocaleString()}`;
-            document.getElementById("resumenDiaFecha").textContent = "sin fecha";
-            resumen.style.display = "block";
-        } else {
-            resumen.style.display = "none";
-        }
-        return;
-    }
     if (monto > 0 && fecha) {
         const [y,m,d] = fecha.split("-");
         document.getElementById("resumenDiaMonto").textContent = `$${monto.toLocaleString()}`;
@@ -889,15 +863,14 @@ function guardarDatosAsesor() {
     const nombreAsesor = appData.asesores[key].nombre;
     const monto = parseFloat(document.getElementById("inputVentaSemanal").value) || 0;
 
-    const sinFecha = document.getElementById("chkSinFecha")?.checked ?? false;
     const fecha = document.getElementById("inputVentaFechaDia").value;
     const reflejarEnCalendario = document.getElementById("chkReflejarCalendario")?.checked ?? true;
 
-    if (monto > 0 && !fecha && !sinFecha) {
-        mostrarAlerta("Por favor ingresa la fecha de la venta, o marca \"No especificar fecha\".", "warning");
+    if (monto > 0 && !fecha) {
+        mostrarAlerta("Por favor ingresa la fecha de la venta.", "warning");
         return;
     }
-    if (monto > 0 && fecha && !sinFecha) {
+    if (monto > 0 && fecha) {
         // Siempre se guarda en el calendario (para poder gestionarla/eliminarla desde ahí),
         // pero si "reflejarEnCalendario" es falso, no se muestra como pastilla en la celda del día.
         ventasCalendario.push({
@@ -969,9 +942,7 @@ function guardarDatosAsesor() {
     document.getElementById("resumenDia").style.display = "none";
     const lblTotalReset = document.getElementById("lblMontoVentaTotal");
     if (lblTotalReset) lblTotalReset.textContent = "$0";
-    if (document.getElementById("chkReflejarCalendario")) { document.getElementById("chkReflejarCalendario").checked = true; document.getElementById("chkReflejarCalendario").disabled = false; }
-    if (document.getElementById("chkSinFecha")) document.getElementById("chkSinFecha").checked = false;
-    if (document.getElementById("inputVentaFechaDia")) document.getElementById("inputVentaFechaDia").disabled = false;
+    if (document.getElementById("chkReflejarCalendario")) document.getElementById("chkReflejarCalendario").checked = true;
     actualizarPrecioGarexCalculado();
     actualizarPrecioInsuramaCalculado();
 
