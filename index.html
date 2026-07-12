@@ -27,6 +27,7 @@
 <li class="tab-btn" data-target="insurama">Insurama</li>
 <li class="tab-btn" data-target="bitacoras">Bitácoras</li>
 <li class="tab-btn" data-target="recordatorios">Recordatorios</li>
+<li class="tab-btn" data-target="horario">Horario</li>
 <li class="tab-btn tab-icon-only" data-target="configuracion" title="Configuración">⚙️</li>
 </ul>
 <div class="navbar-divider"></div>
@@ -539,6 +540,39 @@ Agregar al calendario
 <p style="color:rgba(0,0,0,0.35); font-size:13px; text-align:center; padding:10px 0;">No hay clínicas registradas.</p>
 </div>
 </div>
+<!-- PESTAÑA HORARIO — LIQUID GLASS -->
+<div id="horario" class="seccion-dashboard" style="position: relative; isolation: isolate;">
+    <div class="h-orb h-orb-blue"></div>
+    <div class="h-orb h-orb-green"></div>
+ 
+    <div class="v-section-label">Horario Semanal</div>
+ 
+    <div class="v-glass a-card cal-wrapper">
+        <div class="cal-header">
+            <button class="cal-nav-btn" onclick="horarioNavegar(-1)">‹</button>
+            <div class="cal-titulo" id="horarioTitulo"></div>
+            <button class="cal-nav-btn" onclick="horarioNavegar(1)">›</button>
+            <button class="cal-hoy-btn" onclick="horarioIrHoy()">Esta semana</button>
+        </div>
+ 
+        <div class="horario-scroll-wrap">
+            <div id="horarioCapturaArea" class="horario-captura-area">
+                <div class="horario-captura-header">
+                    <span id="horarioCapturaTitulo" class="horario-captura-titulo"></span>
+                    <span class="horario-captura-marca">Control de Ventas</span>
+                </div>
+                <div id="horarioGrid" class="horario-grid"></div>
+            </div>
+        </div>
+ 
+        <div class="horario-leyenda" id="horarioLeyenda"></div>
+ 
+        <div class="horario-acciones">
+            <button type="button" class="btn-primary horario-btn-accion" onclick="compartirHorarioComoImagen()">Descargar / Compartir imagen</button>
+            <button type="button" class="btn-primary horario-btn-accion horario-btn-secundario" onclick="copiarHorarioComoTexto()">Copiar como texto</button>
+        </div>
+    </div>
+</div>
 <!-- PESTAÑA CONFIGURACIÓN — LIQUID GLASS -->
 <div id="configuracion" class="seccion-dashboard" style="position: relative; isolation: isolate;">
 <div class="c-orb c-orb-gray"></div>
@@ -657,6 +691,7 @@ Reiniciar Todos los Datos a 0
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="firebase-sync.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
