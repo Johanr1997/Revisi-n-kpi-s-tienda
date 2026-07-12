@@ -2336,24 +2336,26 @@ function eliminarVentaCalendario(id, fecha) {
 // bg/text ya vienen listos para usarse como estilo inline, siguiendo
 // el mismo patrón de color que las pastillas del calendario.
 const TIPOS_TURNO = {
+    manana:      { label: "Mañana",       emoji: "", bg: "rgba(0,113,227,0.14)",  text: "#0055b3" },
+    tarde:       { label: "Tarde",        emoji: "", bg: "rgba(255,149,0,0.16)",  text: "#8a5000" },
+    completo:    { label: "Todo el día",  emoji: "", bg: "rgba(52,199,89,0.16)",  text: "#1a6e35" },
     libre:       { label: "Libre",        emoji: "", bg: "rgba(134,134,139,0.14)",text: "#3a3a3c" },
-    vacaciones:  { label: "Vacaciones",   emoji: "", bg: "rgba(52,199,89,0.16)",  text: "#1a6e35" },
-    incapacidad: { label: "Incapacidad",  emoji: "", bg: "rgba(255,59,48,0.14)",  text: "#c92f25" },
+    incapacidad: { label: "Incap./Vac.",  emoji: "", bg: "rgba(255,59,48,0.14)",  text: "#c92f25" },
     custom:      { label: "Personalizado",emoji: "", bg: "rgba(175,82,222,0.14)", text: "#7d2a9e" }
 };
  
 const DIAS_SEMANA = [
-    { key: "dom", label: "Dom" },
     { key: "lun", label: "Lun" },
     { key: "mar", label: "Mar" },
     { key: "mie", label: "Mié" },
     { key: "jue", label: "Jue" },
     { key: "vie", label: "Vie" },
-    { key: "sab", label: "Sáb" }
+    { key: "sab", label: "Sáb" },
+    { key: "dom", label: "Dom" }
 ];
  
-// Datos guardados por semana. Clave = fecha ISO del domingo de esa semana.
-// Estructura: { "2026-07-05": { asesor0: { dom: {tipo,texto}, lun: {...}, ... }, asesor1: {...} } }
+// Datos guardados por semana. Clave = fecha ISO del lunes de esa semana.
+// Estructura: { "2026-07-06": { asesor0: { lun: {tipo,texto}, mar: {...}, ... }, asesor1: {...} } }
 let horarioData = JSON.parse(localStorage.getItem("horarioData")) || {};
  
 function guardarHorarioData() {
@@ -2364,15 +2366,16 @@ function guardarHorarioData() {
 // Semana actualmente visible en pantalla (se navega con las flechas ‹ ›)
 let horarioFechaBase = new Date();
  
-// Dada cualquier fecha, devuelve el ISO (YYYY-MM-DD) del domingo de esa semana
-function obtenerDomingoISO(fecha) {
+// Dada cualquier fecha, devuelve el ISO (YYYY-MM-DD) del lunes de esa semana
+function obtenerLunesISO(fecha) {
     const d = new Date(fecha);
     const dia = d.getDay(); // 0 = domingo
-    d.setDate(d.getDate() - dia);
+    const diff = dia === 0 ? -6 : 1 - dia;
+    d.setDate(d.getDate() + diff);
     return d.toISOString().slice(0, 10);
 }
-function obtenerDomingoActualISO() {
-    return obtenerDomingoISO(horarioFechaBase);
+function obtenerLunesActualISO() {
+    return obtenerLunesISO(horarioFechaBase);
 }
  
 function horarioNavegar(delta) {
@@ -2407,7 +2410,7 @@ function quitarTurno(asesorKey, diaKey, semanaISO) {
 // Modal para asignar un turno: chips rápidos (guardan y cierran al instante)
 // + campo de texto libre para casos personalizados (requiere presionar "Guardar texto")
 function abrirModalTurno(asesorKey, diaKey, fechaISO, nombreAsesor, diaLabel) {
-    const semanaISO = obtenerDomingoActualISO();
+    const semanaISO = obtenerLunesActualISO();
     const turnoActual = (horarioData[semanaISO] && horarioData[semanaISO][asesorKey])
         ? horarioData[semanaISO][asesorKey][diaKey]
         : null;
@@ -2486,12 +2489,12 @@ function abrirModalTurno(asesorKey, diaKey, fechaISO, nombreAsesor, diaLabel) {
  
 // Dibuja la grilla completa de la semana visible
 function renderHorario() {
-    const semanaISO = obtenerDomingoActualISO();
-    const domingo = new Date(semanaISO + "T00:00:00");
+    const semanaISO = obtenerLunesActualISO();
+    const lunes = new Date(semanaISO + "T00:00:00");
  
-    const sabado = new Date(domingo);
-    sabado.setDate(sabado.getDate() + 6);
-    const rango = `${domingo.toLocaleDateString("es-ES", { day: "numeric", month: "short" })} — ${sabado.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}`;
+    const domingo = new Date(lunes);
+    domingo.setDate(domingo.getDate() + 6);
+    const rango = `${lunes.toLocaleDateString("es-ES", { day: "numeric", month: "short" })} — ${domingo.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}`;
  
     const tituloEl = document.getElementById("horarioTitulo");
     if (tituloEl) tituloEl.textContent = rango;
@@ -2504,7 +2507,7 @@ function renderHorario() {
     let html = `<div class="horario-grid-header">
         <div class="horario-head-cell horario-head-asesor">Asesor</div>
         ${DIAS_SEMANA.map((d, i) => {
-            const fecha = new Date(domingo);
+            const fecha = new Date(lunes);
             fecha.setDate(fecha.getDate() + i);
             return `<div class="horario-head-cell">${d.label}<br><span style="font-weight:400; opacity:.7;">${fecha.getDate()}</span></div>`;
         }).join("")}
@@ -2517,7 +2520,7 @@ function renderHorario() {
         html += `<div class="horario-fila">
             <div class="horario-nombre-cell"><span class="horario-avatar">${inicial}</span>${asor.nombre}</div>
             ${DIAS_SEMANA.map((d, i) => {
-                const fecha = new Date(domingo);
+                const fecha = new Date(lunes);
                 fecha.setDate(fecha.getDate() + i);
                 const fechaISO = fecha.toISOString().slice(0, 10);
                 const turno = horarioData[semanaISO] && horarioData[semanaISO][key]
@@ -2601,7 +2604,7 @@ async function compartirHorarioComoImagen() {
  
 // Genera un resumen de texto plano del horario semanal y lo copia al portapapeles
 function copiarHorarioComoTexto() {
-    const semanaISO = obtenerDomingoActualISO();
+    const semanaISO = obtenerLunesActualISO();
     const rango = document.getElementById("horarioTitulo")?.textContent || "";
     let texto = `🗓️ Horario semanal (${rango})\n\n`;
  
