@@ -22,6 +22,7 @@
 <li class="tab-btn active" data-target="ventas-pantalla">Ventas</li>
 <li class="tab-btn" data-target="inicio">Plan SOS</li>
 <li class="tab-btn" data-target="asesores">Asesores</li>
+<li class="tab-btn" data-target="resumen-asesores">Resumen Asesores</li>
 <li class="tab-btn" data-target="garex">Garex</li>
 <li class="tab-btn" data-target="insurama">Insurama</li>
 <li class="tab-btn" data-target="bitacoras">Bitácoras</li>
@@ -127,6 +128,10 @@ Se está mostrando un valor de accesorización ingresado manualmente en lugar de
 <label for="inputVentaFechaDia">Fecha de la venta</label>
 <input type="date" id="inputVentaFechaDia" oninput="actualizarResumenIngreso()">
 </div>
+<label class="cal-checkbox-wrap" for="chkSinFecha">
+<input type="checkbox" id="chkSinFecha" onchange="toggleSinFecha()">
+<span>No especificar fecha (no se reflejará en el calendario)</span>
+</label>
 <label class="cal-checkbox-wrap" for="chkReflejarCalendario">
 <input type="checkbox" id="chkReflejarCalendario" checked>
 <span>Reflejar en el calendario</span>
@@ -152,8 +157,19 @@ Se registrará <strong id="resumenDiaMonto">$0</strong> el día <strong id="resu
 </div>
 </div>
 <!-- MONTOS Y UNIDADES -->
-<div class="v-section-label">Monto de Ventas por Categoría ($)</div>
-<div class="v-glass a-card">
+<div class="v-section-label">Monto de la Venta ($)</div>
+<div class="venta-modo-toggle" style="margin-bottom:10px;">
+<button type="button" class="venta-modo-btn active" id="btnMontoPorCategoria" onclick="setModoMontoVenta('categoria')">Por Dispositivo</button>
+<button type="button" class="venta-modo-btn" id="btnMontoTotal" onclick="setModoMontoVenta('total')">Venta Total</button>
+</div>
+<div class="v-glass a-card" id="panelMontoTotal" style="display:none;">
+<div class="form-group" style="margin-bottom:0;">
+<label for="inputMontoVentaTotalManual">Monto total de la venta ($)</label>
+<input type="number" id="inputMontoVentaTotalManual" value="0" placeholder="Ej: 1500" oninput="recalcularMontoVentaTotal()">
+</div>
+<span style="font-size:11px; color:#86868B; margin-top:6px; display:block;">Este monto se contará como venta total del asesor, sin desglosarse por categoría de producto.</span>
+</div>
+<div class="v-glass a-card" id="panelMontoPorCategoria">
 <div class="a-grid-categorias">
 <div class="form-group"><label>Mac</label><input type="number" id="m_mac" value="0" oninput="recalcularMontoVentaTotal()"></div>
 <div class="form-group"><label>iPad</label><input type="number" id="m_ipad" value="0" oninput="recalcularMontoVentaTotal()"></div>
@@ -254,7 +270,11 @@ Precio Insurama al cliente (c/u): <strong id="v_insuramaPrecioCalculado">$0</str
 </div>
 </div>
 <button class="btn-primary a-btn-guardar" onclick="guardarDatosAsesor()">Actualizar Asesor</button>
-<!-- RESUMEN POR ASESOR -->
+</div>
+<!-- PESTAÑA RESUMEN DE ASESORES — LIQUID GLASS -->
+<div id="resumen-asesores" class="seccion-dashboard" style="position: relative; isolation: isolate;">
+<div class="a-orb a-orb-blue"></div>
+<div class="a-orb a-orb-yellow"></div>
 <div class="v-section-label">Resumen de Desempeño por Asesor</div>
 <div class="v-glass a-card" id="resumenAsesoresVisual"></div>
 </div>
