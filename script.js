@@ -609,11 +609,19 @@ function setModoTrafico(modo) {
 let modoMontoVenta = 'categoria';
 
 function setModoMontoVenta(modo) {
+    const btnCategoria = document.getElementById("btnMontoPorCategoria");
+    const btnTotal = document.getElementById("btnMontoTotal");
+    const panelCategoria = document.getElementById("panelMontoPorCategoria");
+    const panelTotal = document.getElementById("panelMontoTotal");
+    if (!btnCategoria || !btnTotal || !panelCategoria || !panelTotal) {
+        console.error("setModoMontoVenta: no se encontraron uno o más elementos en el HTML. Verifica que index.html y script.js estén sincronizados.", { btnCategoria, btnTotal, panelCategoria, panelTotal });
+        return;
+    }
     modoMontoVenta = modo;
-    document.getElementById("btnMontoPorCategoria").classList.toggle("active", modo === 'categoria');
-    document.getElementById("btnMontoTotal").classList.toggle("active", modo === 'total');
-    document.getElementById("panelMontoPorCategoria").style.display = modo === 'categoria' ? '' : 'none';
-    document.getElementById("panelMontoTotal").style.display = modo === 'total' ? '' : 'none';
+    btnCategoria.classList.toggle("active", modo === 'categoria');
+    btnTotal.classList.toggle("active", modo === 'total');
+    panelCategoria.style.display = modo === 'categoria' ? '' : 'none';
+    panelTotal.style.display = modo === 'total' ? '' : 'none';
     recalcularMontoVentaTotal();
 }
 
