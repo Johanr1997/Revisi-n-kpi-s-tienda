@@ -2190,6 +2190,7 @@ body.dark-mode .login-sub, body.dark-mode .login-foot { color: rgba(255,255,255,
     padding: 10px 8px;
     background: #F5F5F7;
     border-radius: 10px;
+    transition: background 0.15s, box-shadow 0.15s, opacity 0.15s;
 }
 .horario-nombre-texto {
     overflow: hidden;
@@ -2198,12 +2199,35 @@ body.dark-mode .login-sub, body.dark-mode .login-foot { color: rgba(255,255,255,
     flex: 1;
     min-width: 0;
 }
-.horario-nombre-acciones {
+.horario-drag-handle {
+    flex-shrink: 0;
+    width: 20px;
+    height: 22px;
     display: flex;
     align-items: center;
-    gap: 2px;
-    flex-shrink: 0;
+    justify-content: center;
+    color: rgba(0,0,0,0.28);
+    font-size: 14px;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
 }
+.horario-drag-handle:hover { color: rgba(0,0,0,0.55); }
+ 
+/* Fila que se está arrastrando */
+.horario-nombre-cell.horario-arrastrando {
+    opacity: 0.5;
+    box-shadow: 0 0 0 2px #0071E3 inset;
+    cursor: grabbing;
+}
+.horario-nombre-cell.horario-arrastrando .horario-drag-handle { cursor: grabbing; }
+ 
+/* Fila sobre la que se soltaría al momento */
+.horario-nombre-cell.horario-drop-objetivo {
+    background: rgba(0,113,227,0.14);
+    box-shadow: 0 0 0 2px #0071E3 inset;
+}
+ 
 .horario-mini-btn {
     width: 22px;
     height: 22px;
@@ -2218,6 +2242,7 @@ body.dark-mode .login-sub, body.dark-mode .login-foot { color: rgba(255,255,255,
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
     padding: 0;
+    flex-shrink: 0;
 }
 .horario-mini-btn:hover:not(:disabled) { background: #E5E5EA; color: #1D1D1F; }
 .horario-mini-btn:disabled { opacity: 0.25; cursor: default; }
