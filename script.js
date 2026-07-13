@@ -1862,6 +1862,16 @@ function eliminarAsesor(key) {
         if (typeof guardarHorarioOcultos === "function") guardarHorarioOcultos();
     }
 
+    // Quitar sus turnos guardados de todas las semanas del Horario
+    if (typeof horarioData !== "undefined") {
+        Object.keys(horarioData).forEach(semanaISO => {
+            if (horarioData[semanaISO] && horarioData[semanaISO][key]) {
+                delete horarioData[semanaISO][key];
+            }
+        });
+        if (typeof guardarHorarioData === "function") guardarHorarioData();
+    }
+
     sincronizarYRenderizar();
     renderListaAsesoresConfig();
     renderSelectAsesor(false);
@@ -2657,7 +2667,7 @@ function renderHorario() {
     const asesorKeys = Object.keys(appData.asesores).filter(k => !horarioOcultos.includes(k));
 
     if (asesorKeys.length === 0) {
-        html += `<div class="horario-fila"><p style="grid-column: 1 / -1; color:rgba(0,0,0,0.35); font-size:13px; text-align:center; padding:16px 0;">No hay personas en el horario. Agrégalas abajo.</p></div>`;
+        html += `<div class="horario-fila"><p class="horario-vacio-msg" style="grid-column: 1 / -1; font-size:13px; text-align:center; padding:16px 0;">No hay personas en el horario. Agrégalas abajo.</p></div>`;
     }
 
     asesorKeys.forEach((key) => {
