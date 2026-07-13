@@ -1822,24 +1822,6 @@ function crearAsesorConNombre(nombre) {
     return newKey;
 }
 
-function eliminarAsesor(key) {
-    if (Object.keys(appData.asesores).length <= 1) {
-        mostrarAlerta("Debe quedar al menos una persona en la lista.", "warning");
-        return;
-    }
-    const nombre = appData.asesores[key]?.nombre || key;
-    if (!confirm(`¿Eliminar al asesor "${nombre}"? Se borrarán todos sus datos acumulados.`)) return;
-    delete appData.asesores[key];
-    sincronizarYRenderizar();
-    renderListaAsesoresConfig();
-    // Si el select apuntaba al eliminado, redirigir al primero
-    const sel = document.getElementById("selectAsesor");
-    const primerKey = Object.keys(appData.asesores)[0];
-    if (sel && primerKey) {
-        sel.value = primerKey;
-        actualizarCumplimientoAsesorVisual();
-    }
-}
 
 // Cambia entre las pestañas "Metas por Categoría" / "Acumulados" dentro de la
 // tarjeta de resumen de un asesor específico (pestaña Ventas).
@@ -2390,16 +2372,81 @@ function agregarPersonaHorario() {
     mostrarAlerta(`"${nombre}" se agregó al horario y a la lista de asesores.`, "success");
 }
 
-// Cambia el orden de una persona en la lista de asesores (dirección: -1 sube, 1 baja).
-// El orden es compartido por toda la app (select de Asesores, Configuración, Horario),
-// ya que reconstruye appData.asesores respetando el nuevo orden de sus llaves.
-function moverAsesorHorario(key, direccion) {
-    const keys = Object.keys(appData.asesores);
-    const idx = keys.indexOf(key);
-    const nuevoIdx = idx + direccion;
-    if (idx === -1 || nuevoIdx < 0 || nuevoIdx >= keys.length) return;
+// Lista de asesores ocultos en la pestaña Horario. Ocultar a alguien aquí NO borra
+// nada de sus datos (ventas, Garex, Insurama, etc.) — solo deja de aparecer en la
+// grilla del horario. Esta lista es independiente de appData.asesores a propósito.
+let horarioOcultos = JSON.parse(localStorage.getItem("horarioOcultos")) || [];
 
-    [keys[idx], keys[nuevoIdx]] = [keys[nuevoIdx], keys[idx]];
+function guardarHorarioOcultos() {
+    localStorage.setItem("horarioOcultos", JSON.stringify(horarioOcultos));
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
+}
+
+// Quita a un asesor únicamente de la pestaña Horario. Sus datos de ventas, Garex,
+// Insurama y su registro en Ventas Asesores/Configuración permanecen intactos.
+function quitarAsesorDeHorario(key) {
+    const nombre = appData.asesores[key]?.nombre || key;
+    if (!confirm(`¿Quitar a "${nombre}" de la pestaña Horario? Sus datos de ventas, Garex e Insurama no se verán afectados; solo dejará de aparecer aquí.`)) return;
+    if (!horarioOcultos.includes(key)) horarioOcultos.push(key);
+    guardarHorarioOcultos();
+    renderHorario();
+    mostrarAlerta(`"${nombre}" se quitó de la pestaña Horario.`, "success");
+}
+
+// ── REORDENAR ARRASTRANDO CON EL CURSOR (o el dedo) ────────────────────────
+// El orden es compartido por toda la app (select de Asesores, Configuración,
+// Horario), ya que reconstruye appData.asesores respetando el nuevo orden de
+// sus llaves. Se usa el manejador (⠿) de cada fila con Pointer Events, que
+// funciona igual con mouse que con pantallas táctiles.
+let horarioArrastreKey = null;
+let horarioArrastreObjetivo = null;
+
+function horarioPointerDown(e, key) {
+    if (e.button !== undefined && e.button !== 0 && e.pointerType === "mouse") return;
+    horarioArrastreKey = key;
+    horarioArrastreObjetivo = null;
+    const celda = e.currentTarget.closest(".horario-nombre-cell");
+    if (celda) celda.classList.add("horario-arrastrando");
+    e.currentTarget.setPointerCapture(e.pointerId);
+    e.preventDefault();
+}
+
+function horarioPointerMove(e) {
+    if (!horarioArrastreKey) return;
+    e.preventDefault();
+    document.querySelectorAll(".horario-nombre-cell.horario-drop-objetivo")
+        .forEach(el => el.classList.remove("horario-drop-objetivo"));
+
+    const elBajoCursor = document.elementFromPoint(e.clientX, e.clientY);
+    const celdaObjetivo = elBajoCursor ? elBajoCursor.closest(".horario-nombre-cell") : null;
+    if (celdaObjetivo && celdaObjetivo.dataset.key && celdaObjetivo.dataset.key !== horarioArrastreKey) {
+        celdaObjetivo.classList.add("horario-drop-objetivo");
+        horarioArrastreObjetivo = celdaObjetivo.dataset.key;
+    } else {
+        horarioArrastreObjetivo = null;
+    }
+}
+
+function horarioPointerUp(e) {
+    document.querySelectorAll(".horario-nombre-cell.horario-arrastrando, .horario-nombre-cell.horario-drop-objetivo")
+        .forEach(el => el.classList.remove("horario-arrastrando", "horario-drop-objetivo"));
+
+    if (horarioArrastreKey && horarioArrastreObjetivo && horarioArrastreKey !== horarioArrastreObjetivo) {
+        moverAsesorAPosicion(horarioArrastreKey, horarioArrastreObjetivo);
+    }
+    horarioArrastreKey = null;
+    horarioArrastreObjetivo = null;
+}
+
+// Mueve keyOrigen justo antes de keyDestino en el orden de appData.asesores
+function moverAsesorAPosicion(keyOrigen, keyDestino) {
+    const keys = Object.keys(appData.asesores);
+    const idxOrigen = keys.indexOf(keyOrigen);
+    if (idxOrigen === -1) return;
+    keys.splice(idxOrigen, 1);
+
+    const idxDestino = keys.indexOf(keyDestino);
+    keys.splice(idxDestino === -1 ? keys.length : idxDestino, 0, keyOrigen);
 
     const asesoresReordenados = {};
     keys.forEach(k => { asesoresReordenados[k] = appData.asesores[k]; });
@@ -2543,23 +2590,27 @@ function renderHorario() {
         }).join("")}
     </div>`;
  
-    const asesorKeys = Object.keys(appData.asesores);
-    asesorKeys.forEach((key, idx) => {
+    const asesorKeys = Object.keys(appData.asesores).filter(k => !horarioOcultos.includes(k));
+
+    if (asesorKeys.length === 0) {
+        html += `<div class="horario-fila"><p style="grid-column: 1 / -1; color:rgba(0,0,0,0.35); font-size:13px; text-align:center; padding:16px 0;">No hay personas en el horario. Agrégalas abajo.</p></div>`;
+    }
+
+    asesorKeys.forEach((key) => {
         const asor = appData.asesores[key];
         const inicial = asor.nombre.trim().charAt(0).toUpperCase() || "?";
-        const esPrimero = idx === 0;
-        const esUltimo = idx === asesorKeys.length - 1;
-        const puedeEliminar = asesorKeys.length > 1;
 
         html += `<div class="horario-fila">
-            <div class="horario-nombre-cell">
+            <div class="horario-nombre-cell" data-key="${key}">
+                <span class="horario-drag-handle"
+                    onpointerdown="horarioPointerDown(event,'${key}')"
+                    onpointermove="horarioPointerMove(event)"
+                    onpointerup="horarioPointerUp(event)"
+                    onpointercancel="horarioPointerUp(event)"
+                    title="Arrastra para reordenar">⠿</span>
                 <span class="horario-avatar">${inicial}</span>
                 <span class="horario-nombre-texto">${asor.nombre}</span>
-                <span class="horario-nombre-acciones">
-                    <button type="button" class="horario-mini-btn" onclick="moverAsesorHorario('${key}',-1)" ${esPrimero ? "disabled" : ""} title="Subir">▲</button>
-                    <button type="button" class="horario-mini-btn" onclick="moverAsesorHorario('${key}',1)" ${esUltimo ? "disabled" : ""} title="Bajar">▼</button>
-                    <button type="button" class="horario-mini-btn horario-mini-btn-del" onclick="eliminarAsesor('${key}')" ${puedeEliminar ? "" : "disabled"} title="${puedeEliminar ? "Eliminar de la lista" : "Debe quedar al menos una persona"}">✕</button>
-                </span>
+                <button type="button" class="horario-mini-btn horario-mini-btn-del" onclick="quitarAsesorDeHorario('${key}')" title="Quitar del horario (no borra sus datos)">✕</button>
             </div>
             ${DIAS_SEMANA.map((d, i) => {
                 const fecha = new Date(lunes);
@@ -2650,7 +2701,7 @@ function copiarHorarioComoTexto() {
     const rango = document.getElementById("horarioTitulo")?.textContent || "";
     let texto = `🗓️ Horario semanal (${rango})\n\n`;
  
-    Object.keys(appData.asesores).forEach(key => {
+    Object.keys(appData.asesores).filter(k => !horarioOcultos.includes(k)).forEach(key => {
         const asor = appData.asesores[key];
         texto += `👤 ${asor.nombre}\n`;
         DIAS_SEMANA.forEach(d => {
