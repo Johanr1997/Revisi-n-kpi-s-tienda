@@ -1792,9 +1792,10 @@ function renombrarAsesor(key) {
 }
 
 // Lógica compartida para dar de alta un asesor: crea el registro, la clínica de
-// experiencia automática, y refresca todo. Se usa desde el botón "+ Agregar persona"
-// de la pestaña Horario, que es el único lugar de la app donde se pueden agregar
-// o eliminar asesores (en Configuración solo se pueden renombrar y ajustar su %).
+// experiencia automática, y refresca todo. Se usa desde el botón "+ Agregar Asesor"
+// de la pestaña Configuración, que es el único lugar de la app donde se agregan
+// asesores nuevos. (Para quitar a alguien de la vista semanal, sin borrar sus
+// datos, se usa el botón ✕ en la pestaña Horario — ver quitarAsesorDeHorario.)
 function crearAsesorConNombre(nombre) {
     // Generar key única
     const keys = Object.keys(appData.asesores);
@@ -2347,29 +2348,41 @@ function guardarHorarioData() {
 // Semana actualmente visible en pantalla (se navega con las flechas ‹ ›)
 let horarioFechaBase = new Date();
  
+// Devuelve una fecha en formato YYYY-MM-DD usando el calendario LOCAL del
+// navegador. A propósito NO se usa fecha.toISOString(), porque esa función
+// convierte a UTC y puede adelantar o atrasar un día según la zona horaria
+// y la hora del día (por eso el horario podía mostrar el lunes equivocado).
+function fechaLocalISO(fecha) {
+    const y = fecha.getFullYear();
+    const m = String(fecha.getMonth() + 1).padStart(2, "0");
+    const d = String(fecha.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
+
 // Dada cualquier fecha, devuelve el ISO (YYYY-MM-DD) del lunes de esa semana
 function obtenerLunesISO(fecha) {
     const d = new Date(fecha);
     const dia = d.getDay(); // 0 = domingo, 1 = lunes, ..., 6 = sábado
     const diferencia = dia === 0 ? -6 : 1 - dia; // si cae domingo, retrocede 6 días; si no, ubica el lunes de esa semana
     d.setDate(d.getDate() + diferencia);
-    return d.toISOString().slice(0, 10);
+    return fechaLocalISO(d);
 }
 function obtenerLunesActualISO() {
     return obtenerLunesISO(horarioFechaBase);
 }
 
-// Agrega una persona nueva. Este es el único lugar de la app donde se pueden
-// agregar asesores; la persona queda disponible también en Ventas/Asesores y
-// Configuración (misma lista, un solo lugar de verdad).
-function agregarPersonaHorario() {
-    const input = document.getElementById("inputNuevaPersonaHorario");
+// Agrega una persona nueva desde la pestaña Configuración. Este es el único
+// lugar de la app donde se pueden agregar asesores; la persona queda
+// disponible también en Ventas/Asesores y Horario (misma lista, un solo
+// lugar de verdad).
+function agregarNuevoAsesor() {
+    const input = document.getElementById("inputNuevoAsesor");
     const nombre = input ? input.value.trim() : "";
-    if (!nombre) { mostrarAlerta("Ingresa un nombre para agregar a la persona.", "warning"); return; }
+    if (!nombre) { mostrarAlerta("Ingresa un nombre para el nuevo asesor.", "warning"); return; }
 
     crearAsesorConNombre(nombre);
     if (input) input.value = "";
-    mostrarAlerta(`"${nombre}" se agregó al horario y a la lista de asesores.`, "success");
+    mostrarAlerta(`Asesor "${nombre}" agregado correctamente. Se creó una clínica de experiencia para él en la pestaña Recordatorios.`, "success");
 }
 
 // Lista de asesores ocultos en la pestaña Horario. Ocultar a alguien aquí NO borra
@@ -2615,7 +2628,7 @@ function renderHorario() {
             ${DIAS_SEMANA.map((d, i) => {
                 const fecha = new Date(lunes);
                 fecha.setDate(fecha.getDate() + i);
-                const fechaISO = fecha.toISOString().slice(0, 10);
+                const fechaISO = fechaLocalISO(fecha);
                 const turno = horarioData[semanaISO] && horarioData[semanaISO][key]
                     ? horarioData[semanaISO][key][d.key]
                     : null;
