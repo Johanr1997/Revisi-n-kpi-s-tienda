@@ -2191,6 +2191,48 @@ body.dark-mode .login-sub, body.dark-mode .login-foot { color: rgba(255,255,255,
     background: #F5F5F7;
     border-radius: 10px;
 }
+.horario-nombre-texto {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+}
+.horario-nombre-acciones {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+}
+.horario-mini-btn {
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #6E6E73;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    padding: 0;
+}
+.horario-mini-btn:hover:not(:disabled) { background: #E5E5EA; color: #1D1D1F; }
+.horario-mini-btn:disabled { opacity: 0.25; cursor: default; }
+.horario-mini-btn-del:hover:not(:disabled) { background: rgba(255,59,48,0.14); color: #FF3B30; }
+ 
+/* Formulario para agregar personas — solo disponible aquí, en Horario */
+.horario-agregar-persona {
+    display: flex;
+    gap: 10px;
+    align-items: end;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+.horario-agregar-persona .form-group { min-width: 200px; }
+ 
 .horario-avatar {
     width: 26px;
     height: 26px;
@@ -2303,4 +2345,6 @@ body.dark-mode .horario-btn-secundario:hover { background: #58585A; }
 @media (max-width: 640px) {
     .horario-acciones { flex-direction: column; }
     .horario-btn-accion { width: 100%; }
+    .horario-agregar-persona { flex-direction: column; align-items: stretch; }
+    .horario-agregar-persona .form-group { min-width: 0; }
 }
