@@ -95,6 +95,8 @@ function limpiarEstadoLocalCompleto() {
     localStorage.removeItem("ventasCalendario");
     localStorage.removeItem("metasSOS");
     localStorage.removeItem("metasTienda");
+    localStorage.removeItem("horarioData");
+    localStorage.removeItem("horarioOcultos");
 
     if (typeof METAS_SOS_DEFAULT !== "undefined") METAS_SOS = { ...METAS_SOS_DEFAULT };
     if (typeof clonarMetasTiendaDefault === "function") METAS_TIENDA = clonarMetasTiendaDefault();
@@ -115,6 +117,8 @@ function limpiarEstadoLocalCompleto() {
         if (typeof asegurarClinicaInterna === "function") asegurarClinicaInterna();
     }
     if (typeof ventasCalendario !== "undefined") ventasCalendario = [];
+    if (typeof horarioData !== "undefined") horarioData = {};
+    if (typeof horarioOcultos !== "undefined") horarioOcultos = [];
 }
 
 // ── ESTADO DE AUTENTICACIÓN ────────────────────────────────────
@@ -163,6 +167,8 @@ function cargarDatosDesdeNube(uid) {
             if (d.recordatoriosData) { recordatoriosData = d.recordatoriosData; localStorage.setItem("recordatoriosData", JSON.stringify(recordatoriosData)); }
             if (d.clinicasData)      { clinicasData = d.clinicasData; localStorage.setItem("clinicasData", JSON.stringify(clinicasData)); }
             if (d.ventasCalendario)  { ventasCalendario = d.ventasCalendario; localStorage.setItem("ventasCalendario", JSON.stringify(ventasCalendario)); }
+            if (d.horarioData)       { horarioData = d.horarioData; localStorage.setItem("horarioData", JSON.stringify(horarioData)); }
+            if (d.horarioOcultos)    { horarioOcultos = d.horarioOcultos; localStorage.setItem("horarioOcultos", JSON.stringify(horarioOcultos)); }
 
             reRenderizarTodo();
             mostrarAlerta("Datos cargados desde la nube.", "success");
@@ -188,6 +194,7 @@ function reRenderizarTodo() {
     if (typeof renderCalendario === "function") renderCalendario();
     if (typeof renderListaPendiente === "function") { renderListaPendiente("garex"); renderListaPendiente("insurama"); }
     if (typeof actualizarCumplimientoAsesorVisual === "function") actualizarCumplimientoAsesorVisual();
+    if (typeof renderHorario === "function") renderHorario();
 }
 
 // ── GUARDADO EN FIRESTORE ──────────────────────────────────────
@@ -209,6 +216,8 @@ function guardarNubeInmediato() {
         recordatoriosData: typeof recordatoriosData !== "undefined" ? recordatoriosData : null,
         clinicasData: typeof clinicasData !== "undefined" ? clinicasData : null,
         ventasCalendario: typeof ventasCalendario !== "undefined" ? ventasCalendario : null,
+        horarioData: typeof horarioData !== "undefined" ? horarioData : null,
+        horarioOcultos: typeof horarioOcultos !== "undefined" ? horarioOcultos : null,
         actualizadoEn: firebase.firestore.FieldValue.serverTimestamp()
     };
     // IMPORTANTE: se guarda SIN "merge" a propósito. Como "datos" ya incluye
