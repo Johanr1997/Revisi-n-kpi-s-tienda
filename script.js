@@ -1698,9 +1698,6 @@ function renderListaAsesoresConfig() {
                 <button onclick="renombrarAsesor('${key}')" class="asesor-config-save">
                     Guardar
                 </button>
-                ${keys.length > 1 ? `<button onclick="eliminarAsesor('${key}')" class="asesor-config-del">
-                    ✕
-                </button>` : `<div></div>`}
             </div>
             <p class="asesor-meta-calculada" id="metaCalculada_${key}">
                 Meta calculada: <strong>$${Math.round(metaCalculada).toLocaleString()}</strong>
@@ -1795,9 +1792,9 @@ function renombrarAsesor(key) {
 }
 
 // Lógica compartida para dar de alta un asesor: crea el registro, la clínica de
-// experiencia automática, y refresca todo. La usan tanto "Configuración" como
-// el botón de "+ Agregar persona" de la pestaña Horario, para que ambos lugares
-// mantengan una única lista de personas siempre sincronizada.
+// experiencia automática, y refresca todo. Se usa desde el botón "+ Agregar persona"
+// de la pestaña Horario, que es el único lugar de la app donde se pueden agregar
+// o eliminar asesores (en Configuración solo se pueden renombrar y ajustar su %).
 function crearAsesorConNombre(nombre) {
     // Generar key única
     const keys = Object.keys(appData.asesores);
@@ -1823,16 +1820,6 @@ function crearAsesorConNombre(nombre) {
     sincronizarYRenderizar();
     renderListaAsesoresConfig();
     return newKey;
-}
-
-function agregarNuevoAsesor() {
-    const input = document.getElementById("inputNuevoAsesor");
-    const nombre = input ? input.value.trim() : "";
-    if (!nombre) { mostrarAlerta("Ingresa un nombre para el nuevo asesor.", "warning"); return; }
-
-    crearAsesorConNombre(nombre);
-    if (input) input.value = "";
-    mostrarAlerta(`Asesor "${nombre}" agregado correctamente. Se creó una clínica de experiencia para él en la pestaña Recordatorios.`, "success");
 }
 
 function eliminarAsesor(key) {
@@ -2357,17 +2344,17 @@ const TIPOS_TURNO = {
 };
  
 const DIAS_SEMANA = [
-    { key: "dom", label: "Dom" },
     { key: "lun", label: "Lun" },
     { key: "mar", label: "Mar" },
     { key: "mie", label: "Mié" },
     { key: "jue", label: "Jue" },
     { key: "vie", label: "Vie" },
-    { key: "sab", label: "Sáb" }
+    { key: "sab", label: "Sáb" },
+    { key: "dom", label: "Dom" }
 ];
  
-// Datos guardados por semana. Clave = fecha ISO del domingo de esa semana.
-// Estructura: { "2026-07-05": { asesor0: { dom: {tipo,texto}, lun: {...}, ... }, asesor1: {...} } }
+// Datos guardados por semana. Clave = fecha ISO del lunes de esa semana.
+// Estructura: { "2026-07-06": { asesor0: { lun: {tipo,texto}, mar: {...}, ... }, asesor1: {...} } }
 let horarioData = JSON.parse(localStorage.getItem("horarioData")) || {};
  
 function guardarHorarioData() {
@@ -2378,20 +2365,21 @@ function guardarHorarioData() {
 // Semana actualmente visible en pantalla (se navega con las flechas ‹ ›)
 let horarioFechaBase = new Date();
  
-// Dada cualquier fecha, devuelve el ISO (YYYY-MM-DD) del domingo de esa semana
-function obtenerDomingoISO(fecha) {
+// Dada cualquier fecha, devuelve el ISO (YYYY-MM-DD) del lunes de esa semana
+function obtenerLunesISO(fecha) {
     const d = new Date(fecha);
-    const dia = d.getDay(); // 0 = domingo
-    d.setDate(d.getDate() - dia);
+    const dia = d.getDay(); // 0 = domingo, 1 = lunes, ..., 6 = sábado
+    const diferencia = dia === 0 ? -6 : 1 - dia; // si cae domingo, retrocede 6 días; si no, ubica el lunes de esa semana
+    d.setDate(d.getDate() + diferencia);
     return d.toISOString().slice(0, 10);
 }
-function obtenerDomingoActualISO() {
-    return obtenerDomingoISO(horarioFechaBase);
+function obtenerLunesActualISO() {
+    return obtenerLunesISO(horarioFechaBase);
 }
 
-// Agrega una persona nueva directamente desde la pestaña Horario. Usa la misma
-// lógica que "+ Agregar Asesor" en Configuración, así que la persona queda
-// disponible también en Ventas/Asesores (misma lista, un solo lugar de verdad).
+// Agrega una persona nueva. Este es el único lugar de la app donde se pueden
+// agregar asesores; la persona queda disponible también en Ventas/Asesores y
+// Configuración (misma lista, un solo lugar de verdad).
 function agregarPersonaHorario() {
     const input = document.getElementById("inputNuevaPersonaHorario");
     const nombre = input ? input.value.trim() : "";
@@ -2452,7 +2440,7 @@ function quitarTurno(asesorKey, diaKey, semanaISO) {
 // Modal para asignar un turno: chips rápidos (guardan y cierran al instante)
 // + campo de texto libre para casos personalizados (requiere presionar "Guardar texto")
 function abrirModalTurno(asesorKey, diaKey, fechaISO, nombreAsesor, diaLabel) {
-    const semanaISO = obtenerDomingoActualISO();
+    const semanaISO = obtenerLunesActualISO();
     const turnoActual = (horarioData[semanaISO] && horarioData[semanaISO][asesorKey])
         ? horarioData[semanaISO][asesorKey][diaKey]
         : null;
@@ -2531,12 +2519,12 @@ function abrirModalTurno(asesorKey, diaKey, fechaISO, nombreAsesor, diaLabel) {
  
 // Dibuja la grilla completa de la semana visible
 function renderHorario() {
-    const semanaISO = obtenerDomingoActualISO();
-    const domingo = new Date(semanaISO + "T00:00:00");
+    const semanaISO = obtenerLunesActualISO();
+    const lunes = new Date(semanaISO + "T00:00:00");
  
-    const sabado = new Date(domingo);
-    sabado.setDate(sabado.getDate() + 6);
-    const rango = `${domingo.toLocaleDateString("es-ES", { day: "numeric", month: "short" })} — ${sabado.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}`;
+    const domingoFin = new Date(lunes);
+    domingoFin.setDate(domingoFin.getDate() + 6);
+    const rango = `${lunes.toLocaleDateString("es-ES", { day: "numeric", month: "short" })} — ${domingoFin.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}`;
  
     const tituloEl = document.getElementById("horarioTitulo");
     if (tituloEl) tituloEl.textContent = rango;
@@ -2549,7 +2537,7 @@ function renderHorario() {
     let html = `<div class="horario-grid-header">
         <div class="horario-head-cell horario-head-asesor">Asesor</div>
         ${DIAS_SEMANA.map((d, i) => {
-            const fecha = new Date(domingo);
+            const fecha = new Date(lunes);
             fecha.setDate(fecha.getDate() + i);
             return `<div class="horario-head-cell">${d.label}<br><span style="font-weight:400; opacity:.7;">${fecha.getDate()}</span></div>`;
         }).join("")}
@@ -2574,7 +2562,7 @@ function renderHorario() {
                 </span>
             </div>
             ${DIAS_SEMANA.map((d, i) => {
-                const fecha = new Date(domingo);
+                const fecha = new Date(lunes);
                 fecha.setDate(fecha.getDate() + i);
                 const fechaISO = fecha.toISOString().slice(0, 10);
                 const turno = horarioData[semanaISO] && horarioData[semanaISO][key]
@@ -2658,7 +2646,7 @@ async function compartirHorarioComoImagen() {
  
 // Genera un resumen de texto plano del horario semanal y lo copia al portapapeles
 function copiarHorarioComoTexto() {
-    const semanaISO = obtenerDomingoActualISO();
+    const semanaISO = obtenerLunesActualISO();
     const rango = document.getElementById("horarioTitulo")?.textContent || "";
     let texto = `🗓️ Horario semanal (${rango})\n\n`;
  
