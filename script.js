@@ -1698,6 +1698,9 @@ function renderListaAsesoresConfig() {
                 <button onclick="renombrarAsesor('${key}')" class="asesor-config-save">
                     Guardar
                 </button>
+                <button onclick="eliminarAsesor('${key}')" class="asesor-config-del" title="Eliminar asesor permanentemente">
+                    Borrar
+                </button>
             </div>
             <p class="asesor-meta-calculada" id="metaCalculada_${key}">
                 Meta calculada: <strong>$${Math.round(metaCalculada).toLocaleString()}</strong>
@@ -1823,6 +1826,54 @@ function crearAsesorConNombre(nombre) {
     return newKey;
 }
 
+
+// Elimina PERMANENTEMENTE a un asesor y todos sus datos acumulados (ventas,
+// montos, unidades, Garex, Insurama, etc.). A diferencia de "quitarAsesorDeHorario"
+// (que solo lo oculta de la vista semanal sin borrar nada), esta acción es
+// irreversible: el asesor deja de existir en toda la app.
+function eliminarAsesor(key) {
+    const asor = appData.asesores[key];
+    if (!asor) return;
+
+    const keys = Object.keys(appData.asesores);
+    if (keys.length <= 1) {
+        mostrarAlerta("Debe quedar al menos un asesor registrado. No se puede eliminar el único asesor.", "warning");
+        return;
+    }
+
+    const nombre = asor.nombre;
+    const confirmacion = prompt(
+        `⚠️ Esta acción eliminará PERMANENTEMENTE a "${nombre}" y todos sus datos acumulados ` +
+        `(ventas, montos, unidades, Garex e Insurama). Esto NO se puede deshacer.\n\n` +
+        `Si quieres continuar, escribe el nombre exacto del asesor ("${nombre}") abajo:`
+    );
+    if (confirmacion === null) return;
+    if (confirmacion.trim() !== nombre) {
+        mostrarAlerta("El nombre no coincide. No se eliminó ningún asesor.", "warning");
+        return;
+    }
+
+    // Si estaba seleccionado en el select de Ventas, se recalculará al re-renderizar
+    delete appData.asesores[key];
+
+    // Quitarlo también de la lista de ocultos del Horario, si estaba ahí
+    if (typeof horarioOcultos !== "undefined") {
+        horarioOcultos = horarioOcultos.filter(k => k !== key);
+        if (typeof guardarHorarioOcultos === "function") guardarHorarioOcultos();
+    }
+
+    sincronizarYRenderizar();
+    renderListaAsesoresConfig();
+    renderSelectAsesor(false);
+    if (typeof renderHorario === "function") renderHorario();
+    actualizarCumplimientoAsesorVisual();
+
+    // Guardado inmediato en la nube para que la eliminación quede reflejada
+    // sin esperar el debounce normal.
+    if (typeof guardarNubeInmediato === "function") guardarNubeInmediato();
+
+    mostrarAlerta(`Asesor "${nombre}" eliminado permanentemente junto con todos sus datos.`, "success");
+}
 
 // Cambia entre las pestañas "Metas por Categoría" / "Acumulados" dentro de la
 // tarjeta de resumen de un asesor específico (pestaña Ventas).
