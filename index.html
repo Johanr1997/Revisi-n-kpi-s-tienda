@@ -567,14 +567,7 @@ Agregar al calendario
  
         <div class="horario-leyenda" id="horarioLeyenda"></div>
 
-        <div class="horario-agregar-persona">
-            <div class="form-group" style="margin-bottom: 0; flex: 1;">
-                <label for="inputNuevaPersonaHorario">Agregar persona al horario:</label>
-                <input type="text" id="inputNuevaPersonaHorario" placeholder="Ej: Carlos M.">
-            </div>
-            <button type="button" class="btn-primary" style="width: auto; padding: 10px 20px; white-space: nowrap;" onclick="agregarPersonaHorario()">+ Agregar persona</button>
-        </div>
-        <p style="font-size: 12px; color: rgba(0,0,0,0.4); margin-top: 6px;">Arrastra el ícono ⠿ junto a cada nombre para reordenar. El botón ✕ solo quita a la persona de esta pestaña; sus datos de ventas, Garex e Insurama no se borran.</p>
+        <p style="font-size: 12px; color: rgba(0,0,0,0.4); margin-top: 6px;">Arrastra el ícono ⠿ junto a cada nombre para reordenar. El botón ✕ solo quita a la persona de esta pestaña; sus datos de ventas, Garex e Insurama no se borran. Para agregar un asesor nuevo, ve a la pestaña ⚙️ Configuración.</p>
  
         <div class="horario-acciones">
             <button type="button" class="btn-primary horario-btn-accion" onclick="compartirHorarioComoImagen()">Descargar / Compartir imagen</button>
@@ -589,9 +582,16 @@ Agregar al calendario
 <!-- Panel: Gestión de Asesores -->
 <div class="v-section-label">Gestión de Asesores</div>
 <div class="v-glass a-card">
-<p style="font-size: 13px; color: rgba(0,0,0,0.45); margin-bottom: 20px;">Edita el nombre de cada asesor y asígnale el % de la Meta Mensual de la Tienda que le corresponde; la meta en $ de cada uno se calcula automáticamente. Los datos acumulados de cada asesor se conservan al renombrar. Para agregar o eliminar asesores, ve a la pestaña Horario.</p>
+<p style="font-size: 13px; color: rgba(0,0,0,0.45); margin-bottom: 20px;">Agrega nuevos asesores, edita sus nombres y asígnales el % de la Meta Mensual de la Tienda que les corresponde; la meta en $ de cada uno se calcula automáticamente. Los datos acumulados de cada asesor se conservan al renombrar. Para quitar a alguien de la vista semanal sin borrar sus datos, ve a la pestaña Horario.</p>
 <p style="font-size: 12px; color: rgba(0,0,0,0.4); margin-top: -12px; margin-bottom: 20px;">💡 Define primero la Meta Mensual de la Tienda más abajo — de lo contrario, el % no tendrá una base sobre la cual calcular.</p>
 <div id="listaAsesoresConfig" style="margin-bottom: 16px;"></div>
+<div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end;">
+<div class="form-group" style="margin-bottom: 0;">
+<label for="inputNuevoAsesor">Nombre del nuevo asesor:</label>
+<input type="text" id="inputNuevoAsesor" placeholder="Ej: Carlos M.">
+</div>
+<button class="btn-primary" style="width: auto; padding: 10px 20px; white-space: nowrap;" onclick="agregarNuevoAsesor()">+ Agregar Asesor</button>
+</div>
 </div>
 <!-- Panel: Metas del Plan SOS -->
 <div class="v-section-label">Metas del Plan SOS</div>
