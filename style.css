@@ -2129,9 +2129,10 @@ body.dark-mode .login-sub, body.dark-mode .login-foot { color: rgba(255,255,255,
     -webkit-overflow-scrolling: touch;
 }
  
-/* Área que se captura como imagen: SIEMPRE fondo blanco y texto oscuro,
-   sin importar si la app está en modo oscuro, para que la captura se vea
-   bien y consistente al compartirla con cualquier compañero. */
+/* Área que se captura como imagen. Estos son los colores CLAROS por defecto
+   (modo claro), y también los que se fuerzan durante la exportación real
+   (clase .modo-captura) sin importar el tema — ver el bloque "MODO OSCURO"
+   más abajo para los estilos que se aplican solo en pantalla. */
 .horario-captura-area {
     background: #FFFFFF;
     border-radius: 16px;
@@ -2346,11 +2347,69 @@ body.dark-mode .login-sub, body.dark-mode .login-foot { color: rgba(255,255,255,
 }
 .horario-chip:hover { transform: translateY(-1px); filter: brightness(0.95); }
  
+.horario-vacio-msg { color: rgba(0,0,0,0.35); }
+
 /* ═══════════════════════════════════════════════════════════════
    MODO OSCURO — pestaña Horario
-   (la grilla capturable se mantiene siempre clara a propósito;
-   solo ajustamos lo que queda fuera del área de captura)
+   La grilla se adapta visualmente al modo oscuro para verse bien en
+   pantalla, PERO al generar la imagen para compartir (se agrega la
+   clase .modo-captura justo durante la captura con html2canvas) se
+   fuerza de vuelta a los colores claros originales, así la imagen
+   compartida siempre se ve igual sin importar el tema de quien la genera.
    ═══════════════════════════════════════════════════════════════ */
+body.dark-mode .horario-captura-area:not(.modo-captura) {
+    background: #1C1C1E;
+}
+body.dark-mode .horario-captura-area:not(.modo-captura) .horario-captura-header {
+    border-bottom-color: rgba(255,255,255,0.12);
+}
+body.dark-mode .horario-captura-area:not(.modo-captura) .horario-captura-titulo {
+    color: #F2F2F7;
+}
+body.dark-mode .horario-captura-area:not(.modo-captura) .horario-captura-marca {
+    color: rgba(255,255,255,0.4);
+}
+body.dark-mode .horario-captura-area:not(.modo-captura) .horario-head-cell {
+    color: rgba(255,255,255,0.5);
+}
+body.dark-mode .horario-captura-area:not(.modo-captura) .horario-vacio-msg {
+    color: rgba(255,255,255,0.4);
+}
+body.dark-mode .horario-captura-area:not(.modo-captura) .horario-nombre-cell {
+    background: rgba(255,255,255,0.08);
+    color: #F2F2F7;
+}
+body.dark-mode .horario-captura-area:not(.modo-captura) .horario-nombre-cell.horario-drop-objetivo {
+    background: rgba(10,132,255,0.28);
+}
+body.dark-mode .horario-captura-area:not(.modo-captura) .horario-drag-handle {
+    color: rgba(255,255,255,0.35);
+}
+body.dark-mode .horario-captura-area:not(.modo-captura) .horario-drag-handle:hover {
+    color: rgba(255,255,255,0.7);
+}
+body.dark-mode .horario-captura-area:not(.modo-captura) .horario-mini-btn {
+    color: rgba(255,255,255,0.55);
+}
+body.dark-mode .horario-captura-area:not(.modo-captura) .horario-mini-btn:hover:not(:disabled) {
+    background: rgba(255,255,255,0.14);
+    color: #F2F2F7;
+}
+body.dark-mode .horario-captura-area:not(.modo-captura) .horario-mini-btn-del:hover:not(:disabled) {
+    background: rgba(255,69,58,0.2);
+    color: #FF453A;
+}
+body.dark-mode .horario-captura-area:not(.modo-captura) .horario-celda {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.1);
+}
+body.dark-mode .horario-captura-area:not(.modo-captura) .horario-celda:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.18);
+}
+body.dark-mode .horario-captura-area:not(.modo-captura) .horario-celda-vacia {
+    color: rgba(255,255,255,0.25);
+}
 body.dark-mode .horario-leyenda { color: rgba(255,255,255,0.75) !important; }
 body.dark-mode .horario-btn-secundario { background: #48484A; }
 body.dark-mode .horario-btn-secundario:hover { background: #58585A; }
