@@ -542,36 +542,45 @@ Agregar al calendario
 </div>
 <!-- PESTAÑA HORARIO — LIQUID GLASS -->
 <div id="horario" class="seccion-dashboard" style="position: relative; isolation: isolate;">
-    <div class="h-orb h-orb-blue"></div>
-    <div class="h-orb h-orb-green"></div>
- 
-    <div class="v-section-label">Horario Semanal</div>
- 
-    <div class="v-glass a-card cal-wrapper">
-        <div class="cal-header">
-            <button class="cal-nav-btn" onclick="horarioNavegar(-1)">‹</button>
-            <div class="cal-titulo" id="horarioTitulo"></div>
-            <button class="cal-nav-btn" onclick="horarioNavegar(1)">›</button>
-            <button class="cal-hoy-btn" onclick="horarioIrHoy()">Esta semana</button>
-        </div>
- 
-        <div class="horario-scroll-wrap">
-            <div id="horarioCapturaArea" class="horario-captura-area">
-                <div class="horario-captura-header">
-                    <span id="horarioCapturaTitulo" class="horario-captura-titulo"></span>
-                    <span class="horario-captura-marca">Control de Ventas</span>
-                </div>
-                <div id="horarioGrid" class="horario-grid"></div>
+    <div class="h-orb h-orb-blue"></div>
+    <div class="h-orb h-orb-green"></div>
+ 
+    <div class="v-section-label">Horario Semanal</div>
+ 
+    <div class="v-glass a-card cal-wrapper">
+        <div class="cal-header">
+            <button class="cal-nav-btn" onclick="horarioNavegar(-1)">‹</button>
+            <div class="cal-titulo" id="horarioTitulo"></div>
+            <button class="cal-nav-btn" onclick="horarioNavegar(1)">›</button>
+            <button class="cal-hoy-btn" onclick="horarioIrHoy()">Esta semana</button>
+        </div>
+ 
+        <div class="horario-scroll-wrap">
+            <div id="horarioCapturaArea" class="horario-captura-area">
+                <div class="horario-captura-header">
+                    <span id="horarioCapturaTitulo" class="horario-captura-titulo"></span>
+                    <span class="horario-captura-marca">Control de Ventas</span>
+                </div>
+                <div id="horarioGrid" class="horario-grid"></div>
+            </div>
+        </div>
+ 
+        <div class="horario-leyenda" id="horarioLeyenda"></div>
+
+        <div class="horario-agregar-persona">
+            <div class="form-group" style="margin-bottom: 0; flex: 1;">
+                <label for="inputNuevaPersonaHorario">Agregar persona al horario:</label>
+                <input type="text" id="inputNuevaPersonaHorario" placeholder="Ej: Carlos M.">
             </div>
+            <button type="button" class="btn-primary" style="width: auto; padding: 10px 20px; white-space: nowrap;" onclick="agregarPersonaHorario()">+ Agregar persona</button>
         </div>
- 
-        <div class="horario-leyenda" id="horarioLeyenda"></div>
- 
-        <div class="horario-acciones">
-            <button type="button" class="btn-primary horario-btn-accion" onclick="compartirHorarioComoImagen()">Descargar / Compartir imagen</button>
-            <button type="button" class="btn-primary horario-btn-accion horario-btn-secundario" onclick="copiarHorarioComoTexto()">Copiar como texto</button>
-        </div>
-    </div>
+        <p style="font-size: 12px; color: rgba(0,0,0,0.4); margin-top: 6px;">Usa las flechas ▲▼ junto a cada nombre para reordenar, y ✕ para eliminar. Estos son los únicos lugares donde se pueden agregar o quitar personas.</p>
+ 
+        <div class="horario-acciones">
+            <button type="button" class="btn-primary horario-btn-accion" onclick="compartirHorarioComoImagen()">Descargar / Compartir imagen</button>
+            <button type="button" class="btn-primary horario-btn-accion horario-btn-secundario" onclick="copiarHorarioComoTexto()">Copiar como texto</button>
+        </div>
+    </div>
 </div>
 <!-- PESTAÑA CONFIGURACIÓN — LIQUID GLASS -->
 <div id="configuracion" class="seccion-dashboard" style="position: relative; isolation: isolate;">
@@ -580,16 +589,9 @@ Agregar al calendario
 <!-- Panel: Gestión de Asesores -->
 <div class="v-section-label">Gestión de Asesores</div>
 <div class="v-glass a-card">
-<p style="font-size: 13px; color: rgba(0,0,0,0.45); margin-bottom: 20px;">Agrega nuevos asesores, edita sus nombres y asígnales el % de la Meta Mensual de la Tienda que les corresponde; la meta en $ de cada uno se calcula automáticamente. Los datos acumulados de cada asesor se conservan al renombrar.</p>
+<p style="font-size: 13px; color: rgba(0,0,0,0.45); margin-bottom: 20px;">Edita el nombre de cada asesor y asígnale el % de la Meta Mensual de la Tienda que le corresponde; la meta en $ de cada uno se calcula automáticamente. Los datos acumulados de cada asesor se conservan al renombrar. Para agregar o eliminar asesores, ve a la pestaña Horario.</p>
 <p style="font-size: 12px; color: rgba(0,0,0,0.4); margin-top: -12px; margin-bottom: 20px;">💡 Define primero la Meta Mensual de la Tienda más abajo — de lo contrario, el % no tendrá una base sobre la cual calcular.</p>
 <div id="listaAsesoresConfig" style="margin-bottom: 16px;"></div>
-<div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end;">
-<div class="form-group" style="margin-bottom: 0;">
-<label for="inputNuevoAsesor">Nombre del nuevo asesor:</label>
-<input type="text" id="inputNuevoAsesor" placeholder="Ej: Carlos M.">
-</div>
-<button class="btn-primary" style="width: auto; padding: 10px 20px; white-space: nowrap;" onclick="agregarNuevoAsesor()">+ Agregar Asesor</button>
-</div>
 </div>
 <!-- Panel: Metas del Plan SOS -->
 <div class="v-section-label">Metas del Plan SOS</div>
