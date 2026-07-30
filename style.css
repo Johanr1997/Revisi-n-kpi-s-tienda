@@ -422,6 +422,25 @@ body.dark-mode .mes-selector-badge { color: #30D158; background: rgba(48,209,88,
 }
 .v-sos-meta { font-size: 10px; color: rgba(0,0,0,0.28); }
 
+/* Comparativa mes a mes: badge "▲/▼ X% vs mes anterior" junto a un KPI */
+.v-cmp-wrap { margin-top: 6px; min-height: 18px; }
+.v-cmp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+.v-cmp-badge.v-cmp-up      { color: #248A3D; background: rgba(52,199,89,0.14); }
+.v-cmp-badge.v-cmp-down    { color: #C92F25; background: rgba(255,59,48,0.12); }
+.v-cmp-badge.v-cmp-neutral { color: #6E6E73; background: rgba(0,0,0,0.06); }
+body.dark-mode .v-cmp-badge.v-cmp-up      { color: #30D158 !important; background: rgba(48,209,88,0.18) !important; }
+body.dark-mode .v-cmp-badge.v-cmp-down    { color: #FF6961 !important; background: rgba(255,69,58,0.18) !important; }
+body.dark-mode .v-cmp-badge.v-cmp-neutral { color: rgba(255,255,255,0.65) !important; background: rgba(255,255,255,0.08) !important; }
+
 /* Colores de barra según estado */
 .v-sos-card.verde   .v-sos-fill { background: #34C759; }
 .v-sos-card.amarillo .v-sos-fill { background: #FF9500; }
@@ -1490,6 +1509,57 @@ body.dark-mode .bitacora-item-fecha { color: rgba(255,255,255,0.6); }
     flex-shrink: 0;
 }
 .theme-toggle-btn:hover { background: rgba(0,0,0,0.06); transform: scale(1.06); }
+
+/* Indicador de sincronización con la nube (junto a las pestañas de la navbar) */
+.sync-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    background: rgba(0,0,0,0.05);
+    color: #6E6E73;
+    transition: background 0.2s, color 0.2s;
+}
+.sync-status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+}
+.sync-status.sync-status-pendiente,
+.sync-status.sync-status-guardando {
+    color: #B37800;
+    background: rgba(255,149,0,0.14);
+}
+.sync-status.sync-status-pendiente .sync-status-dot,
+.sync-status.sync-status-guardando .sync-status-dot {
+    animation: syncPulse 1s ease-in-out infinite;
+}
+.sync-status.sync-status-guardado { color: #248A3D; background: rgba(52,199,89,0.14); }
+.sync-status.sync-status-error,
+.sync-status.sync-status-sin-conexion { color: #C92F25; background: rgba(255,59,48,0.13); }
+
+@keyframes syncPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+
+body.dark-mode .sync-status { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.65); }
+body.dark-mode .sync-status.sync-status-pendiente,
+body.dark-mode .sync-status.sync-status-guardando { color: #FFB340 !important; background: rgba(255,159,10,0.18) !important; }
+body.dark-mode .sync-status.sync-status-guardado { color: #30D158 !important; background: rgba(48,209,88,0.18) !important; }
+body.dark-mode .sync-status.sync-status-error,
+body.dark-mode .sync-status.sync-status-sin-conexion { color: #FF6961 !important; background: rgba(255,69,58,0.18) !important; }
+
+@media (max-width: 640px) {
+    .sync-status .sync-status-text { display: none; }
+    .sync-status { padding: 6px; }
+}
 
 /* Separador visual entre las pestañas y el botón de modo oscuro/claro */
 .navbar-divider {

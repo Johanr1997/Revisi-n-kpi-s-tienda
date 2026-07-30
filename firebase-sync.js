@@ -18,6 +18,50 @@ let usuarioActualUID = null;
 let cargaInicialCompleta = false; // evita guardar en la nube antes de haber cargado los datos del usuario
 let timeoutGuardadoNube = null;
 
+// ── INDICADOR DE SINCRONIZACIÓN CON LA NUBE ────────────────────
+// Estados posibles:
+//   "pendiente"     hay cambios locales sin subir todavía (dentro del debounce de 900ms)
+//   "guardando"     la subida a Firestore está en curso ahora mismo
+//   "guardado"      la última subida terminó con éxito
+//   "error"         la última subida falló (ver consola para el detalle)
+//   "sin-conexion"  el navegador detectó que no hay internet
+// Se actualiza desde programarGuardadoNube()/guardarNubeInmediato() y desde los eventos
+// online/offline del navegador, para que el gerente siempre sepa si sus datos ya quedaron
+// respaldados en la nube antes de cerrar la pestaña.
+const SYNC_STATUS_CONFIG = {
+    pendiente:     { texto: "Cambios sin guardar…", clase: "sync-status-pendiente" },
+    guardando:     { texto: "Guardando…",           clase: "sync-status-guardando" },
+    guardado:      { texto: "Guardado en la nube",  clase: "sync-status-guardado" },
+    error:         { texto: "Error al guardar",     clase: "sync-status-error" },
+    "sin-conexion": { texto: "Sin conexión",        clase: "sync-status-sin-conexion" }
+};
+
+function actualizarIndicadorSync(estado) {
+    const el = document.getElementById("syncStatusIndicator");
+    if (!el) return;
+    const cfg = SYNC_STATUS_CONFIG[estado];
+    if (!cfg) return;
+    el.className = "sync-status " + cfg.clase;
+    el.title = cfg.texto;
+    const textoEl = el.querySelector(".sync-status-text");
+    if (textoEl) textoEl.textContent = cfg.texto;
+    el.style.display = "inline-flex";
+}
+
+function ocultarIndicadorSync() {
+    const el = document.getElementById("syncStatusIndicator");
+    if (el) el.style.display = "none";
+}
+
+// Si el navegador pierde conexión, se refleja de inmediato aunque no haya un guardado en
+// curso; al recuperarla, el próximo cambio (o el guardado ya pendiente) lo actualizará solo.
+window.addEventListener("offline", () => {
+    if (usuarioActualUID) actualizarIndicadorSync("sin-conexion");
+});
+window.addEventListener("online", () => {
+    if (usuarioActualUID) actualizarIndicadorSync("guardado");
+});
+
 // ── DOMINIO OBLIGATORIO ────────────────────────────────────────
 // Solo se permite iniciar sesión con un correo que termine en @ishopgroup.com
 const DOMINIO_PERMITIDO = "@ishopgroup.com";
@@ -145,6 +189,7 @@ auth.onAuthStateChanged(user => {
         if (btnCerrarSesion) btnCerrarSesion.style.display = "none";
         const elTienda = document.getElementById("nombreTiendaNav");
         if (elTienda) elTienda.textContent = "";
+        ocultarIndicadorSync();
     }
 });
 
@@ -217,6 +262,7 @@ function cargarDatosDesdeNube(uid) {
 
             reRenderizarTodo();
             mostrarAlerta("Datos cargados desde la nube.", "success");
+            actualizarIndicadorSync("guardado");
         } else {
             // Usuario nuevo: aún no tiene datos en la nube, se sube lo que haya localmente (o valores vacíos)
             guardarNubeInmediato();
@@ -225,6 +271,7 @@ function cargarDatosDesdeNube(uid) {
     }).catch(err => {
         console.error("Error cargando datos de Firebase:", err);
         mostrarAlerta("No se pudieron cargar los datos de la nube. Revisa tu conexión.", "warning");
+        actualizarIndicadorSync("error");
         cargaInicialCompleta = true; // permite seguir trabajando localmente aunque falle la nube
     });
 }
@@ -256,12 +303,14 @@ function reRenderizarTodo() {
 // agrupar varios cambios seguidos en un solo guardado.
 function programarGuardadoNube() {
     if (!usuarioActualUID || !cargaInicialCompleta) return;
+    actualizarIndicadorSync("pendiente");
     clearTimeout(timeoutGuardadoNube);
     timeoutGuardadoNube = setTimeout(guardarNubeInmediato, 900);
 }
 
 function guardarNubeInmediato() {
     if (!usuarioActualUID) return;
+    actualizarIndicadorSync("guardando");
     // datosPorMes ya contiene, para el mes seleccionado, exactamente lo mismo que appData/
     // METAS_SOS/METAS_TIENDA (son la misma referencia en memoria), así que basta con subir
     // datosPorMes completo — incluye el histórico de todos los meses, no solo el actual.
@@ -284,5 +333,9 @@ function guardarNubeInmediato() {
     // localmente "resucitarían" al recargar la página. Un guardado completo
     // garantiza que la nube siempre refleje exactamente lo que hay en pantalla.
     db.collection("usuarios").doc(usuarioActualUID).set(datos)
-        .catch(err => console.error("Error guardando en Firebase:", err));
+        .then(() => actualizarIndicadorSync("guardado"))
+        .catch(err => {
+            console.error("Error guardando en Firebase:", err);
+            actualizarIndicadorSync("error");
+        });
 }

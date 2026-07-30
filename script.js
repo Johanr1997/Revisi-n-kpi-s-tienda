@@ -1288,6 +1288,78 @@ function eliminarBitacora(id) {
     mostrarAlerta("Anotación eliminada de la bitácora.", "success");
 }
 
+// ═══════════════════════════════════════════
+// COMPARATIVA MES A MES
+// ═══════════════════════════════════════════
+// Calcula los mismos KPIs headline (ventas acumuladas, conversión, accesorización, ticket
+// promedio) para un mes cualquiera de datosPorMes, sin depender de que ese mes esté
+// actualmente seleccionado. Se usa para comparar el mes que se está viendo contra el mes
+// inmediato anterior. Devuelve null si ese mes no existe en datosPorMes (nunca se visitó).
+function calcularResumenKPIsMes(mesISO) {
+    const mesData = datosPorMes[mesISO];
+    if (!mesData || !mesData.appData) return null;
+
+    const asesores = mesData.appData.asesores || {};
+    let ventaSemanalSolo = 0;
+    let garexMontoSolo = 0;
+    const montosTienda = { mac: 0, ipad: 0, iphone: 0, watch: 0, airpods: 0, audio: 0, acc_apple: 0, acc_terceros: 0 };
+
+    Object.values(asesores).forEach(asor => {
+        ventaSemanalSolo += asor.ventaSemanal || 0;
+        garexMontoSolo += sumarMontoVenta(asor.ventasGarex || []);
+        const m = asor.montos || {};
+        Object.keys(montosTienda).forEach(k => { montosTienda[k] += m[k] || 0; });
+    });
+
+    const inicio = mesData.appData.inicio || {};
+    const accesorizacion = inicio.accesorizacionManual
+        ? (inicio.accesorizacionManualValor || 0)
+        : calcularAccesorizacion(montosTienda);
+
+    return {
+        ventasTotalMostrado: conIVA(ventaSemanalSolo) + garexMontoSolo,
+        conversion: inicio.conversion || 0,
+        accesorizacion,
+        ticket: inicio.ticket || 0
+    };
+}
+
+// Arma el HTML de un badge "▲/▼ X% vs mes anterior" a partir de dos valores. Si no hay mes
+// anterior con datos (mesData === null), no se muestra nada (evita comparar contra un mes
+// que nunca se llegó a usar). Si el mes anterior existe pero el valor era 0, se marca como
+// "nuevo" porque el % de cambio no se puede calcular (división entre cero).
+function formatearComparativaMes(actual, anterior) {
+    if (anterior === null || anterior === undefined) return "";
+    actual = actual || 0;
+    if (anterior === 0) {
+        if (actual === 0) return `<span class="v-cmp-badge v-cmp-neutral">Sin cambios vs mes anterior</span>`;
+        return `<span class="v-cmp-badge v-cmp-up">▲ Nuevo vs mes anterior</span>`;
+    }
+    const delta = ((actual - anterior) / Math.abs(anterior)) * 100;
+    if (Math.abs(delta) < 0.05) return `<span class="v-cmp-badge v-cmp-neutral">Sin cambios vs mes anterior</span>`;
+    const signo = delta > 0 ? "▲" : "▼";
+    const clase = delta > 0 ? "v-cmp-up" : "v-cmp-down";
+    return `<span class="v-cmp-badge ${clase}">${signo} ${Math.abs(delta).toFixed(1)}% vs mes anterior</span>`;
+}
+
+// Pinta los 4 badges de comparación mes a mes (ventas, conversión, accesorización, ticket)
+// contra el mes calendario inmediatamente anterior a mesSeleccionado.
+function renderComparativaMesAMes(resumenMesActual) {
+    const contenedorVentas = document.getElementById("cmpVentasAcumuladas");
+    const contenedorConv   = document.getElementById("cmpConversion");
+    const contenedorAcc    = document.getElementById("cmpAccesorizacion");
+    const contenedorTicket = document.getElementById("cmpTicket");
+    if (!contenedorVentas && !contenedorConv && !contenedorAcc && !contenedorTicket) return;
+
+    const mesAnteriorISO = sumarMesesISO(mesSeleccionado, -1);
+    const resumenAnterior = calcularResumenKPIsMes(mesAnteriorISO);
+
+    if (contenedorVentas) contenedorVentas.innerHTML = formatearComparativaMes(resumenMesActual.ventasTotalMostrado, resumenAnterior ? resumenAnterior.ventasTotalMostrado : null);
+    if (contenedorConv)   contenedorConv.innerHTML   = formatearComparativaMes(resumenMesActual.conversion,          resumenAnterior ? resumenAnterior.conversion          : null);
+    if (contenedorAcc)    contenedorAcc.innerHTML     = formatearComparativaMes(resumenMesActual.accesorizacion,      resumenAnterior ? resumenAnterior.accesorizacion      : null);
+    if (contenedorTicket) contenedorTicket.innerHTML  = formatearComparativaMes(resumenMesActual.ticket,              resumenAnterior ? resumenAnterior.ticket              : null);
+}
+
 // RENDERS MÚLTIPLES
 function renderTodo() {
     renderSelectAsesor();
@@ -1568,6 +1640,16 @@ function renderTodo() {
     }
     document.getElementById("accesorizacionReal").textContent = `${appData.inicio.accesorizacion.toFixed(1)}%`;
     document.getElementById("ticketReal").textContent = `$${appData.inicio.ticket.toLocaleString()}`;
+
+    // Comparativa mes a mes (badges "▲/▼ X% vs mes anterior" junto a los 4 KPIs headline)
+    if (typeof renderComparativaMesAMes === "function") {
+        renderComparativaMesAMes({
+            ventasTotalMostrado: acumuladoTotalVentasMostrado,
+            conversion: appData.inicio.conversion,
+            accesorizacion: appData.inicio.accesorizacion,
+            ticket: appData.inicio.ticket
+        });
+    }
 
     const avisoAccManual = document.getElementById("v_accManualAviso");
     if (avisoAccManual) avisoAccManual.style.display = appData.inicio.accesorizacionManual ? "flex" : "none";

@@ -30,6 +30,10 @@
 <li class="tab-btn" data-target="horario">Horario</li>
 <li class="tab-btn tab-icon-only" data-target="configuracion" title="Configuración">⚙️</li>
 </ul>
+<span id="syncStatusIndicator" class="sync-status" style="display:none;" title="Estado de sincronización con la nube">
+<span class="sync-status-dot"></span>
+<span class="sync-status-text">—</span>
+</span>
 <div class="navbar-divider"></div>
 <button type="button" class="theme-toggle-btn" id="btnThemeToggle" onclick="toggleModoOscuro()" title="Cambiar a modo oscuro">☾</button>
 <button type="button" class="theme-toggle-btn" id="btnCerrarSesion" onclick="cerrarSesionFirebase()" title="Cerrar sesión" style="display:none;">⏻</button>
@@ -296,6 +300,7 @@ Precio Insurama al cliente (c/u): <strong id="v_insuramaPrecioCalculado">$0</str
 <span class="v-eyebrow">Ventas acumuladas</span>
 <div class="v-hero-number" id="ventasAcumuladas">$0</div>
 <div class="v-hero-sub">Meta tienda acumulada: <span id="v_metaTotalTienda">$0</span></div>
+<div id="cmpVentasAcumuladas" class="v-cmp-wrap"></div>
 <label class="cal-checkbox-wrap" for="checkIVA" style="margin-top:8px;">
 <input type="checkbox" id="checkIVA" onchange="toggleIVA13()">
 <span>IVA </span>
@@ -351,6 +356,7 @@ id="v_arcCircle"/>
 <div class="v-sos-val" id="conversionReal">0%</div>
 <div class="v-sos-track"><div class="v-sos-fill" id="fillConversion"></div></div>
 <div class="v-sos-meta">Meta <span id="metaVisualConv">25.0%</span></div>
+<div id="cmpConversion" class="v-cmp-wrap"></div>
 </div>
 <div class="v-glass v-sos-card" id="cardAccesorizacion">
 <div class="v-sos-dot" id="dotAccesorizacion"></div>
@@ -358,6 +364,7 @@ id="v_arcCircle"/>
 <div class="v-sos-val" id="accesorizacionReal">0%</div>
 <div class="v-sos-track"><div class="v-sos-fill" id="fillAccesorizacion"></div></div>
 <div class="v-sos-meta">Meta <span id="metaVisualAcc">29.4%</span></div>
+<div id="cmpAccesorizacion" class="v-cmp-wrap"></div>
 </div>
 <div class="v-glass v-sos-card" id="cardTicket">
 <div class="v-sos-dot" id="dotTicket"></div>
@@ -365,6 +372,7 @@ id="v_arcCircle"/>
 <div class="v-sos-val" id="ticketReal">$0</div>
 <div class="v-sos-track"><div class="v-sos-fill" id="fillTicket"></div></div>
 <div class="v-sos-meta">Meta <span id="metaVisualTick">$305</span></div>
+<div id="cmpTicket" class="v-cmp-wrap"></div>
 </div>
 </div>
 <!-- PROTECCIONES Y ACTIVACIÓN -->
