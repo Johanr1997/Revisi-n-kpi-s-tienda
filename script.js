@@ -2436,7 +2436,16 @@ let calAño  = new Date().getFullYear();
 let calMes  = new Date().getMonth(); // 0-11
 let calDiaSeleccionado = null;
 
+// Las flechas ‹ › del mini calendario ahora mueven el mes de TODA la página (el mismo
+// mesSeleccionado que usa el selector de arriba), en vez de navegar el calendario por su
+// cuenta. Así los dos quedan siempre en el mismo mes, sin importar desde cuál de los dos
+// se navegue.
 function calNavegar(delta) {
+    if (typeof cambiarMesSeleccionado === "function") {
+        cambiarMesSeleccionado(delta);
+        return;
+    }
+    // Respaldo por si cambiarMesSeleccionado no está disponible: navega solo el calendario.
     calMes += delta;
     if (calMes > 11) { calMes = 0; calAño++; }
     if (calMes < 0)  { calMes = 11; calAño--; }
@@ -2446,7 +2455,14 @@ function calNavegar(delta) {
     if (detalle) detalle.style.display = "none";
 }
 
+// El botón "Hoy" del mini calendario también lleva a toda la página de vuelta al mes actual.
 function calIrHoy() {
+    if (typeof irAMesActual === "function" && typeof mesSeleccionado !== "undefined" && typeof mesISOActual === "function") {
+        if (mesSeleccionado !== mesISOActual()) {
+            irAMesActual();
+            return;
+        }
+    }
     const hoy = new Date();
     calAño = hoy.getFullYear();
     calMes = hoy.getMonth();
