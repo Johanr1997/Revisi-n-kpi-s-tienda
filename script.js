@@ -527,8 +527,15 @@ function irAlMesSeleccionadoActual() {
     renderSelectAsesor(false);
     actualizarCumplimientoAsesorVisual();
     renderTodo();
+    // El mini calendario (pestaña Recordatorios) tiene su propia navegación (calAño/calMes),
+    // independiente del selector de mes de arriba. Se sincroniza aquí para que, al cambiar
+    // de mes con el selector, el calendario salte directo a ese mes en vez de quedarse
+    // mostrando el mes que tuviera navegado antes (lo que hacía parecer que "otros meses"
+    // se seguían mezclando).
+    if (typeof sincronizarCalendarioConMesSeleccionado === "function") sincronizarCalendarioConMesSeleccionado();
     renderCalendario();
     if (typeof renderRecordatorios === "function") renderRecordatorios();
+    if (typeof renderClinicas === "function") renderClinicas();
     if (typeof renderHorario === "function") renderHorario();
     actualizarSelectorMes();
 }
@@ -696,6 +703,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Pintar el selector de mes (‹ Mes Año ›) del encabezado
     actualizarSelectorMes();
+
+    // Si mesSeleccionado quedó en un mes distinto al real (por ejemplo, se cerró la página
+    // viendo un mes pasado), el mini calendario de Recordatorios debe abrir directo en ese
+    // mes en vez de mostrar siempre el mes real actual.
+    if (typeof sincronizarCalendarioConMesSeleccionado === "function") sincronizarCalendarioConMesSeleccionado();
 });
 
 function onSelectAsesorChange() {
@@ -2353,16 +2365,30 @@ function eliminarClinica(id) {
     renderCalendario();
 }
 
+// La clínica interna fija (sin fecha propia) siempre se muestra, sin importar el mes que se
+// esté viendo. Las demás (con fecha programada o ya realizada) solo se muestran si esa fecha
+// cae dentro de mesSeleccionado, igual que Recordatorios.
+function clinicaPerteneceAlMesSeleccionado(c) {
+    if (!c.fecha) return true;
+    const fechaRelevante = (c.realizada && c.fechaRealizada) ? c.fechaRealizada : c.fecha;
+    return !!fechaRelevante && fechaRelevante.startsWith(mesSeleccionado);
+}
+
 function renderClinicas() {
     const cont = document.getElementById("listaClinicas");
     if (!cont) return;
 
-    if (clinicasData.length === 0) {
-        cont.innerHTML = '<p style="color:rgba(0,0,0,0.35); font-size:13px; text-align:center; padding:10px 0;">No hay clínicas registradas.</p>';
+    const clinicasDelMes = clinicasData.filter(clinicaPerteneceAlMesSeleccionado);
+
+    if (clinicasDelMes.length === 0) {
+        const mensaje = clinicasData.length === 0
+            ? "No hay clínicas registradas."
+            : "No hay clínicas registradas para este mes.";
+        cont.innerHTML = `<p style="color:rgba(0,0,0,0.35); font-size:13px; text-align:center; padding:10px 0;">${mensaje}</p>`;
         return;
     }
 
-    cont.innerHTML = clinicasData.map(c => {
+    cont.innerHTML = clinicasDelMes.map(c => {
         const realizada = c.realizada;
         const fechaDisplay = c.fecha ? (() => { const [y,m,d] = c.fecha.split("-"); return `${d}/${m}/${y}`; })() : "Sin fecha";
         const fechaRealizadaDisplay = c.fechaRealizada ? (() => { const [y,m,d] = c.fechaRealizada.split("-"); return `${d}/${m}/${y}`; })() : "";
@@ -2414,7 +2440,10 @@ function calNavegar(delta) {
     calMes += delta;
     if (calMes > 11) { calMes = 0; calAño++; }
     if (calMes < 0)  { calMes = 11; calAño--; }
+    calDiaSeleccionado = null;
     renderCalendario();
+    const detalle = document.getElementById("calDetalle");
+    if (detalle) detalle.style.display = "none";
 }
 
 function calIrHoy() {
@@ -2424,6 +2453,20 @@ function calIrHoy() {
     calDiaSeleccionado = null;
     renderCalendario();
     document.getElementById("calDetalle").style.display = "none";
+}
+
+// Salta el mini calendario al mes que esté seleccionado arriba (mesSeleccionado, "YYYY-MM"),
+// para que no se quede mostrando un mes distinto al que se está viendo en el resto del
+// dashboard. Se llama al cambiar de mes con el selector de arriba.
+function sincronizarCalendarioConMesSeleccionado() {
+    if (typeof mesSeleccionado === "undefined" || !mesSeleccionado) return;
+    const [y, m] = mesSeleccionado.split("-").map(Number);
+    if (!y || !m) return;
+    calAño = y;
+    calMes = m - 1;
+    calDiaSeleccionado = null;
+    const detalle = document.getElementById("calDetalle");
+    if (detalle) detalle.style.display = "none";
 }
 
 // Recopila todos los eventos de todas las fuentes y los indexa por "YYYY-MM-DD"
