@@ -38,8 +38,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 const METAS_SOS_DEFAULT = { conversion: 0, accesorizacion: 0, ticket: 0, qr: 0 };
-let METAS_SOS = JSON.parse(localStorage.getItem("metasSOS")) || { ...METAS_SOS_DEFAULT };
-if (METAS_SOS.qr === undefined) METAS_SOS.qr = 0; // Compatibilidad con datos guardados antes de este campo
+// METAS_SOS se declara más abajo junto con METAS_TIENDA y appData, como parte del mes
+// actualmente seleccionado dentro de datosPorMes (ver "MODELO DE DATOS POR MES").
 
 function guardarMetasSOS() {
     const conv  = parseFloat(document.getElementById("cfgMetaConversion").value);
@@ -53,8 +53,8 @@ function guardarMetasSOS() {
     }
 
     METAS_SOS = { conversion: conv, accesorizacion: acc, ticket: tick, qr: qr };
-    localStorage.setItem("metasSOS", JSON.stringify(METAS_SOS));
-    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
+    datosPorMes[mesSeleccionado].metasSOS = METAS_SOS;
+    guardarDatosPorMes();
 
     // Actualizar los badges de meta en la pestaña Ventas
     document.getElementById("metaVisualConv").textContent  = `${conv.toFixed(1)}%`;
@@ -80,15 +80,8 @@ function clonarMetasTiendaDefault() {
     return JSON.parse(JSON.stringify(METAS_TIENDA_DEFAULT));
 }
 
-let METAS_TIENDA = JSON.parse(localStorage.getItem("metasTienda")) || clonarMetasTiendaDefault();
-// Compatibilidad: completa cualquier campo faltante de datos guardados en una versión anterior
-(function migrarMetasTienda() {
-    const base = clonarMetasTiendaDefault();
-    METAS_TIENDA.ventas = { ...base.ventas, ...(METAS_TIENDA.ventas || {}) };
-    METAS_TIENDA.unidades = { ...base.unidades, ...(METAS_TIENDA.unidades || {}) };
-    METAS_TIENDA.office = { ...base.office, ...(METAS_TIENDA.office || {}) };
-    METAS_TIENDA.servicioTecnico = { ...base.servicioTecnico, ...(METAS_TIENDA.servicioTecnico || {}) };
-})();
+// METAS_TIENDA se declara más abajo junto con METAS_SOS y appData (ver "MODELO DE DATOS
+// POR MES"). clonarMetasTiendaDefault() se sigue usando como base para meses nuevos.
 
 // Carga los valores guardados de METAS_TIENDA en los inputs del panel de Configuración
 function cargarMetaTiendaEnInputs() {
@@ -170,8 +163,8 @@ function guardarMetaTienda() {
         office: { personal365: personal365, homeStudent: homeStudent },
         servicioTecnico: { activo: servicioActivo, meta: servicioActivo ? servicioMeta : 0 }
     };
-    localStorage.setItem("metasTienda", JSON.stringify(METAS_TIENDA));
-    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
+    datosPorMes[mesSeleccionado].metasTienda = METAS_TIENDA;
+    guardarDatosPorMes();
 
     // La meta ($) de cada asesor se calcula a partir de su % sobre esta meta de tienda: hay que refrescar todo
     renderTodo();
@@ -323,28 +316,204 @@ function nuevoAsesor(nombre) {
     };
 }
 
-let appData = JSON.parse(localStorage.getItem("controlVentasData")) || {
-    inicio: { conversion: 0, accesorizacion: 0, accesorizacionManual: false, accesorizacionManualValor: null, ticket: 0, trafico: 0, comentarios: "", oportunidades: "" },
-    bitacoras: [],
-    asesores: {
-        asesor0: nuevoAsesor("Asesor 1"),
-        asesor1: nuevoAsesor("Asesor 2"),
-        asesor2: nuevoAsesor("Asesor 3")
-    }
-};
+// ═══════════════════════════════════════════════════════════════
+// MODELO DE DATOS POR MES
+// ═══════════════════════════════════════════════════════════════
+// Todo lo que se "acumula" mes a mes (Plan SOS, ventas/unidades/Garex/Insurama de cada
+// asesor, la lista de asesores en sí y sus % de meta, las Metas del Plan SOS y la Meta
+// Mensual de la Tienda) vive dentro de datosPorMes["YYYY-MM"]. Cambiar de mes con el
+// selector de la parte superior reasigna appData/METAS_SOS/METAS_TIENDA al bloque del mes
+// elegido; si ese mes no existía, se crea en blanco (asesores "Asesor 1/2/3" y metas en 0),
+// así cada mes arranca desde cero sin pisar los datos de los demás.
+//
+// Lo que NO se reinicia por mes (bitácoras, recordatorios, clínicas, horario semanal) sigue
+// guardado aparte, en variables globales independientes, igual que antes de este cambio.
 
-// MIGRACIÓN: si hay datos guardados de una versión anterior (sin ventasGarex/ventasInsurama), los completa
+function mesISOActual() {
+    const hoy = new Date();
+    return `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
+}
+
+// Devuelve un bloque de datos vacío para un mes que todavía no existe en datosPorMes
+function nuevoMesData() {
+    return {
+        appData: {
+            inicio: { conversion: 0, accesorizacion: 0, accesorizacionManual: false, accesorizacionManualValor: null, ticket: 0, trafico: 0, comentarios: "", oportunidades: "" },
+            asesores: {
+                asesor0: nuevoAsesor("Asesor 1"),
+                asesor1: nuevoAsesor("Asesor 2"),
+                asesor2: nuevoAsesor("Asesor 3")
+            }
+        },
+        metasSOS: { ...METAS_SOS_DEFAULT },
+        metasTienda: clonarMetasTiendaDefault()
+    };
+}
+
+// Completa campos faltantes de un bloque mensual guardado con una versión anterior de la
+// app (mismo propósito que las migraciones que existían antes de este cambio, aplicadas
+// ahora por mes en vez de una sola vez de forma global).
 let _migracionContadorId = 0;
-Object.keys(appData.asesores).forEach(key => {
-    const a = appData.asesores[key];
-    if (!a.ventasGarex) a.ventasGarex = [];
-    if (!a.ventasInsurama) a.ventasInsurama = [];
-    // Migrar registros antiguos que no tengan montoVenta (precio al cliente)
-    a.ventasGarex.forEach(v => { if (v.montoVenta === undefined) v.montoVenta = 0; if (v.id === undefined) v.id = "migrado_" + (_migracionContadorId++); });
-    a.ventasInsurama.forEach(v => { if (v.montoVenta === undefined) v.montoVenta = 0; if (v.id === undefined) v.id = "migrado_" + (_migracionContadorId++); });
-    // Migrar la meta fija en $ (versión anterior) al nuevo modelo por porcentaje de la Meta de la Tienda
-    if (a.porcentajeMeta === undefined) a.porcentajeMeta = 0;
-});
+function normalizarMesData(datos) {
+    if (!datos.appData) datos.appData = nuevoMesData().appData;
+    if (!datos.appData.inicio) datos.appData.inicio = nuevoMesData().appData.inicio;
+    if (!datos.appData.asesores) datos.appData.asesores = {};
+    Object.keys(datos.appData.asesores).forEach(key => {
+        const a = datos.appData.asesores[key];
+        if (!a.ventasGarex) a.ventasGarex = [];
+        if (!a.ventasInsurama) a.ventasInsurama = [];
+        a.ventasGarex.forEach(v => { if (v.montoVenta === undefined) v.montoVenta = 0; if (v.id === undefined) v.id = "migrado_" + (_migracionContadorId++); });
+        a.ventasInsurama.forEach(v => { if (v.montoVenta === undefined) v.montoVenta = 0; if (v.id === undefined) v.id = "migrado_" + (_migracionContadorId++); });
+        if (a.porcentajeMeta === undefined) a.porcentajeMeta = 0;
+    });
+
+    if (!datos.metasSOS) datos.metasSOS = { ...METAS_SOS_DEFAULT };
+    if (datos.metasSOS.qr === undefined) datos.metasSOS.qr = 0;
+
+    if (!datos.metasTienda) datos.metasTienda = clonarMetasTiendaDefault();
+    const baseTienda = clonarMetasTiendaDefault();
+    datos.metasTienda.ventas = { ...baseTienda.ventas, ...(datos.metasTienda.ventas || {}) };
+    datos.metasTienda.unidades = { ...baseTienda.unidades, ...(datos.metasTienda.unidades || {}) };
+    datos.metasTienda.office = { ...baseTienda.office, ...(datos.metasTienda.office || {}) };
+    datos.metasTienda.servicioTecnico = { ...baseTienda.servicioTecnico, ...(datos.metasTienda.servicioTecnico || {}) };
+
+    return datos;
+}
+
+let datosPorMes = JSON.parse(localStorage.getItem("datosPorMes")) || {};
+let mesSeleccionado = localStorage.getItem("mesSeleccionado") || mesISOActual();
+
+// MIGRACIÓN ÚNICA: si el navegador tiene datos guardados con el modelo anterior (un solo
+// mes global, sin datosPorMes), se mueven al mes en que estábamos trabajando para no perder
+// nada de lo ya capturado. bitacoras vivía antes dentro de appData; se traslada a
+// bitacorasData (más abajo) para que quede fuera del ciclo mensual, igual que recordatorios
+// y clínicas.
+if (Object.keys(datosPorMes).length === 0) {
+    const appDataAntiguo = JSON.parse(localStorage.getItem("controlVentasData") || "null");
+    const metasSOSAntiguo = JSON.parse(localStorage.getItem("metasSOS") || "null");
+    const metasTiendaAntiguo = JSON.parse(localStorage.getItem("metasTienda") || "null");
+    if (appDataAntiguo || metasSOSAntiguo || metasTiendaAntiguo) {
+        datosPorMes[mesSeleccionado] = {
+            appData: {
+                inicio: (appDataAntiguo && appDataAntiguo.inicio) || nuevoMesData().appData.inicio,
+                asesores: (appDataAntiguo && appDataAntiguo.asesores) || nuevoMesData().appData.asesores
+            },
+            metasSOS: metasSOSAntiguo || { ...METAS_SOS_DEFAULT },
+            metasTienda: metasTiendaAntiguo || clonarMetasTiendaDefault()
+        };
+        if (appDataAntiguo && appDataAntiguo.bitacoras && !localStorage.getItem("bitacorasData")) {
+            localStorage.setItem("bitacorasData", JSON.stringify(appDataAntiguo.bitacoras));
+        }
+    }
+}
+
+if (!datosPorMes[mesSeleccionado]) datosPorMes[mesSeleccionado] = nuevoMesData();
+normalizarMesData(datosPorMes[mesSeleccionado]);
+
+let appData = datosPorMes[mesSeleccionado].appData;
+let METAS_SOS = datosPorMes[mesSeleccionado].metasSOS;
+let METAS_TIENDA = datosPorMes[mesSeleccionado].metasTienda;
+
+// Bitácoras: antes vivían dentro de appData (por lo que se reiniciaban con cada mes); ahora
+// son su propia lista global, igual que recordatoriosData y clinicasData, porque son un
+// historial de notas operativas que no depende del mes de ventas que se esté viendo.
+let bitacorasData = JSON.parse(localStorage.getItem("bitacorasData")) || [];
+
+function guardarBitacoras() {
+    localStorage.setItem("bitacorasData", JSON.stringify(bitacorasData));
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
+}
+
+// Guarda TODOS los meses (datosPorMes) y cuál está seleccionado. Se usa en vez de guardar
+// appData/METAS_SOS/METAS_TIENDA por separado, porque los tres viven dentro del mismo
+// bloque mensual y ya están enlazados por referencia a datosPorMes[mesSeleccionado].
+function guardarDatosPorMes() {
+    localStorage.setItem("datosPorMes", JSON.stringify(datosPorMes));
+    localStorage.setItem("mesSeleccionado", mesSeleccionado);
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
+}
+
+function formatearMesLabel(mesISO) {
+    const [y, m] = mesISO.split("-").map(Number);
+    const nombre = new Date(y, m - 1, 1).toLocaleDateString("es-ES", { month: "long", year: "numeric" });
+    return nombre.charAt(0).toUpperCase() + nombre.slice(1);
+}
+
+function sumarMesesISO(mesISO, delta) {
+    let [y, m] = mesISO.split("-").map(Number);
+    m += delta;
+    while (m > 12) { m -= 12; y++; }
+    while (m < 1) { m += 12; y--; }
+    return `${y}-${String(m).padStart(2, "0")}`;
+}
+
+// Cambia el mes que se está viendo/editando con las flechas del selector: guarda lo que
+// hubiera pendiente de Garex/Insurama sin guardar (con confirmación, porque se perdería) y
+// salta al mes destino.
+function cambiarMesSeleccionado(delta) {
+    if (lineasGarexPendientes.length > 0 || lineasInsuramaPendientes.length > 0) {
+        const continuar = confirm("Tienes líneas de Garex/Insurama sin guardar. Si cambias de mes se perderán. ¿Deseas continuar?");
+        if (!continuar) return;
+        lineasGarexPendientes = [];
+        lineasInsuramaPendientes = [];
+    }
+    mesSeleccionado = sumarMesesISO(mesSeleccionado, delta);
+    irAlMesSeleccionadoActual();
+}
+
+// Salta directo al mes real de hoy (botón "Mes actual" del selector)
+function irAMesActual() {
+    if (mesSeleccionado === mesISOActual()) return;
+    mesSeleccionado = mesISOActual();
+    irAlMesSeleccionadoActual();
+}
+
+// Aplica el mesSeleccionado vigente: crea el bloque del mes si hace falta, reasigna las
+// variables globales que usa el resto de la app (appData/METAS_SOS/METAS_TIENDA) y vuelve a
+// renderizar todo lo que depende de ellas.
+function irAlMesSeleccionadoActual() {
+    if (!datosPorMes[mesSeleccionado]) datosPorMes[mesSeleccionado] = nuevoMesData();
+    normalizarMesData(datosPorMes[mesSeleccionado]);
+
+    appData = datosPorMes[mesSeleccionado].appData;
+    METAS_SOS = datosPorMes[mesSeleccionado].metasSOS;
+    METAS_TIENDA = datosPorMes[mesSeleccionado].metasTienda;
+
+    localStorage.setItem("mesSeleccionado", mesSeleccionado);
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
+
+    renderListaPendiente("garex");
+    renderListaPendiente("insurama");
+    if (typeof cargarDatosInicioEnInputs === "function") cargarDatosInicioEnInputs();
+    if (typeof cargarMetasSOSEnInputs === "function") cargarMetasSOSEnInputs();
+    if (typeof cargarMetaTiendaEnInputs === "function") cargarMetaTiendaEnInputs();
+    renderSelectAsesor(false);
+    actualizarCumplimientoAsesorVisual();
+    renderTodo();
+    renderCalendario();
+    if (typeof renderHorario === "function") renderHorario();
+    actualizarSelectorMes();
+}
+
+// Actualiza el texto y los botones del selector de mes en el encabezado
+function actualizarSelectorMes() {
+    const label = formatearMesLabel(mesSeleccionado);
+
+    const lbl = document.getElementById("mesSelectorLabel");
+    if (lbl) lbl.textContent = label;
+
+    // Mismo nombre de mes, repetido junto a "Gestión de Asesores" en Configuración, para
+    // que quede claro a qué mes pertenece la lista de asesores que se está editando ahí.
+    const lblConfig = document.getElementById("mesSelectorConfigLabel");
+    if (lblConfig) lblConfig.textContent = label;
+
+    const esMesActual = mesSeleccionado === mesISOActual();
+    const badge = document.getElementById("mesSelectorActualBadge");
+    if (badge) badge.style.display = esMesActual ? "inline-flex" : "none";
+
+    const btnHoy = document.getElementById("mesSelectorHoyBtn");
+    if (btnHoy) btnHoy.style.display = esMesActual ? "none" : "inline-flex";
+}
 
 // Suma las 10 categorías de "Meta de Venta por Categoría" más la meta de Servicio Técnico
 // (si está activo) para obtener la Meta Total de la Tienda ($)
@@ -486,6 +655,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Cargar la Meta Mensual de la Tienda en los inputs de Configuración
     cargarMetaTiendaEnInputs();
+
+    // Pintar el selector de mes (‹ Mes Año ›) del encabezado
+    actualizarSelectorMes();
 });
 
 function onSelectAsesorChange() {
@@ -902,6 +1074,11 @@ function guardarDatosAsesor() {
             tipo: "venta",
             monto,
             asesorKey: key,
+            // Recuerda a qué mes (de datosPorMes) pertenece este asesor, porque los asesores
+            // son independientes por mes: si más adelante se elimina esta venta desde el
+            // calendario estando en OTRO mes seleccionado, hay que ajustar el acumulado del
+            // asesor correcto, no el del mes que esté activo en ese momento.
+            mesISO: mesSeleccionado,
             visibleEnCalendario: reflejarEnCalendario
         });
         guardarVentasCalendario();
@@ -1044,17 +1221,19 @@ function agregarNotaBitacora() {
         fecha: fechaDisplay,
         fechaISO: agregarCal ? fechaISO : null
     };
-    appData.bitacoras.unshift(nuevaNota);
+    bitacorasData.unshift(nuevaNota);
     document.getElementById("inputNotaBitacora").value = "";
     document.getElementById("inputBitacoraFecha").value = "";
-    sincronizarYRenderizar();
+    guardarBitacoras();
+    renderTodo();
     renderCalendario();
 }
 
 function eliminarBitacora(id) {
     if (!confirm("¿Eliminar esta anotación de la bitácora?")) return;
-    appData.bitacoras = appData.bitacoras.filter((b, i) => (b.id ?? i) !== id);
-    sincronizarYRenderizar();
+    bitacorasData = bitacorasData.filter((b, i) => (b.id ?? i) !== id);
+    guardarBitacoras();
+    renderTodo();
     renderCalendario();
     mostrarAlerta("Anotación eliminada de la bitácora.", "success");
 }
@@ -1386,7 +1565,7 @@ function renderTodo() {
     renderTablaInsurama("tablaInsuramaContenedor");
 
     // Render Historial Bitácoras
-    document.getElementById("contenedorBitacoras").innerHTML = appData.bitacoras.map((b, i) => `
+    document.getElementById("contenedorBitacoras").innerHTML = bitacorasData.map((b, i) => `
         <div class="bitacora-item">
             <div class="bitacora-item-contenido">
                 <p class="bitacora-item-texto">${b.texto}</p>
@@ -1912,48 +2091,46 @@ function cambiarTabAsesor(key, tab, btnEl) {
 }
 
 function sincronizarYRenderizar() {
-    localStorage.setItem("controlVentasData", JSON.stringify(appData));
-    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
+    guardarDatosPorMes();
     renderTodo();
     if (typeof renderHorario === "function") renderHorario();
 }
 
-// FORMATEAR MODULO A 0 TOTAL
+// Reinicia a cero SOLO el mes actualmente seleccionado: su Plan SOS y sus asesores (ventas,
+// montos, unidades, Garex, Insurama, QR, Trade-In), además de las ventas del calendario que
+// pertenecen a ese mes. Las Metas del Plan SOS y la Meta Mensual de la Tienda de ese mes NO
+// se tocan (igual que antes). Bitácoras, recordatorios y clínicas ahora son globales — no
+// dependen de qué mes esté seleccionado — así que tampoco se ven afectados por este botón.
 function reiniciarTodoCero() {
-    if (confirm("⚠️ ¿Estás completamente seguro de restaurar el ecosistema comercial? Se eliminarán todos los acumulados y clínicas. Las bitácoras y los recordatorios mensuales NO se verán afectados.")) {
-        localStorage.removeItem("controlVentasData");
-        localStorage.removeItem("clinicasData");
-        localStorage.removeItem("ventasCalendario");
-        // Las metas SOS se conservan intencionalmente; solo se borran datos de ventas.
-        // Las bitácoras (appData.bitacoras) se conservan tal cual estaban.
-        appData = {
+    const mesLabel = formatearMesLabel(mesSeleccionado);
+    if (confirm(`⚠️ ¿Estás completamente seguro de restaurar a cero los datos de ${mesLabel}? Se eliminarán las ventas, asesores y datos de Plan SOS de ese mes. Las metas de ese mes, las bitácoras, los recordatorios y las clínicas NO se verán afectados.`)) {
+        datosPorMes[mesSeleccionado].appData = {
             inicio: { conversion: 0, accesorizacion: 0, accesorizacionManual: false, accesorizacionManualValor: null, ticket: 0, trafico: 0, comentarios: "", oportunidades: "" },
-            bitacoras: appData.bitacoras || [],
             asesores: {
                 asesor0: nuevoAsesor("Asesor 1"),
                 asesor1: nuevoAsesor("Asesor 2"),
                 asesor2: nuevoAsesor("Asesor 3")
             }
         };
-        // Los recordatorios mensuales (recordatoriosData) NO se tocan.
-        // Siempre se recrea una clínica fija "Interna" para Fábrica, sin importar cuántas veces se reinicie
-        clinicasData = [];
-        asegurarClinicaInterna();
-        ventasCalendario = [];
+        appData = datosPorMes[mesSeleccionado].appData;
+
+        // Solo se eliminan del calendario las ventas que pertenecen al mes que se reinicia;
+        // las de otros meses se conservan.
+        ventasCalendario = ventasCalendario.filter(v => v.mesISO !== mesSeleccionado);
+        guardarVentasCalendario();
+
         document.querySelectorAll("input, textarea").forEach(el => el.value = "");
         lineasGarexPendientes = [];
         lineasInsuramaPendientes = [];
         renderListaPendiente("garex");
         renderListaPendiente("insurama");
-        renderRecordatorios();
-        renderClinicas();
         renderCalendario();
         sincronizarYRenderizar();
         // Guardado inmediato (sin esperar el debounce normal) para que el borrado
         // quede reflejado en la nube incluso si la página se recarga enseguida.
         if (typeof guardarNubeInmediato === "function") guardarNubeInmediato();
         actualizarCumplimientoAsesorVisual();
-        mostrarAlerta("Ciclo comercial formateado a cero.", "success");
+        mostrarAlerta(`Datos de ${mesLabel} reiniciados a cero.`, "success");
     }
 }
 
@@ -1993,8 +2170,9 @@ function borrarVentas() {
             a.unidades = { mac:0, ipad:0, iphone:0, watch:0, airpods:0, audio:0 };
         });
 
-        // Quitar del calendario solo las entradas de tipo "venta" (no toca recordatorios/clínicas)
-        ventasCalendario = ventasCalendario.filter(v => v.tipo !== "venta");
+        // Quitar del calendario solo las entradas de tipo "venta" del mes actualmente
+        // seleccionado (no toca recordatorios/clínicas ni las ventas de otros meses)
+        ventasCalendario = ventasCalendario.filter(v => !(v.tipo === "venta" && v.mesISO === mesSeleccionado));
         guardarVentasCalendario();
         renderCalendario();
 
@@ -2229,7 +2407,7 @@ function obtenerEventosPorFecha() {
     });
 
     // 3. Bitácoras (usan fechaISO si está disponible)
-    appData.bitacoras.forEach(b => {
+    bitacorasData.forEach(b => {
         if (b.fechaISO) {
             agregar(b.fechaISO, { tipo:"bitacora", label: b.texto.substring(0, 50) + (b.texto.length > 50 ? "…" : ""), color:"#86868B", pillClass:"cal-pill-bitacora" });
         }
@@ -2362,7 +2540,12 @@ function eliminarVentaCalendario(id, fecha) {
     const entrada = ventasCalendario.find(v => v.id === id);
     if (!entrada) return;
 
-    const asor = entrada.asesorKey ? appData.asesores[entrada.asesorKey] : null;
+    // La venta puede pertenecer a un mes distinto al que se está viendo ahora mismo (los
+    // asesores son independientes por mes), así que hay que buscar al asesor dentro del
+    // bloque del mes en que se registró la venta, no en el mes actualmente seleccionado.
+    // Las ventas guardadas antes de este cambio no tienen mesISO: se asume el mes actual.
+    const mesDeLaVenta = (entrada.mesISO && datosPorMes[entrada.mesISO]) ? entrada.mesISO : mesSeleccionado;
+    const asor = entrada.asesorKey ? datosPorMes[mesDeLaVenta].appData.asesores[entrada.asesorKey] : null;
 
     if (entrada.grupoId) {
         const diasDelGrupo = ventasCalendario.filter(v => v.grupoId === entrada.grupoId);

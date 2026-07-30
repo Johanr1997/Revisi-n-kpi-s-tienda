@@ -89,28 +89,27 @@ function cerrarSesionFirebase() {
 // error a la cuenta del siguiente usuario que inicie sesión en el mismo
 // navegador/computadora.
 function limpiarEstadoLocalCompleto() {
-    localStorage.removeItem("controlVentasData");
+    localStorage.removeItem("controlVentasData"); // clave del modelo anterior, ya no se usa
+    localStorage.removeItem("datosPorMes");
+    localStorage.removeItem("mesSeleccionado");
+    localStorage.removeItem("bitacorasData");
     localStorage.removeItem("recordatoriosData");
     localStorage.removeItem("clinicasData");
     localStorage.removeItem("ventasCalendario");
-    localStorage.removeItem("metasSOS");
-    localStorage.removeItem("metasTienda");
+    localStorage.removeItem("metasSOS");    // clave del modelo anterior, ya no se usa
+    localStorage.removeItem("metasTienda"); // clave del modelo anterior, ya no se usa
     localStorage.removeItem("horarioData");
     localStorage.removeItem("horarioOcultos");
 
-    if (typeof METAS_SOS_DEFAULT !== "undefined") METAS_SOS = { ...METAS_SOS_DEFAULT };
-    if (typeof clonarMetasTiendaDefault === "function") METAS_TIENDA = clonarMetasTiendaDefault();
-    if (typeof nuevoAsesor === "function") {
-        appData = {
-            inicio: { conversion: 0, accesorizacion: 0, accesorizacionManual: false, accesorizacionManualValor: null, ticket: 0, trafico: 0, comentarios: "", oportunidades: "" },
-            bitacoras: [],
-            asesores: {
-                asesor0: nuevoAsesor("Asesor 1"),
-                asesor1: nuevoAsesor("Asesor 2"),
-                asesor2: nuevoAsesor("Asesor 3")
-            }
-        };
+    if (typeof mesISOActual === "function") mesSeleccionado = mesISOActual();
+    if (typeof nuevoMesData === "function") {
+        datosPorMes = {};
+        datosPorMes[mesSeleccionado] = nuevoMesData();
+        appData = datosPorMes[mesSeleccionado].appData;
+        METAS_SOS = datosPorMes[mesSeleccionado].metasSOS;
+        METAS_TIENDA = datosPorMes[mesSeleccionado].metasTienda;
     }
+    if (typeof bitacorasData !== "undefined") bitacorasData = [];
     if (typeof recordatoriosData !== "undefined") recordatoriosData = [];
     if (typeof clinicasData !== "undefined") {
         clinicasData = [];
@@ -161,9 +160,43 @@ function cargarDatosDesdeNube(uid) {
     db.collection("usuarios").doc(uid).get().then(docSnap => {
         if (docSnap.exists) {
             const d = docSnap.data();
-            if (d.metasSOS)          { METAS_SOS = d.metasSOS; localStorage.setItem("metasSOS", JSON.stringify(METAS_SOS)); }
-            if (d.metasTienda)       { METAS_TIENDA = d.metasTienda; localStorage.setItem("metasTienda", JSON.stringify(METAS_TIENDA)); }
-            if (d.appData)           { appData = d.appData; localStorage.setItem("controlVentasData", JSON.stringify(appData)); }
+            if (d.datosPorMes) {
+                // Modelo nuevo: datos organizados por mes (datosPorMes["YYYY-MM"])
+                datosPorMes = d.datosPorMes;
+                mesSeleccionado = d.mesSeleccionado || (typeof mesISOActual === "function" ? mesISOActual() : mesSeleccionado);
+                if (!datosPorMes[mesSeleccionado] && typeof nuevoMesData === "function") datosPorMes[mesSeleccionado] = nuevoMesData();
+                if (typeof normalizarMesData === "function") normalizarMesData(datosPorMes[mesSeleccionado]);
+                appData = datosPorMes[mesSeleccionado].appData;
+                METAS_SOS = datosPorMes[mesSeleccionado].metasSOS;
+                METAS_TIENDA = datosPorMes[mesSeleccionado].metasTienda;
+                localStorage.setItem("datosPorMes", JSON.stringify(datosPorMes));
+                localStorage.setItem("mesSeleccionado", mesSeleccionado);
+            } else if (d.appData || d.metasSOS || d.metasTienda) {
+                // Cuenta que había sincronizado con el modelo anterior (un solo mes global,
+                // sin datosPorMes): se migra ese documento al mes actualmente seleccionado,
+                // igual que se hace con los datos que hubiera guardados en el navegador.
+                const mesDestino = mesSeleccionado;
+                const base = typeof nuevoMesData === "function" ? nuevoMesData() : null;
+                datosPorMes = {};
+                datosPorMes[mesDestino] = {
+                    appData: {
+                        inicio: (d.appData && d.appData.inicio) || (base && base.appData.inicio),
+                        asesores: (d.appData && d.appData.asesores) || (base && base.appData.asesores)
+                    },
+                    metasSOS: d.metasSOS || (typeof METAS_SOS_DEFAULT !== "undefined" ? { ...METAS_SOS_DEFAULT } : {}),
+                    metasTienda: d.metasTienda || (typeof clonarMetasTiendaDefault === "function" ? clonarMetasTiendaDefault() : {})
+                };
+                if (d.appData && d.appData.bitacoras && !d.bitacorasData) {
+                    bitacorasData = d.appData.bitacoras;
+                }
+                if (typeof normalizarMesData === "function") normalizarMesData(datosPorMes[mesDestino]);
+                appData = datosPorMes[mesDestino].appData;
+                METAS_SOS = datosPorMes[mesDestino].metasSOS;
+                METAS_TIENDA = datosPorMes[mesDestino].metasTienda;
+                localStorage.setItem("datosPorMes", JSON.stringify(datosPorMes));
+                localStorage.setItem("mesSeleccionado", mesSeleccionado);
+            }
+            if (d.bitacorasData)     { bitacorasData = d.bitacorasData; localStorage.setItem("bitacorasData", JSON.stringify(bitacorasData)); }
             if (d.recordatoriosData) { recordatoriosData = d.recordatoriosData; localStorage.setItem("recordatoriosData", JSON.stringify(recordatoriosData)); }
             if (d.clinicasData)      { clinicasData = d.clinicasData; localStorage.setItem("clinicasData", JSON.stringify(clinicasData)); }
             if (d.ventasCalendario)  { ventasCalendario = d.ventasCalendario; localStorage.setItem("ventasCalendario", JSON.stringify(ventasCalendario)); }
@@ -201,6 +234,8 @@ function reRenderizarTodo() {
     if (typeof renderListaPendiente === "function") { renderListaPendiente("garex"); renderListaPendiente("insurama"); }
     if (typeof actualizarCumplimientoAsesorVisual === "function") actualizarCumplimientoAsesorVisual();
     if (typeof renderHorario === "function") renderHorario();
+    // Refleja en el selector de mes del encabezado cuál mes quedó cargado desde la nube
+    if (typeof actualizarSelectorMes === "function") actualizarSelectorMes();
 }
 
 // ── GUARDADO EN FIRESTORE ──────────────────────────────────────
@@ -215,10 +250,13 @@ function programarGuardadoNube() {
 
 function guardarNubeInmediato() {
     if (!usuarioActualUID) return;
+    // datosPorMes ya contiene, para el mes seleccionado, exactamente lo mismo que appData/
+    // METAS_SOS/METAS_TIENDA (son la misma referencia en memoria), así que basta con subir
+    // datosPorMes completo — incluye el histórico de todos los meses, no solo el actual.
     const datos = {
-        metasSOS: typeof METAS_SOS !== "undefined" ? METAS_SOS : null,
-        metasTienda: typeof METAS_TIENDA !== "undefined" ? METAS_TIENDA : null,
-        appData: typeof appData !== "undefined" ? appData : null,
+        datosPorMes: typeof datosPorMes !== "undefined" ? datosPorMes : null,
+        mesSeleccionado: typeof mesSeleccionado !== "undefined" ? mesSeleccionado : null,
+        bitacorasData: typeof bitacorasData !== "undefined" ? bitacorasData : null,
         recordatoriosData: typeof recordatoriosData !== "undefined" ? recordatoriosData : null,
         clinicasData: typeof clinicasData !== "undefined" ? clinicasData : null,
         ventasCalendario: typeof ventasCalendario !== "undefined" ? ventasCalendario : null,
