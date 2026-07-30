@@ -432,19 +432,42 @@ function inicializarModoOscuro() {
     }
 }
 
+// Recarga los inputs de la pestaña "Plan SOS" (Inicio) con los valores guardados en appData.inicio.
+// Se usa tanto en la carga inicial de la página como después de recibir los datos reales desde la
+// nube (Firebase) en firebase-sync.js, para que estos campos nunca se queden vacíos/desactualizados
+// justo después de iniciar sesión (lo cual podía hacer que "Guardar Datos de Inicio" sobrescribiera
+// silenciosamente la Conversión y el Ticket Promedio guardados con 0).
+function cargarDatosInicioEnInputs() {
+    document.getElementById("inputConversion").value = appData.inicio.conversion || "";
+    document.getElementById("inputTicket").value = appData.inicio.ticket || "";
+    document.getElementById("inputComentarios").value = appData.inicio.comentarios || "";
+    document.getElementById("inputOportunidades").value = appData.inicio.oportunidades || "";
+    actualizarLabelTraficoAcumulado();
+}
+
+// Recarga los inputs y badges de "Metas del Plan SOS" con los valores guardados en METAS_SOS.
+// Igual que la función anterior, se usa en la carga inicial y después de sincronizar con la nube.
+function cargarMetasSOSEnInputs() {
+    document.getElementById("cfgMetaConversion").value    = METAS_SOS.conversion;
+    document.getElementById("cfgMetaAccesorizacion").value = METAS_SOS.accesorizacion;
+    document.getElementById("cfgMetaTicket").value         = METAS_SOS.ticket;
+    document.getElementById("cfgMetaQR").value             = METAS_SOS.qr;
+
+    document.getElementById("metaVisualConv").textContent  = `${METAS_SOS.conversion.toFixed(1)}%`;
+    document.getElementById("metaVisualAcc").textContent   = `${METAS_SOS.accesorizacion.toFixed(1)}%`;
+    document.getElementById("metaVisualTick").textContent  = `$${METAS_SOS.ticket.toLocaleString()}`;
+    document.getElementById("metaVisualQR").textContent    = `${METAS_SOS.qr}`;
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     inicializarModoOscuro();
     configurarNavegacionPestañas();
     configurarSelectsProteccion();
     actualizarRelojYFecha();
     setInterval(actualizarRelojYFecha, 1000);
-    
+
     // Cargar datos en inputs de Inicio si ya existen
-    document.getElementById("inputConversion").value = appData.inicio.conversion || "";
-    document.getElementById("inputTicket").value = appData.inicio.ticket || "";
-    document.getElementById("inputComentarios").value = appData.inicio.comentarios || "";
-    document.getElementById("inputOportunidades").value = appData.inicio.oportunidades || "";
-    actualizarLabelTraficoAcumulado();
+    cargarDatosInicioEnInputs();
 
     // Construir el select de asesores dinámicamente
     renderSelectAsesor(false);
@@ -458,17 +481,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     renderTodo();
 
-    // Cargar metas SOS en los inputs de Configuración
-    document.getElementById("cfgMetaConversion").value    = METAS_SOS.conversion;
-    document.getElementById("cfgMetaAccesorizacion").value = METAS_SOS.accesorizacion;
-    document.getElementById("cfgMetaTicket").value         = METAS_SOS.ticket;
-    document.getElementById("cfgMetaQR").value             = METAS_SOS.qr;
-
-    // Sincronizar badges de Ventas con los valores guardados
-    document.getElementById("metaVisualConv").textContent  = `${METAS_SOS.conversion.toFixed(1)}%`;
-    document.getElementById("metaVisualAcc").textContent   = `${METAS_SOS.accesorizacion.toFixed(1)}%`;
-    document.getElementById("metaVisualTick").textContent  = `$${METAS_SOS.ticket.toLocaleString()}`;
-    document.getElementById("metaVisualQR").textContent    = `${METAS_SOS.qr}`;
+    // Cargar metas SOS en los inputs de Configuración y sincronizar badges de Ventas
+    cargarMetasSOSEnInputs();
 
     // Cargar la Meta Mensual de la Tienda en los inputs de Configuración
     cargarMetaTiendaEnInputs();

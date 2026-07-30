@@ -187,6 +187,12 @@ function cargarDatosDesdeNube(uid) {
 // Vuelve a pintar toda la interfaz después de cargar datos nuevos desde la nube
 function reRenderizarTodo() {
     if (typeof cargarMetaTiendaEnInputs === "function") cargarMetaTiendaEnInputs();
+    // Vuelve a llenar los inputs de "Plan SOS" y "Metas del Plan SOS" con los datos recién
+    // cargados desde la nube. Sin esto, esos campos se quedaban vacíos tras iniciar sesión
+    // (aunque sí hubiera datos guardados), con el riesgo de que "Guardar Datos de Inicio"
+    // sobrescribiera Conversión y Ticket Promedio con 0 sin que el usuario lo notara.
+    if (typeof cargarDatosInicioEnInputs === "function") cargarDatosInicioEnInputs();
+    if (typeof cargarMetasSOSEnInputs === "function") cargarMetasSOSEnInputs();
     if (typeof renderTodo === "function") renderTodo();
     if (typeof renderSelectAsesor === "function") renderSelectAsesor();
     if (typeof renderRecordatorios === "function") renderRecordatorios();
