@@ -334,7 +334,12 @@ function mesISOActual() {
     return `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
 }
 
-// Devuelve un bloque de datos vacío para un mes que todavía no existe en datosPorMes
+// Devuelve un bloque de datos vacío para un mes que todavía no existe en datosPorMes.
+// Incluye horarioData/horarioOcultos porque el horario semanal de turnos también es
+// independiente por mes: como cada mes tiene su propia lista de asesores (mismas claves
+// "asesor0/1/2..." reutilizadas mes a mes para personas distintas), el horario de turnos
+// tiene que vivir junto a esos asesores para no mezclar el turno de una persona de un mes
+// con la de otra persona en otro mes que comparta la misma clave.
 function nuevoMesData() {
     return {
         appData: {
@@ -346,7 +351,9 @@ function nuevoMesData() {
             }
         },
         metasSOS: { ...METAS_SOS_DEFAULT },
-        metasTienda: clonarMetasTiendaDefault()
+        metasTienda: clonarMetasTiendaDefault(),
+        horarioData: {},
+        horarioOcultos: []
     };
 }
 
@@ -376,6 +383,9 @@ function normalizarMesData(datos) {
     datos.metasTienda.unidades = { ...baseTienda.unidades, ...(datos.metasTienda.unidades || {}) };
     datos.metasTienda.office = { ...baseTienda.office, ...(datos.metasTienda.office || {}) };
     datos.metasTienda.servicioTecnico = { ...baseTienda.servicioTecnico, ...(datos.metasTienda.servicioTecnico || {}) };
+
+    if (!datos.horarioData) datos.horarioData = {};
+    if (!datos.horarioOcultos) datos.horarioOcultos = [];
 
     return datos;
 }
@@ -409,6 +419,22 @@ if (Object.keys(datosPorMes).length === 0) {
 
 if (!datosPorMes[mesSeleccionado]) datosPorMes[mesSeleccionado] = nuevoMesData();
 normalizarMesData(datosPorMes[mesSeleccionado]);
+
+// MIGRACIÓN ÚNICA (horario): el horario semanal de turnos también pasó a ser independiente
+// por mes (ver nuevoMesData). Si el navegador tenía un horario guardado con el modelo
+// anterior (un solo horario global, en las claves "horarioData"/"horarioOcultos"), se
+// traslada al mes en que estábamos trabajando la primera vez que se carga esta versión,
+// para no perder los turnos ya cargados.
+if (!localStorage.getItem("horarioMigradoAMes")) {
+    const horarioDataAntiguo = JSON.parse(localStorage.getItem("horarioData") || "null");
+    const horarioOcultosAntiguo = JSON.parse(localStorage.getItem("horarioOcultos") || "null");
+    const yaTieneHorarioPropio = Object.keys(datosPorMes[mesSeleccionado].horarioData || {}).length > 0;
+    if (!yaTieneHorarioPropio && ((horarioDataAntiguo && Object.keys(horarioDataAntiguo).length > 0) || (horarioOcultosAntiguo && horarioOcultosAntiguo.length > 0))) {
+        datosPorMes[mesSeleccionado].horarioData = horarioDataAntiguo || {};
+        datosPorMes[mesSeleccionado].horarioOcultos = horarioOcultosAntiguo || [];
+    }
+    localStorage.setItem("horarioMigradoAMes", "1");
+}
 
 let appData = datosPorMes[mesSeleccionado].appData;
 let METAS_SOS = datosPorMes[mesSeleccionado].metasSOS;
@@ -478,6 +504,17 @@ function irAlMesSeleccionadoActual() {
     appData = datosPorMes[mesSeleccionado].appData;
     METAS_SOS = datosPorMes[mesSeleccionado].metasSOS;
     METAS_TIENDA = datosPorMes[mesSeleccionado].metasTienda;
+    if (typeof datosPorMes[mesSeleccionado].horarioData !== "undefined") horarioData = datosPorMes[mesSeleccionado].horarioData;
+    if (typeof datosPorMes[mesSeleccionado].horarioOcultos !== "undefined") horarioOcultos = datosPorMes[mesSeleccionado].horarioOcultos;
+
+    // Salta la semana visible del Horario a una que caiga dentro del mes seleccionado (el 1°
+    // del mes, o "hoy" si el mes elegido es el mes real actual), para no quedarse viendo una
+    // semana de otro mes con el horario de un mes distinto.
+    if (typeof horarioFechaBase !== "undefined") {
+        horarioFechaBase = (mesSeleccionado === mesISOActual())
+            ? new Date()
+            : new Date(`${mesSeleccionado}-01T00:00:00`);
+    }
 
     localStorage.setItem("mesSeleccionado", mesSeleccionado);
     if (typeof programarGuardadoNube === "function") programarGuardadoNube();
@@ -491,6 +528,7 @@ function irAlMesSeleccionadoActual() {
     actualizarCumplimientoAsesorVisual();
     renderTodo();
     renderCalendario();
+    if (typeof renderRecordatorios === "function") renderRecordatorios();
     if (typeof renderHorario === "function") renderHorario();
     actualizarSelectorMes();
 }
@@ -2236,14 +2274,21 @@ function renderRecordatorios() {
     const cont = document.getElementById("listaRecordatorios");
     if (!cont) return;
 
-    if (recordatoriosData.length === 0) {
-        cont.innerHTML = '<p style="color:rgba(0,0,0,0.35); font-size:13px; text-align:center; padding:10px 0;">No hay recordatorios registrados.</p>';
+    // Solo se muestran los recordatorios cuya fecha cae dentro del mes que se está viendo
+    // (mesSeleccionado), igual que el resto del dashboard.
+    const recordatoriosDelMes = recordatoriosData.filter(r => r.fecha && r.fecha.startsWith(mesSeleccionado));
+
+    if (recordatoriosDelMes.length === 0) {
+        const mensaje = recordatoriosData.length === 0
+            ? "No hay recordatorios registrados."
+            : "No hay recordatorios registrados para este mes.";
+        cont.innerHTML = `<p style="color:rgba(0,0,0,0.35); font-size:13px; text-align:center; padding:10px 0;">${mensaje}</p>`;
         return;
     }
 
     const badgeLabels = { mantenimiento: "Mantenimiento", reunion: "Reunión", tarea: "Tarea", otro: "Otro" };
 
-    cont.innerHTML = recordatoriosData.map(r => {
+    cont.innerHTML = recordatoriosDelMes.map(r => {
         const [y, m, d] = r.fecha.split("-");
         const fechaDisplay = `${d}/${m}/${y}`;
         return `
@@ -2594,15 +2639,21 @@ const DIAS_SEMANA = [
     { key: "dom", label: "Dom" }
 ];
  
-// Datos guardados por semana. Clave = fecha ISO del lunes de esa semana.
+// Datos guardados por semana. Clave = fecha ISO del lunes de esa semana. Vive dentro del
+// bloque del mes actualmente seleccionado (datosPorMes[mesSeleccionado].horarioData), porque
+// las claves "asesor0/1/2..." se reutilizan mes a mes para personas distintas: si el horario
+// fuera global, el turno de una persona de un mes se vería mezclado con el de otra persona
+// en otro mes que compartiera la misma clave.
 // Estructura: { "2026-07-06": { asesor0: { lun: {tipo,texto}, mar: {...}, ... }, asesor1: {...} } }
-let horarioData = JSON.parse(localStorage.getItem("horarioData")) || {};
- 
+let horarioData = datosPorMes[mesSeleccionado].horarioData;
+
 function guardarHorarioData() {
-    localStorage.setItem("horarioData", JSON.stringify(horarioData));
-    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
+    // Re-enlaza por si horarioData fue reasignado a un objeto nuevo en vez de mutado en
+    // sitio (ej. al eliminar un asesor), para que quede guardado en el mes correcto.
+    datosPorMes[mesSeleccionado].horarioData = horarioData;
+    guardarDatosPorMes();
 }
- 
+
 // Semana actualmente visible en pantalla (se navega con las flechas ‹ ›)
 let horarioFechaBase = new Date();
  
@@ -2645,12 +2696,15 @@ function agregarNuevoAsesor() {
 
 // Lista de asesores ocultos en la pestaña Horario. Ocultar a alguien aquí NO borra
 // nada de sus datos (ventas, Garex, Insurama, etc.) — solo deja de aparecer en la
-// grilla del horario. Esta lista es independiente de appData.asesores a propósito.
-let horarioOcultos = JSON.parse(localStorage.getItem("horarioOcultos")) || [];
+// grilla del horario. Esta lista es independiente de appData.asesores a propósito, y
+// vive dentro del mismo bloque del mes seleccionado, por la misma razón que horarioData.
+let horarioOcultos = datosPorMes[mesSeleccionado].horarioOcultos;
 
 function guardarHorarioOcultos() {
-    localStorage.setItem("horarioOcultos", JSON.stringify(horarioOcultos));
-    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
+    // Re-enlaza por si horarioOcultos fue reasignado a un array nuevo en vez de mutado en
+    // sitio (ej. al eliminar un asesor), para que quede guardado en el mes correcto.
+    datosPorMes[mesSeleccionado].horarioOcultos = horarioOcultos;
+    guardarDatosPorMes();
 }
 
 // Quita a un asesor únicamente de la pestaña Horario. Sus datos de ventas, Garex,

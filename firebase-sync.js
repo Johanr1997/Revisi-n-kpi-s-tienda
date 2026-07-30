@@ -108,6 +108,10 @@ function limpiarEstadoLocalCompleto() {
         appData = datosPorMes[mesSeleccionado].appData;
         METAS_SOS = datosPorMes[mesSeleccionado].metasSOS;
         METAS_TIENDA = datosPorMes[mesSeleccionado].metasTienda;
+        // horarioData/horarioOcultos viven dentro del bloque del mes (ver script.js), no
+        // como listas planas: se re-enlazan aquí para que apunten al mes recién creado.
+        if (typeof horarioData !== "undefined") horarioData = datosPorMes[mesSeleccionado].horarioData;
+        if (typeof horarioOcultos !== "undefined") horarioOcultos = datosPorMes[mesSeleccionado].horarioOcultos;
     }
     if (typeof bitacorasData !== "undefined") bitacorasData = [];
     if (typeof recordatoriosData !== "undefined") recordatoriosData = [];
@@ -116,8 +120,6 @@ function limpiarEstadoLocalCompleto() {
         if (typeof asegurarClinicaInterna === "function") asegurarClinicaInterna();
     }
     if (typeof ventasCalendario !== "undefined") ventasCalendario = [];
-    if (typeof horarioData !== "undefined") horarioData = {};
-    if (typeof horarioOcultos !== "undefined") horarioOcultos = [];
 }
 
 // ── ESTADO DE AUTENTICACIÓN ────────────────────────────────────
@@ -169,6 +171,11 @@ function cargarDatosDesdeNube(uid) {
                 appData = datosPorMes[mesSeleccionado].appData;
                 METAS_SOS = datosPorMes[mesSeleccionado].metasSOS;
                 METAS_TIENDA = datosPorMes[mesSeleccionado].metasTienda;
+                // horarioData/horarioOcultos ahora viven dentro de cada bloque mensual (ver
+                // script.js): se re-enlazan al mes recién cargado en vez de usar campos planos,
+                // para que un turno de un mes no se mezcle con otro mes que reutilice la misma clave.
+                if (typeof horarioData !== "undefined") horarioData = datosPorMes[mesSeleccionado].horarioData;
+                if (typeof horarioOcultos !== "undefined") horarioOcultos = datosPorMes[mesSeleccionado].horarioOcultos;
                 localStorage.setItem("datosPorMes", JSON.stringify(datosPorMes));
                 localStorage.setItem("mesSeleccionado", mesSeleccionado);
             } else if (d.appData || d.metasSOS || d.metasTienda) {
@@ -189,10 +196,17 @@ function cargarDatosDesdeNube(uid) {
                 if (d.appData && d.appData.bitacoras && !d.bitacorasData) {
                     bitacorasData = d.appData.bitacoras;
                 }
+                // Modelo anterior también guardaba horarioData/horarioOcultos como campos
+                // planos (un solo horario global): se migran al mes de destino igual que
+                // appData/metasSOS/metasTienda.
+                if (d.horarioData)    datosPorMes[mesDestino].horarioData = d.horarioData;
+                if (d.horarioOcultos) datosPorMes[mesDestino].horarioOcultos = d.horarioOcultos;
                 if (typeof normalizarMesData === "function") normalizarMesData(datosPorMes[mesDestino]);
                 appData = datosPorMes[mesDestino].appData;
                 METAS_SOS = datosPorMes[mesDestino].metasSOS;
                 METAS_TIENDA = datosPorMes[mesDestino].metasTienda;
+                if (typeof horarioData !== "undefined") horarioData = datosPorMes[mesDestino].horarioData;
+                if (typeof horarioOcultos !== "undefined") horarioOcultos = datosPorMes[mesDestino].horarioOcultos;
                 localStorage.setItem("datosPorMes", JSON.stringify(datosPorMes));
                 localStorage.setItem("mesSeleccionado", mesSeleccionado);
             }
@@ -200,8 +214,6 @@ function cargarDatosDesdeNube(uid) {
             if (d.recordatoriosData) { recordatoriosData = d.recordatoriosData; localStorage.setItem("recordatoriosData", JSON.stringify(recordatoriosData)); }
             if (d.clinicasData)      { clinicasData = d.clinicasData; localStorage.setItem("clinicasData", JSON.stringify(clinicasData)); }
             if (d.ventasCalendario)  { ventasCalendario = d.ventasCalendario; localStorage.setItem("ventasCalendario", JSON.stringify(ventasCalendario)); }
-            if (d.horarioData)       { horarioData = d.horarioData; localStorage.setItem("horarioData", JSON.stringify(horarioData)); }
-            if (d.horarioOcultos)    { horarioOcultos = d.horarioOcultos; localStorage.setItem("horarioOcultos", JSON.stringify(horarioOcultos)); }
 
             reRenderizarTodo();
             mostrarAlerta("Datos cargados desde la nube.", "success");
@@ -260,8 +272,9 @@ function guardarNubeInmediato() {
         recordatoriosData: typeof recordatoriosData !== "undefined" ? recordatoriosData : null,
         clinicasData: typeof clinicasData !== "undefined" ? clinicasData : null,
         ventasCalendario: typeof ventasCalendario !== "undefined" ? ventasCalendario : null,
-        horarioData: typeof horarioData !== "undefined" ? horarioData : null,
-        horarioOcultos: typeof horarioOcultos !== "undefined" ? horarioOcultos : null,
+        // horarioData/horarioOcultos ya NO se suben aparte: viven dentro de cada bloque
+        // mensual (datosPorMes[mes].horarioData / .horarioOcultos), así que ya están
+        // incluidos en "datosPorMes" de arriba.
         actualizadoEn: firebase.firestore.FieldValue.serverTimestamp()
     };
     // IMPORTANTE: se guarda SIN "merge" a propósito. Como "datos" ya incluye
