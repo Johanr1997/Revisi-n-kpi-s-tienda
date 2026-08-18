@@ -144,6 +144,7 @@ function limpiarEstadoLocalCompleto() {
     localStorage.removeItem("metasTienda"); // clave del modelo anterior, ya no se usa
     localStorage.removeItem("horarioData");
     localStorage.removeItem("horarioOcultos");
+    localStorage.removeItem("horarioPresets");
 
     if (typeof mesISOActual === "function") mesSeleccionado = mesISOActual();
     if (typeof nuevoMesData === "function") {
@@ -164,6 +165,9 @@ function limpiarEstadoLocalCompleto() {
         if (typeof asegurarClinicaInterna === "function") asegurarClinicaInterna();
     }
     if (typeof ventasCalendario !== "undefined") ventasCalendario = [];
+    // Los accesos rápidos del Horario (ej. "Horario normal", "10:00 am – 7:00 pm") vuelven
+    // a los valores de fábrica al cerrar sesión, igual que el resto del estado local.
+    if (typeof HORARIO_PRESETS_DEFAULT !== "undefined") horarioPresets = HORARIO_PRESETS_DEFAULT.map(p => ({ ...p }));
 }
 
 // ── ESTADO DE AUTENTICACIÓN ────────────────────────────────────
@@ -259,6 +263,9 @@ function cargarDatosDesdeNube(uid) {
             if (d.recordatoriosData) { recordatoriosData = d.recordatoriosData; localStorage.setItem("recordatoriosData", JSON.stringify(recordatoriosData)); }
             if (d.clinicasData)      { clinicasData = d.clinicasData; localStorage.setItem("clinicasData", JSON.stringify(clinicasData)); }
             if (d.ventasCalendario)  { ventasCalendario = d.ventasCalendario; localStorage.setItem("ventasCalendario", JSON.stringify(ventasCalendario)); }
+            // Accesos rápidos del Horario (ej. "Horario normal", "10:00 am – 7:00 pm"): se
+            // restauran igual que el resto del estado global no ligado a un mes en particular.
+            if (d.horarioPresets)    { horarioPresets = d.horarioPresets; localStorage.setItem("horarioPresets", JSON.stringify(horarioPresets)); }
 
             reRenderizarTodo();
             mostrarAlerta("Datos cargados desde la nube.", "success");
@@ -321,6 +328,9 @@ function guardarNubeInmediato() {
         recordatoriosData: typeof recordatoriosData !== "undefined" ? recordatoriosData : null,
         clinicasData: typeof clinicasData !== "undefined" ? clinicasData : null,
         ventasCalendario: typeof ventasCalendario !== "undefined" ? ventasCalendario : null,
+        // Accesos rápidos del Horario (ej. "Horario normal", "10:00 am – 7:00 pm"): son
+        // globales (no dependen del mes), igual que bitácoras/recordatorios/clínicas.
+        horarioPresets: typeof horarioPresets !== "undefined" ? horarioPresets : null,
         // horarioData/horarioOcultos ya NO se suben aparte: viven dentro de cada bloque
         // mensual (datosPorMes[mes].horarioData / .horarioOcultos), así que ya están
         // incluidos en "datosPorMes" de arriba.
