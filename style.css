@@ -2302,6 +2302,55 @@ body.dark-mode .login-sub, body.dark-mode .login-foot { color: rgba(255,255,255,
     line-height: 1.5;
 }
 .horario-head-asesor { text-align: left; }
+.horario-head-daynum { font-weight: 400; opacity: 0.7; }
+
+/* "Hoy": resalta la columna del día actual dentro de la semana visible (si esa
+   semana incluye hoy), igual que el punto rojo del mini calendario de Recordatorios */
+.horario-head-cell-hoy { color: #0071E3; }
+.horario-head-daynum-hoy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 3px;
+    border-radius: 999px;
+    background: #0071E3;
+    color: #FFFFFF;
+    font-weight: 700;
+    opacity: 1;
+}
+.horario-celda-hoy {
+    box-shadow: 0 0 0 1.5px #0071E3 inset;
+}
+body.dark-mode .horario-head-cell-hoy { color: #4DA3FF; }
+body.dark-mode .horario-head-daynum-hoy { background: #0A84FF; }
+body.dark-mode .horario-celda-hoy { box-shadow: 0 0 0 1.5px #0A84FF inset; }
+
+/* Fin de semana (Sáb/Dom): tinte sutil para distinguirlas de un vistazo del resto
+   de la semana laboral. Cada fila y el encabezado tienen exactamente 8 hijos (1
+   columna de nombre/asesor + 7 días), así que la posición 7 siempre es Sábado y
+   la 8 siempre es Domingo. */
+.horario-grid-header > .horario-head-cell:nth-child(7),
+.horario-grid-header > .horario-head-cell:nth-child(8),
+.horario-fila > .horario-celda:nth-child(7),
+.horario-fila > .horario-celda:nth-child(8) {
+    background: rgba(0,113,227,0.045);
+}
+.horario-fila > .horario-celda:nth-child(7):hover,
+.horario-fila > .horario-celda:nth-child(8):hover {
+    background: rgba(0,113,227,0.09);
+}
+body.dark-mode .horario-grid-header > .horario-head-cell:nth-child(7),
+body.dark-mode .horario-grid-header > .horario-head-cell:nth-child(8),
+body.dark-mode .horario-fila > .horario-celda:nth-child(7),
+body.dark-mode .horario-fila > .horario-celda:nth-child(8) {
+    background: rgba(10,132,255,0.08);
+}
+body.dark-mode .horario-fila > .horario-celda:nth-child(7):hover,
+body.dark-mode .horario-fila > .horario-celda:nth-child(8):hover {
+    background: rgba(10,132,255,0.14);
+}
  
 .horario-nombre-cell {
     display: flex;
@@ -2468,6 +2517,40 @@ body.dark-mode .login-sub, body.dark-mode .login-foot { color: rgba(255,255,255,
     transition: transform 0.12s ease, filter 0.12s ease;
 }
 .horario-chip:hover { transform: translateY(-1px); filter: brightness(0.95); }
+
+/* Accesos rápidos (valores fijos reutilizables, ej. "Horario normal" o "10am - 7pm"):
+   mismo look que los chips fijos, pero con una "x" pequeña superpuesta para poder
+   eliminarlos sin cerrar el modal. */
+.horario-chips-presets { margin-top: 2px; }
+.horario-chip-preset-wrap {
+    position: relative;
+    display: inline-flex;
+}
+.horario-chip-preset {
+    padding-right: 26px;
+}
+.horario-chip-preset-del {
+    position: absolute;
+    top: 50%;
+    right: 5px;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.12);
+    color: rgba(0,0,0,0.55);
+    font-size: 9px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.horario-chip-preset-del:hover { background: rgba(255,59,48,0.25); color: #FF3B30; }
+body.dark-mode .horario-chip-preset-del { background: rgba(255,255,255,0.18); color: rgba(255,255,255,0.7); }
+body.dark-mode .horario-chip-preset-del:hover { background: rgba(255,69,58,0.3); color: #FF453A; }
  
 .horario-vacio-msg { color: rgba(0,0,0,0.35); }
 
@@ -2536,9 +2619,40 @@ body.dark-mode .horario-leyenda { color: rgba(255,255,255,0.75) !important; }
 body.dark-mode .horario-btn-secundario { background: #48484A; }
 body.dark-mode .horario-btn-secundario:hover { background: #58585A; }
  
-/* Responsive: en celular, la grilla mantiene su ancho mínimo y hace scroll
-   horizontal dentro de la tarjeta, en vez de romperse */
+/* Responsive: en celular, la grilla se compacta para necesitar menos scroll
+   horizontal. El ancho de 640px y los tamaños originales se reservan solo
+   para el momento de generar la imagen a compartir (clase .modo-captura),
+   así la imagen exportada se ve siempre igual sin importar el tamaño de
+   pantalla desde donde se generó. */
 @media (max-width: 640px) {
     .horario-acciones { flex-direction: column; }
     .horario-btn-accion { width: 100%; }
+
+    .horario-captura-area:not(.modo-captura) { min-width: 560px; padding: 14px; }
+    .horario-captura-area:not(.modo-captura) .horario-grid {
+        grid-template-columns: 92px repeat(7, minmax(56px, 1fr));
+        gap: 4px;
+    }
+    .horario-captura-area:not(.modo-captura) .horario-head-cell { font-size: 10px; padding: 4px 2px 8px; }
+    .horario-captura-area:not(.modo-captura) .horario-nombre-cell { padding: 8px 6px; gap: 5px; font-size: 12px; }
+    .horario-captura-area:not(.modo-captura) .horario-avatar { width: 22px; height: 22px; font-size: 10px; }
+    .horario-captura-area:not(.modo-captura) .horario-drag-handle { width: 16px; }
+    .horario-captura-area:not(.modo-captura) .horario-mini-btn { width: 18px; height: 18px; }
+    .horario-captura-area:not(.modo-captura) .horario-celda { min-height: 46px; padding: 3px; }
+    .horario-captura-area:not(.modo-captura) .horario-pill { font-size: 9.5px; padding: 5px 3px; }
+
+    /* Sombra sutil en el borde derecho del contenedor con scroll, como pista
+       visual de que hay más días hacia la derecha */
+    .horario-scroll-wrap { position: relative; }
+    .horario-scroll-wrap::after {
+        content: "";
+        position: absolute;
+        top: 0; right: 0; bottom: 0;
+        width: 26px;
+        background: linear-gradient(to right, transparent, rgba(255,255,255,0.92));
+        pointer-events: none;
+    }
+    body.dark-mode .horario-scroll-wrap::after {
+        background: linear-gradient(to right, transparent, rgba(28,28,30,0.92));
+    }
 }
