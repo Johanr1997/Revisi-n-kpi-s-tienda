@@ -1085,9 +1085,6 @@ function pedirFecha(titulo, fechaDefault) {
 
 
 
-
-
-
 function actualizarResumenIngreso() {
     const monto = parseFloat(document.getElementById("inputVentaSemanal").value) || 0;
     const fecha = document.getElementById("inputVentaFechaDia").value;
@@ -2779,6 +2776,38 @@ const DIAS_SEMANA = [
     { key: "sab", label: "Sáb" },
     { key: "dom", label: "Dom" }
 ];
+
+// Accesos rápidos configurables por el usuario (además de Libre/Vacaciones/Incapacidad):
+// valores fijos de texto (ej. "Horario normal" o "10:00 am – 7:00 pm") que se guardan una
+// vez desde el modal de turno y después se reutilizan con un solo clic, en vez de tener que
+// escribirlos cada vez. Es una lista global (no depende del mes ni de la semana), igual que
+// Bitácoras/Recordatorios/Clínicas, y se sincroniza con la nube junto con esos datos.
+const HORARIO_PRESETS_DEFAULT = [
+    { id: "preset_normal", texto: "Horario normal" },
+    { id: "preset_10_7",   texto: "10:00 am – 7:00 pm" }
+];
+let horarioPresets = JSON.parse(localStorage.getItem("horarioPresets")) || HORARIO_PRESETS_DEFAULT.map(p => ({ ...p }));
+
+function guardarHorarioPresets() {
+    localStorage.setItem("horarioPresets", JSON.stringify(horarioPresets));
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
+}
+
+// Agrega un nuevo acceso rápido si el texto no está vacío y no existe ya uno igual
+// (comparación sin distinguir mayúsculas/minúsculas ni espacios sobrantes).
+function agregarHorarioPreset(texto) {
+    const limpio = (texto || "").trim();
+    if (!limpio) return;
+    const yaExiste = horarioPresets.some(p => p.texto.trim().toLowerCase() === limpio.toLowerCase());
+    if (yaExiste) return;
+    horarioPresets.push({ id: "preset_" + Date.now(), texto: limpio });
+    guardarHorarioPresets();
+}
+
+function eliminarHorarioPreset(id) {
+    horarioPresets = horarioPresets.filter(p => p.id !== id);
+    guardarHorarioPresets();
+}
  
 // Datos guardados por semana. Clave = fecha ISO del lunes de esa semana. Vive dentro del
 // bloque del mes actualmente seleccionado (datosPorMes[mesSeleccionado].horarioData), porque
@@ -2949,9 +2978,27 @@ function quitarTurno(asesorKey, diaKey, semanaISO) {
     renderHorario();
     mostrarAlerta("Turno eliminado.", "success");
 }
+
+// Genera el HTML de los chips de accesos rápidos (se re-usa también para refrescar
+// esa sección del modal sin cerrarlo, al agregar o eliminar un acceso rápido).
+function renderHorarioChipsPresets() {
+    if (horarioPresets.length === 0) {
+        return `<p class="horario-vacio-msg" style="font-size:12px; margin-top:6px;">Aún no tienes accesos rápidos guardados. Escribe un texto abajo y marca la casilla para crear el primero.</p>`;
+    }
+    return `<div class="horario-chips horario-chips-presets">
+        ${horarioPresets.map(p => `
+            <span class="horario-chip-preset-wrap">
+                <button type="button" class="horario-chip horario-chip-preset" data-preset-id="${p.id}" style="background:rgba(0,113,227,0.12); color:#0071E3;">${p.texto}</button>
+                <button type="button" class="horario-chip-preset-del" data-preset-id="${p.id}" title="Eliminar este acceso rápido">✕</button>
+            </span>`).join("")}
+    </div>`;
+}
  
-// Modal para asignar un turno: chips rápidos (guardan y cierran al instante)
-// + campo de texto libre para casos personalizados (requiere presionar "Guardar texto")
+// Modal para asignar un turno: chips rápidos de Libre/Vacaciones/Incapacidad (guardan y
+// cierran al instante), chips de accesos rápidos personalizados (mismo comportamiento, y
+// además se pueden eliminar con la "x"), y un campo de texto libre para casos puntuales
+// (requiere presionar "Guardar texto"; con la casilla marcada, también queda guardado
+// como acceso rápido para la próxima vez).
 function abrirModalTurno(asesorKey, diaKey, fechaISO, nombreAsesor, diaLabel) {
     const semanaISO = obtenerLunesActualISO();
     const turnoActual = (horarioData[semanaISO] && horarioData[semanaISO][asesorKey])
@@ -2971,10 +3018,18 @@ function abrirModalTurno(asesorKey, diaKey, fechaISO, nombreAsesor, diaLabel) {
                             ${t.emoji} ${t.label}
                         </button>`).join("")}
             </div>
+            <div class="form-group" style="margin-top:16px; margin-bottom:6px;">
+                <label>Accesos rápidos</label>
+            </div>
+            <div id="horarioChipsPresetsBox">${renderHorarioChipsPresets()}</div>
             <div class="form-group" style="margin-top:16px;">
                 <label for="horarioTextoLibre">Texto personalizado (opcional)</label>
                 <input type="text" id="horarioTextoLibre" placeholder="Ej: 10am - 6pm, cita médica...">
             </div>
+            <label class="cal-checkbox-wrap" for="horarioGuardarComoAcceso" style="padding-top:0; padding-bottom:14px;">
+                <input type="checkbox" id="horarioGuardarComoAcceso">
+                <span>Guardar como acceso rápido para reutilizar después</span>
+            </label>
             <div class="modal-actions">
                 ${turnoActual ? `<button type="button" class="modal-btn modal-btn-cancel" id="horarioBtnQuitar" style="color:#FF3B30;">Quitar turno</button>` : ""}
                 <button type="button" class="modal-btn modal-btn-cancel" id="horarioBtnCancelar">Cancelar</button>
@@ -2996,21 +3051,46 @@ function abrirModalTurno(asesorKey, diaKey, fechaISO, nombreAsesor, diaLabel) {
         setTimeout(() => overlay.remove(), 280);
     };
  
-    // Chips: un clic guarda y cierra de inmediato (flujo rápido)
-    overlay.querySelectorAll(".horario-chip").forEach(btn => {
+    // Chips fijos (Libre/Vacaciones/Incapacidad): un clic guarda y cierra de inmediato
+    overlay.querySelectorAll(".horario-chip[data-tipo]").forEach(btn => {
         btn.addEventListener("click", () => {
             guardarTurno(asesorKey, diaKey, semanaISO, { tipo: btn.dataset.tipo, texto: "" });
             cerrar();
         });
     });
+
+    // Accesos rápidos: se re-renderizan al agregar/eliminar uno sin cerrar el modal, así
+    // que se usa delegación de eventos en el contenedor en vez de listeners directos.
+    const presetsBox = overlay.querySelector("#horarioChipsPresetsBox");
+    presetsBox.addEventListener("click", (e) => {
+        const btnDel = e.target.closest(".horario-chip-preset-del");
+        if (btnDel) {
+            const preset = horarioPresets.find(p => p.id === btnDel.dataset.presetId);
+            if (preset && confirm(`¿Eliminar el acceso rápido "${preset.texto}"? Esto no afecta los turnos que ya lo tengan asignado.`)) {
+                eliminarHorarioPreset(btnDel.dataset.presetId);
+                presetsBox.innerHTML = renderHorarioChipsPresets();
+            }
+            return;
+        }
+        const btnPreset = e.target.closest(".horario-chip-preset");
+        if (btnPreset) {
+            const preset = horarioPresets.find(p => p.id === btnPreset.dataset.presetId);
+            if (!preset) return;
+            guardarTurno(asesorKey, diaKey, semanaISO, { tipo: "custom", texto: preset.texto });
+            cerrar();
+        }
+    });
  
-    // Texto libre: requiere presionar "Guardar texto"
+    // Texto libre: requiere presionar "Guardar texto". Si la casilla está marcada, ese
+    // mismo texto también se guarda como acceso rápido para la próxima vez.
     overlay.querySelector("#horarioBtnGuardarTexto").addEventListener("click", () => {
         const texto = inputTexto.value.trim();
         if (!texto) {
             mostrarAlerta("Escribe un texto personalizado o elige una opción rápida.", "warning");
             return;
         }
+        const chkAcceso = overlay.querySelector("#horarioGuardarComoAcceso");
+        if (chkAcceso && chkAcceso.checked) agregarHorarioPreset(texto);
         guardarTurno(asesorKey, diaKey, semanaISO, { tipo: "custom", texto });
         cerrar();
     });
@@ -3046,13 +3126,17 @@ function renderHorario() {
  
     const grid = document.getElementById("horarioGrid");
     if (!grid) return;
+
+    // Fecha de hoy (ISO local), para resaltar su columna si la semana visible la incluye
+    const hoyISO = fechaLocalISO(new Date());
  
     let html = `<div class="horario-grid-header">
         <div class="horario-head-cell horario-head-asesor">Asesor</div>
         ${DIAS_SEMANA.map((d, i) => {
             const fecha = new Date(lunes);
             fecha.setDate(fecha.getDate() + i);
-            return `<div class="horario-head-cell">${d.label}<br><span style="font-weight:400; opacity:.7;">${fecha.getDate()}</span></div>`;
+            const esHoy = fechaLocalISO(fecha) === hoyISO;
+            return `<div class="horario-head-cell${esHoy ? " horario-head-cell-hoy" : ""}">${d.label}<br><span class="horario-head-daynum${esHoy ? " horario-head-daynum-hoy" : ""}">${fecha.getDate()}</span></div>`;
         }).join("")}
     </div>`;
  
@@ -3082,6 +3166,7 @@ function renderHorario() {
                 const fecha = new Date(lunes);
                 fecha.setDate(fecha.getDate() + i);
                 const fechaISO = fechaLocalISO(fecha);
+                const esHoy = fechaISO === hoyISO;
                 const turno = horarioData[semanaISO] && horarioData[semanaISO][key]
                     ? horarioData[semanaISO][key][d.key]
                     : null;
@@ -3097,7 +3182,7 @@ function renderHorario() {
                 }
  
                 const nombreEscapado = asor.nombre.replace(/'/g, "\\'");
-                return `<div class="horario-celda" onclick="abrirModalTurno('${key}','${d.key}','${fechaISO}', '${nombreEscapado}', '${d.label} ${fecha.getDate()}')">${contenido}</div>`;
+                return `<div class="horario-celda${esHoy ? " horario-celda-hoy" : ""}" onclick="abrirModalTurno('${key}','${d.key}','${fechaISO}', '${nombreEscapado}', '${d.label} ${fecha.getDate()}')">${contenido}</div>`;
             }).join("")}
         </div>`;
     });
