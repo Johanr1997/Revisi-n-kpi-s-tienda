@@ -47,11 +47,11 @@ firebase.initializeApp(firebaseConfig);
 // de la tienda que le corresponde. Se muestra automáticamente en la
 // parte de arriba de la página al iniciar sesión.
 const TIENDAS_POR_CORREO = {
-    "jo.rivera@ishopgroup.com":   "El Cafetal",
-    "e.innecken@ishopgroup.com":  "Plaza Real",
+    "jo.rivera@ishopgroup.com":   "Los Reyes",
+    "b.martinez@ishopgroup.com":  "El Cafetal",
     "jos.sanchez@ishopgroup.com": "La Ceiba",
-    "d.witter@ishopgroup.com":    "Mango Plaza",
-    "m.guzman@ishopgroup.com":    "Los Reyes",
+    "d.witter@ishopgroup.com":    "Plaza Real",
+    "m.guzman@ishopgroup.com":    "Mango Plaza",
     "ej.garcia@ishopgroup.com":   "San Francisco",
     "d.pena@ishopgroup.com":      "Plaza Bratsi",
     "mr.rodriguez@ishopgroup.com":"Monte General",
