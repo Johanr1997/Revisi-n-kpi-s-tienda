@@ -1375,8 +1375,9 @@ function renderTodo() {
     let totalQR = 0;
     let totalTradeIn = 0;
 
-    // Acumuladores para el attach rate por dispositivo (Garex y Seguros)
-    const unidadesPorDispositivo = { mac: 0, ipad: 0, iphone: 0, watch: 0 };
+    // Acumuladores para el attach rate por dispositivo (Garex y Seguros) y, junto con
+    // airpods/audio, para el resumen de unidades de TODA la tienda (Resumen Ventas).
+    const unidadesPorDispositivo = { mac: 0, ipad: 0, iphone: 0, watch: 0, airpods: 0, audio: 0 };
     const garexPorDispositivo = { Mac: 0, iPad: 0, iPhone: 0, Watch: 0 };
     const segurosPorDispositivo = { Mac: 0, iPad: 0, iPhone: 0, Watch: 0 };
 
@@ -1399,10 +1400,12 @@ function renderTodo() {
         totalTradeIn += asor.tradeIn;
 
         // Unidades vendidas por dispositivo (base para el attach rate)
-        unidadesPorDispositivo.mac    += asor.unidades.mac;
-        unidadesPorDispositivo.ipad   += asor.unidades.ipad;
-        unidadesPorDispositivo.iphone += asor.unidades.iphone;
-        unidadesPorDispositivo.watch  += asor.unidades.watch;
+        unidadesPorDispositivo.mac     += asor.unidades.mac;
+        unidadesPorDispositivo.ipad    += asor.unidades.ipad;
+        unidadesPorDispositivo.iphone  += asor.unidades.iphone;
+        unidadesPorDispositivo.watch   += asor.unidades.watch;
+        unidadesPorDispositivo.airpods += asor.unidades.airpods;
+        unidadesPorDispositivo.audio   += asor.unidades.audio;
 
         // Montos por dispositivo y accesorio (base para la accesorización automática de tienda)
         montosTienda.mac          += asor.montos.mac;
@@ -1579,6 +1582,94 @@ function renderTodo() {
     document.getElementById("v_metaTotalTienda").textContent = `$${metaTotalTiendaMostrado.toLocaleString()}`;
     const porcMetaTienda = metaTotalTienda > 0 ? ((acumuladoTotalVentas / metaTotalTienda) * 100).toFixed(1) : 0;
     document.getElementById("cumplimientoMetaTotal").textContent = `${porcMetaTienda}%`;
+
+    // Render Pestaña Resumen Ventas — tarjeta de TODA la tienda (agregado de todos los
+    // asesores), para ver el total vendido además del desglose por asesor de más abajo.
+    const elResumenTienda = document.getElementById("resumenTiendaVisual");
+    if (elResumenTienda) {
+        const categoriasMetaTienda = [
+            { label: "Mac",              key: "mac" },
+            { label: "iPad",             key: "ipad" },
+            { label: "iPhone",           key: "iphone" },
+            { label: "Watch",            key: "watch" },
+            { label: "AirPods",          key: "airpods" },
+            { label: "Audio",            key: "audio" },
+            { label: "Accesorios Apple", key: "acc_apple" },
+            { label: "Acc. Terceros",    key: "acc_terceros" }
+        ];
+        const filasMetaCategoriaTienda = categoriasMetaTienda.map(c => {
+            const metaCat = METAS_TIENDA.ventas[c.key] || 0;
+            const llevaCat = montosTienda[c.key] || 0;
+            const pctCat = metaCat > 0 ? Math.min((llevaCat / metaCat) * 100, 100) : 0;
+            return `
+                <div class="ra-meta-cat-row">
+                    <div class="ra-meta-cat-head">
+                        <span>${c.label}</span>
+                        <span class="ra-muted">$${Math.round(conIVA(llevaCat)).toLocaleString()} / $${Math.round(conIVA(metaCat)).toLocaleString()}</span>
+                    </div>
+                    <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno" style="width:${pctCat}%;"></div></div>
+                </div>`;
+        }).join("");
+
+        const categoriasUnidadesTienda = [
+            { label: "Mac",     key: "mac" },
+            { label: "iPad",    key: "ipad" },
+            { label: "iPhone",  key: "iphone" },
+            { label: "Watch",   key: "watch" },
+            { label: "AirPods", key: "airpods" }
+        ];
+        const filasMetaUnidadesTienda = categoriasUnidadesTienda.map(c => {
+            const metaUnidCat = METAS_TIENDA.unidades[c.key] || 0;
+            const llevaUnidCat = unidadesPorDispositivo[c.key] || 0;
+            const pctUnidCat = metaUnidCat > 0 ? Math.min((llevaUnidCat / metaUnidCat) * 100, 100) : 0;
+            return `
+                <div class="ra-meta-cat-row">
+                    <div class="ra-meta-cat-head">
+                        <span>${c.label}</span>
+                        <span class="ra-muted">${llevaUnidCat} / ${metaUnidCat} uds</span>
+                    </div>
+                    <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno" style="width:${pctUnidCat}%;"></div></div>
+                </div>`;
+        }).join("");
+
+        elResumenTienda.innerHTML = `
+            <div class="ra-card">
+                <div class="ra-header">
+                    <div>
+                        <strong>Toda la Tienda</strong>
+                        <span class="ra-acc-badge">Accesorización: ${calcularAccesorizacion(montosTienda).toFixed(1)}%</span>
+                    </div>
+                    <span class="ra-cumplimiento">${porcMetaTienda}% de cumplimiento</span>
+                </div>
+                <div class="barra-progreso"><div class="progreso-relleno" style="width:${Math.min(porcMetaTienda,100)}%;"></div></div>
+                <div class="ra-stat-strip">
+                    <div class="ra-stat"><span class="ra-stat-label">Venta</span><span class="ra-stat-value">$${(conIVA(acumuladoVentaSemanalSolo) + acumuladoGarexMontoSolo).toLocaleString()}</span></div>
+                    <div class="ra-stat"><span class="ra-stat-label">Meta</span><span class="ra-stat-value">$${conIVA(metaTotalTienda).toLocaleString()}</span></div>
+                    <div class="ra-stat"><span class="ra-stat-label">QR Colocados</span><span class="ra-stat-value">${totalQR}</span></div>
+                    <div class="ra-stat"><span class="ra-stat-label">Trade-In</span><span class="ra-stat-value">${totalTradeIn}</span></div>
+                </div>
+
+                <div class="ra-section" style="margin-top:0; padding-top:0; border-top:none;">
+                    <p class="ra-section-title">Unidades por Dispositivo — <span class="ra-accent-blue">Meta de tienda</span></p>
+                    <div class="ra-meta-cat-grid">
+                        ${filasMetaUnidadesTienda}
+                    </div>
+                </div>
+                <div class="ra-section">
+                    <p class="ra-section-title">Dispositivos y Accesorios — <span class="ra-accent-blue">Meta de tienda</span></p>
+                    <div class="ra-meta-cat-grid">
+                        ${filasMetaCategoriaTienda}
+                    </div>
+                </div>
+                <div class="ra-section">
+                    <p class="ra-section-title">Protecciones colocadas</p>
+                    <div class="ra-grid ra-grid-3">
+                        <div>Garex: <strong>${totalGarex}</strong></div>
+                        <div>Seguros: <strong>${totalSeguros}</strong></div>
+                    </div>
+                </div>
+            </div>`;
+    }
 
     // Animar arco SVG de cumplimiento de meta
     const arcCircle = document.getElementById("v_arcCircle");

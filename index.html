@@ -22,7 +22,7 @@
 <li class="tab-btn active" data-target="ventas-pantalla">Ventas</li>
 <li class="tab-btn" data-target="inicio">Plan SOS</li>
 <li class="tab-btn" data-target="asesores">Ventas Asesores</li>
-<li class="tab-btn" data-target="resumen-asesores">Resumen Asesores</li>
+<li class="tab-btn" data-target="resumen-asesores">Resumen Ventas</li>
 <li class="tab-btn" data-target="garex">Garex</li>
 <li class="tab-btn" data-target="insurama">Insurama</li>
 <li class="tab-btn" data-target="bitacoras">Bitácoras</li>
@@ -282,10 +282,12 @@ Precio Insurama al cliente (c/u): <strong id="v_insuramaPrecioCalculado">$0</str
 </div>
 <button class="btn-primary a-btn-guardar" onclick="guardarDatosAsesor()">Actualizar Asesor</button>
 </div>
-<!-- PESTAÑA RESUMEN DE ASESORES — LIQUID GLASS -->
+<!-- PESTAÑA RESUMEN DE VENTAS — LIQUID GLASS -->
 <div id="resumen-asesores" class="seccion-dashboard" style="position: relative; isolation: isolate;">
 <div class="a-orb a-orb-blue"></div>
 <div class="a-orb a-orb-yellow"></div>
+<div class="v-section-label">Ventas de la Tienda</div>
+<div class="v-glass a-card" id="resumenTiendaVisual"></div>
 <div class="v-section-label">Resumen de Desempeño por Asesor</div>
 <div class="v-glass a-card" id="resumenAsesoresVisual"></div>
 </div>
