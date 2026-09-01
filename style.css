@@ -2327,6 +2327,18 @@ body.dark-mode .horario-head-cell-hoy { color: #4DA3FF; }
 body.dark-mode .horario-head-daynum-hoy { background: #0A84FF; }
 body.dark-mode .horario-celda-hoy { box-shadow: 0 0 0 1.5px #0A84FF inset; }
 
+/* El resaltado de "hoy" es útil mientras se trabaja en la app, pero no tiene sentido en
+   la imagen descargada/compartida (el día "actual" depende de cuándo se vea la imagen,
+   no de cuándo se generó) — se anula igual que el modo oscuro justo durante la captura. */
+.horario-captura-area.modo-captura .horario-head-cell-hoy { color: inherit; }
+.horario-captura-area.modo-captura .horario-head-daynum-hoy {
+    background: transparent;
+    color: inherit;
+    font-weight: 400;
+    opacity: 0.7;
+}
+.horario-captura-area.modo-captura .horario-celda-hoy { box-shadow: none; }
+
 /* Fin de semana (Sáb/Dom): tinte sutil para distinguirlas de un vistazo del resto
    de la semana laboral. Cada fila y el encabezado tienen exactamente 8 hijos (1
    columna de nombre/asesor + 7 días), así que la posición 7 siempre es Sábado y
