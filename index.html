@@ -585,13 +585,27 @@ Agregar al calendario
  
         <div class="horario-leyenda" id="horarioLeyenda"></div>
 
-        <p style="font-size: 12px; color: rgba(0,0,0,0.4); margin-top: 6px;">Arrastra el ícono ⠿ junto a cada nombre para reordenar. El botón ✕ solo quita a la persona de esta pestaña; sus datos de ventas, Garex e Insurama no se borran. Para agregar un asesor nuevo, ve a la pestaña ⚙️ Configuración.</p>
+        <p style="font-size: 12px; color: rgba(0,0,0,0.4); margin-top: 6px;">Arrastra el ícono ⠿ junto a cada nombre para reordenar (cada grupo se reordena por separado). El botón ✕ de un asesor solo lo quita de esta pestaña, sin borrar sus datos; el ✕ de una persona de "Otras personas" la elimina junto con sus turnos, ya que no tiene ventas ni metas guardadas en ningún otro lugar. Para agregar un asesor nuevo (con ventas), ve a la pestaña ⚙️ Configuración; para alguien que solo necesitas ver aquí, usa el formulario de abajo.</p>
  
         <div class="horario-acciones">
             <button type="button" class="btn-primary horario-btn-accion" onclick="compartirHorarioComoImagen()">Descargar / Compartir imagen</button>
             <button type="button" class="btn-primary horario-btn-accion horario-btn-secundario" onclick="copiarHorarioComoTexto()">Copiar como texto</button>
         </div>
     </div>
+
+    <div class="v-section-label">Agregar Persona al Horario</div>
+    <div class="v-glass a-card">
+        <p style="font-size: 12px; color: rgba(0,0,0,0.4); margin-top: 0; margin-bottom: 16px;">Úsalo para alguien que solo necesitas ver en esta pestaña (ej. personal de otra área, practicante). No tiene ventas, metas, Garex ni Insurama, y no aparece en ninguna otra parte de la app.</p>
+        <div class="r-form-row">
+            <div class="form-group" style="flex:1; margin-bottom:0;">
+                <label for="inputNuevaPersonaHorario">Nombre</label>
+                <input type="text" id="inputNuevaPersonaHorario" placeholder="Ej: Practicante, Seguridad...">
+            </div>
+            <div style="flex:0 0 auto; display:flex; align-items:flex-end;">
+                <button type="button" class="btn-primary" style="width:auto; padding:10px 20px; white-space:nowrap;" onclick="agregarPersonaHorario()">+ Agregar</button>
+            </div>
+        </div>
+    </div>
 </div>
 <!-- PESTAÑA CONFIGURACIÓN — LIQUID GLASS -->
 <div id="configuracion" class="seccion-dashboard" style="position: relative; isolation: isolate;">

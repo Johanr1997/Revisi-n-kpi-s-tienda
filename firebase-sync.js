@@ -157,6 +157,7 @@ function limpiarEstadoLocalCompleto() {
         // como listas planas: se re-enlazan aquí para que apunten al mes recién creado.
         if (typeof horarioData !== "undefined") horarioData = datosPorMes[mesSeleccionado].horarioData;
         if (typeof horarioOcultos !== "undefined") horarioOcultos = datosPorMes[mesSeleccionado].horarioOcultos;
+        if (typeof horarioPersonasExtra !== "undefined") horarioPersonasExtra = datosPorMes[mesSeleccionado].horarioPersonasExtra;
     }
     if (typeof bitacorasData !== "undefined") bitacorasData = [];
     if (typeof recordatoriosData !== "undefined") recordatoriosData = [];
@@ -225,6 +226,7 @@ function cargarDatosDesdeNube(uid) {
                 // para que un turno de un mes no se mezcle con otro mes que reutilice la misma clave.
                 if (typeof horarioData !== "undefined") horarioData = datosPorMes[mesSeleccionado].horarioData;
                 if (typeof horarioOcultos !== "undefined") horarioOcultos = datosPorMes[mesSeleccionado].horarioOcultos;
+                if (typeof horarioPersonasExtra !== "undefined") horarioPersonasExtra = datosPorMes[mesSeleccionado].horarioPersonasExtra;
                 localStorage.setItem("datosPorMes", JSON.stringify(datosPorMes));
                 localStorage.setItem("mesSeleccionado", mesSeleccionado);
             } else if (d.appData || d.metasSOS || d.metasTienda) {
@@ -256,6 +258,7 @@ function cargarDatosDesdeNube(uid) {
                 METAS_TIENDA = datosPorMes[mesDestino].metasTienda;
                 if (typeof horarioData !== "undefined") horarioData = datosPorMes[mesDestino].horarioData;
                 if (typeof horarioOcultos !== "undefined") horarioOcultos = datosPorMes[mesDestino].horarioOcultos;
+                if (typeof horarioPersonasExtra !== "undefined") horarioPersonasExtra = datosPorMes[mesDestino].horarioPersonasExtra;
                 localStorage.setItem("datosPorMes", JSON.stringify(datosPorMes));
                 localStorage.setItem("mesSeleccionado", mesSeleccionado);
             }
