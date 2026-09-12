@@ -1,0 +1,17 @@
+{
+  "name": "Control de Ventas",
+  "short_name": "Ctrl. Ventas",
+  "description": "Panel de control de ventas, metas del Plan SOS, Garex, Insurama, horarios y bitácoras de la tienda.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5F5F7",
+  "theme_color": "#0071E3",
+  "lang": "es",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/apple-touch-icon-180.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
