@@ -589,17 +589,20 @@ let lineasInsuramaPendientes = [];
 // ═══════════════════════════════════════════
 const mediaModoOscuroSistema = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
 
+const ICONO_SOL = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><line x1="12" y1="1.8" x2="12" y2="4.3"/><line x1="12" y1="19.7" x2="12" y2="22.2"/><line x1="1.8" y1="12" x2="4.3" y2="12"/><line x1="19.7" y1="12" x2="22.2" y2="12"/><line x1="4.6" y1="4.6" x2="6.3" y2="6.3"/><line x1="17.7" y1="17.7" x2="19.4" y2="19.4"/><line x1="4.6" y1="19.4" x2="6.3" y2="17.7"/><line x1="17.7" y1="6.3" x2="19.4" y2="4.6"/></svg>';
+const ICONO_LUNA = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>';
+
 function aplicarModoOscuro(activar) {
     document.body.classList.toggle("dark-mode", activar);
 
     const btnNav = document.getElementById("btnThemeToggle");
     if (btnNav) {
-        btnNav.textContent = activar ? "☀" : "☾";
+        btnNav.innerHTML = activar ? ICONO_SOL : ICONO_LUNA;
         btnNav.title = activar ? "Cambiar a modo claro" : "Cambiar a modo oscuro";
     }
     const btnCfg = document.getElementById("btnThemeToggleConfig");
     if (btnCfg) {
-        btnCfg.textContent = activar ? "☀ Activar modo claro" : "☾ Activar modo oscuro";
+        btnCfg.innerHTML = (activar ? ICONO_SOL : ICONO_LUNA) + (activar ? " Activar modo claro" : " Activar modo oscuro");
     }
     const chkAuto = document.getElementById("chkModoOscuroAuto");
     if (chkAuto) chkAuto.checked = localStorage.getItem("modoOscuroAuto") !== "0";
@@ -1118,7 +1121,7 @@ function guardarDatosAsesor() {
         ventasCalendario.push({
             id: Date.now(),
             fecha,
-            label: `💰 ${nombreAsesor}: $${monto.toLocaleString()}`,
+            label: `${nombreAsesor}: $${monto.toLocaleString()}`,
             tipo: "venta",
             monto,
             asesorKey: key,
@@ -1498,7 +1501,7 @@ function renderTodo() {
                 <div class="ra-header">
                     <div>
                         <strong>${asor.nombre}</strong>
-                        <span class="ra-incentivo">💰 Incentivos: $${incentivoTotal.toFixed(2)}</span>
+                        <span class="ra-incentivo"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 15.3c0 1.2 1.1 2 2.5 2s2.5-.8 2.5-2c0-1.4-1.2-1.8-2.5-2.2-1.3-.4-2.5-.8-2.5-2.2 0-1.2 1.1-2 2.5-2s2.5.8 2.5 2"/><line x1="12" y1="6.7" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="17.3"/></svg> Incentivos: $${incentivoTotal.toFixed(2)}</span>
                         <span class="ra-acc-badge">Accesorización: ${accesorizacionAsor}%</span>
                     </div>
                     <span class="ra-cumplimiento">${cumplimiento}% de cumplimiento</span>
@@ -2139,7 +2142,7 @@ function previsualizarMetaAsesor(key) {
         .reduce((acc, k) => acc + (appData.asesores[k].porcentajeMeta || 0), 0);
     const sumaTotal = sumaOtros + porcentaje;
     const excedeAlerta = sumaTotal > 100
-        ? `<br><span style="color:#FF3B30;">⚠ La suma entre asesores sería ${sumaTotal.toFixed(1)}% (supera el 100%). Máximo disponible para este asesor: ${(100 - sumaOtros).toFixed(1)}%.</span>`
+        ? `<br><span style="color:#FF3B30;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-1px; margin-right:3px;"><path d="M12 4 2.5 20h19L12 4z"/><line x1="12" y1="10" x2="12" y2="14.5"/><line x1="12" y1="17" x2="12" y2="17.1"/></svg>La suma entre asesores sería ${sumaTotal.toFixed(1)}% (supera el 100%). Máximo disponible para este asesor: ${(100 - sumaOtros).toFixed(1)}%.</span>`
         : "";
 
     texto.innerHTML = `Meta calculada: <strong>$${Math.round(metaCalculada).toLocaleString()}</strong>
@@ -2180,7 +2183,10 @@ function renombrarAsesor(key) {
         // Actualizar también las entradas del calendario que tengan el nombre anterior
         ventasCalendario = ventasCalendario.map(v => ({
             ...v,
-            label: v.label.replace(`💰 ${nombreAnterior}:`, `💰 ${nuevoNombre}:`)
+            // El "💰 " es un prefijo antiguo: ya no se agrega a las ventas nuevas, pero
+            // se sigue aceptando aquí para no romper el renombrado en datos guardados
+            // antes de este cambio.
+            label: v.label.replace(`💰 ${nombreAnterior}:`, `${nuevoNombre}:`).replace(`${nombreAnterior}:`, `${nuevoNombre}:`)
         }));
         guardarVentasCalendario();
 
@@ -2566,11 +2572,13 @@ function renderClinicas() {
         return `
         <div class="c-item">
             <div class="c-item-check ${realizada ? 'realizada' : ''}" onclick="toggleClinica(${c.id})" title="${realizada ? 'Marcar como pendiente' : 'Marcar como realizada'}">
-                ${realizada ? '✓' : ''}
+                ${realizada ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4.5 4.5L19 7"/></svg>' : ''}
             </div>
             <span class="c-item-nombre ${realizada ? 'realizada' : ''}">${c.nombre}</span>
             <span class="c-item-fecha">${realizada ? 'Realizada: ' + fechaRealizadaDisplay : 'Programada: ' + fechaDisplay}</span>
-            <span class="c-item-estado ${realizada ? 'c-estado-realizada' : 'c-estado-pendiente'}">${realizada ? '✅ Realizada' : '⏳ Pendiente'}</span>
+            <span class="c-item-estado ${realizada ? 'c-estado-realizada' : 'c-estado-pendiente'}">${realizada
+                ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5 5.5-6"/></svg> Realizada'
+                : '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.5l3.5 2"/></svg> Pendiente'}</span>
             <button class="c-item-del" onclick="eliminarClinica(${c.id})" title="Eliminar">✕</button>
         </div>`;
     }).join("");
@@ -3377,7 +3385,7 @@ function renderHorario() {
                     onpointermove="horarioPointerMove(event)"
                     onpointerup="horarioPointerUp(event)"
                     onpointercancel="horarioPointerUp(event)"
-                    title="Arrastra para reordenar">⠿</span>
+                    title="Arrastra para reordenar"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span>
                 <span class="horario-avatar">${inicial}</span>
                 <span class="horario-nombre-texto">${nombre}</span>
                 ${btnQuitarHTML}

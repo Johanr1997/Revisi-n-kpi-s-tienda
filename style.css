@@ -230,6 +230,7 @@ body.dark-mode .mes-selector-badge { color: #30D158; background: rgba(48,209,88,
 
 .btn-primary { background: #0071E3; color: white; border: none; padding: 12px; font-size: 14px; font-weight: 500; border-radius: 8px; cursor: pointer; width: 100%; }
 .btn-primary:hover { background: #0077ED; }
+.btn-icon-text { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
 
 .verde { background-color: #EAF9EE; color: #248A3D; }
 .amarillo { background-color: #FFF7E6; color: #B26A00; }
@@ -1007,6 +1008,9 @@ body.dark-mode .bitacora-item-fecha { color: rgba(255,255,255,0.6); }
     white-space: nowrap;
 }
 .c-item-estado {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     font-size: 11px;
     font-weight: 600;
     padding: 3px 10px;
@@ -1914,7 +1918,9 @@ body.dark-mode .asesor-config-del {
     margin-bottom: 5px;
 }
 .ra-incentivo {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     margin-left: 10px;
     font-size: 11px;
     font-weight: 600;

@@ -45,15 +45,15 @@
 <li class="tab-btn" data-target="bitacoras">Bitácoras</li>
 <li class="tab-btn" data-target="recordatorios">Recordatorios</li>
 <li class="tab-btn" data-target="horario">Horario</li>
-<li class="tab-btn tab-icon-only" data-target="configuracion" title="Configuración">⚙️</li>
+<li class="tab-btn tab-icon-only" data-target="configuracion" title="Configuración"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="7.3"/><g stroke-width="2.2"><line x1="12" y1="2.3" x2="12" y2="4.6"/><line x1="12" y1="19.4" x2="12" y2="21.7"/><line x1="2.3" y1="12" x2="4.6" y2="12"/><line x1="19.4" y1="12" x2="21.7" y2="12"/><line x1="5.2" y1="5.2" x2="6.8" y2="6.8"/><line x1="17.2" y1="17.2" x2="18.8" y2="18.8"/><line x1="5.2" y1="18.8" x2="6.8" y2="17.2"/><line x1="17.2" y1="6.8" x2="18.8" y2="5.2"/></g></svg></li>
 </ul>
 <span id="syncStatusIndicator" class="sync-status" style="display:none;" title="Estado de sincronización con la nube">
 <span class="sync-status-dot"></span>
 <span class="sync-status-text">—</span>
 </span>
 <div class="navbar-divider"></div>
-<button type="button" class="theme-toggle-btn" id="btnThemeToggle" onclick="toggleModoOscuro()" title="Cambiar a modo oscuro">☾</button>
-<button type="button" class="theme-toggle-btn" id="btnCerrarSesion" onclick="cerrarSesionFirebase()" title="Cerrar sesión" style="display:none;">⏻</button>
+<button type="button" class="theme-toggle-btn" id="btnThemeToggle" onclick="toggleModoOscuro()" title="Cambiar a modo oscuro"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg></button>
+<button type="button" class="theme-toggle-btn" id="btnCerrarSesion" onclick="cerrarSesionFirebase()" title="Cerrar sesión" style="display:none;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v8"/><path d="M7 5.5a8 8 0 1 0 10 0"/></svg></button>
 </div>
 </div>
 <!-- ═══════════ PANTALLA DE INICIO DE SESIÓN (Firebase Auth) ═══════════ -->
@@ -603,9 +603,9 @@ Agregar al calendario
         <div class="horario-leyenda" id="horarioLeyenda"></div>
 
         <details class="tip-toggle">
-        <summary>💡 Ayuda</summary>
+        <summary><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6.5 6.5 0 0 0-4 11.6c.6.5 1 1.3 1 2.1v.3h6v-.3c0-.8.4-1.6 1-2.1A6.5 6.5 0 0 0 12 3z"/></svg>Ayuda</summary>
         <div class="tip-toggle-body">
-        <p style="font-size: 12px; color: rgba(0,0,0,0.4);">Arrastra el ícono ⠿ junto a cada nombre para reordenar (cada grupo se reordena por separado). El botón ✕ de un asesor solo lo quita de esta pestaña, sin borrar sus datos; el ✕ de una persona de "Otras personas" la elimina junto con sus turnos, ya que no tiene ventas ni metas guardadas en ningún otro lugar. Para agregar un asesor nuevo (con ventas), ve a la pestaña ⚙️ Configuración; para alguien que solo necesitas ver aquí, usa el formulario de abajo.</p>
+        <p style="font-size: 12px; color: rgba(0,0,0,0.4);">Arrastra el ícono de puntos junto a cada nombre para reordenar (cada grupo se reordena por separado). El botón ✕ de un asesor solo lo quita de esta pestaña, sin borrar sus datos; el ✕ de una persona de "Otras personas" la elimina junto con sus turnos, ya que no tiene ventas ni metas guardadas en ningún otro lugar. Para agregar un asesor nuevo (con ventas), ve a la pestaña de Configuración (el ícono de engranaje); para alguien que solo necesitas ver aquí, usa el formulario de abajo.</p>
         </div>
         </details>
  
@@ -618,7 +618,7 @@ Agregar al calendario
     <div class="v-section-label">Agregar Persona al Horario</div>
     <div class="v-glass a-card">
         <details class="tip-toggle">
-        <summary>💡 Ayuda</summary>
+        <summary><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6.5 6.5 0 0 0-4 11.6c.6.5 1 1.3 1 2.1v.3h6v-.3c0-.8.4-1.6 1-2.1A6.5 6.5 0 0 0 12 3z"/></svg>Ayuda</summary>
         <div class="tip-toggle-body">
         <p style="font-size: 12px; color: rgba(0,0,0,0.4);">Úsalo para alguien que solo necesitas ver en esta pestaña (ej. personal de otra área, practicante). No tiene ventas, metas, Garex ni Insurama, y no aparece en ninguna otra parte de la app.</p>
         </div>
@@ -642,7 +642,7 @@ Agregar al calendario
 <div class="v-section-label">Gestión de Asesores</div>
 <div class="v-glass a-card">
 <details class="tip-toggle">
-<summary>💡 Ayuda</summary>
+<summary><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6.5 6.5 0 0 0-4 11.6c.6.5 1 1.3 1 2.1v.3h6v-.3c0-.8.4-1.6 1-2.1A6.5 6.5 0 0 0 12 3z"/></svg>Ayuda</summary>
 <div class="tip-toggle-body">
 <p style="font-size: 13px; color: rgba(0,0,0,0.45);">Agrega nuevos asesores, edita sus nombres y asígnales el % de la Meta Mensual de la Tienda que les corresponde; la meta en $ de cada uno se calcula automáticamente. Los datos acumulados de cada asesor se conservan al renombrar. El botón "Borrar" elimina al asesor y todos sus datos de forma PERMANENTE (pedirá confirmación escribiendo su nombre). Para quitar a alguien de la vista semanal sin borrar sus datos, ve a la pestaña Horario.</p>
 <p style="font-size: 12px; color: rgba(0,0,0,0.4);">💡 Define primero la Meta Mensual de la Tienda más abajo — de lo contrario, el % no tendrá una base sobre la cual calcular.</p>
@@ -662,7 +662,7 @@ Agregar al calendario
 <div class="v-section-label">Metas del Plan SOS</div>
 <div class="v-glass a-card">
 <details class="tip-toggle">
-<summary>💡 Ayuda</summary>
+<summary><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6.5 6.5 0 0 0-4 11.6c.6.5 1 1.3 1 2.1v.3h6v-.3c0-.8.4-1.6 1-2.1A6.5 6.5 0 0 0 12 3z"/></svg>Ayuda</summary>
 <div class="tip-toggle-body">
 <p style="font-size: 13px; color: rgba(0,0,0,0.45);">Estas metas aplican a toda la tienda y se usan para el semáforo de Conversión, Accesorización y Ticket Promedio.</p>
 </div>
@@ -691,7 +691,7 @@ Agregar al calendario
 <div class="v-section-label">Meta Mensual de la Tienda</div>
 <div class="v-glass a-card">
 <details class="tip-toggle">
-<summary>💡 Ayuda</summary>
+<summary><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6.5 6.5 0 0 0-4 11.6c.6.5 1 1.3 1 2.1v.3h6v-.3c0-.8.4-1.6 1-2.1A6.5 6.5 0 0 0 12 3z"/></svg>Ayuda</summary>
 <div class="tip-toggle-body">
 <p style="font-size: 13px; color: rgba(0,0,0,0.45);">Define la meta mensual de la tienda, desglosada por categoría. Estos valores son independientes de la meta individual de cada asesor.</p>
 </div>
@@ -740,7 +740,7 @@ Agregar al calendario
 <p style="font-weight:600; font-size:14px; margin-bottom:4px;">Modo oscuro</p>
 <p style="font-size:13px; color: rgba(0,0,0,0.45); margin:0;">Cambia la apariencia de toda la aplicación. Tu preferencia se guarda automáticamente.</p>
 </div>
-<button type="button" class="btn-primary" style="width:auto; padding:10px 22px; white-space:nowrap;" id="btnThemeToggleConfig" onclick="toggleModoOscuro()">☽ Activar modo oscuro</button>
+<button type="button" class="btn-primary btn-icon-text" style="width:auto; padding:10px 22px; white-space:nowrap;" id="btnThemeToggleConfig" onclick="toggleModoOscuro()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg> Activar modo oscuro</button>
 </div>
 <label class="cal-checkbox-wrap" for="chkModoOscuroAuto" style="padding-top:14px; border-top:1px solid rgba(0,0,0,0.07);">
 <input type="checkbox" id="chkModoOscuroAuto" checked onchange="toggleModoOscuroAuto()">
@@ -748,7 +748,7 @@ Agregar al calendario
 </label>
 </div>
 <!-- Panel: Reset -->
-<div class="v-section-label">⚙ Configuración del Sistema</div>
+<div class="v-section-label" style="display:flex; align-items:center; gap:6px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="7.3"/><g stroke-width="2.4"><line x1="12" y1="2.3" x2="12" y2="4.6"/><line x1="12" y1="19.4" x2="12" y2="21.7"/><line x1="2.3" y1="12" x2="4.6" y2="12"/><line x1="19.4" y1="12" x2="21.7" y2="12"/><line x1="5.2" y1="5.2" x2="6.8" y2="6.8"/><line x1="17.2" y1="17.2" x2="18.8" y2="18.8"/><line x1="5.2" y1="18.8" x2="6.8" y2="17.2"/><line x1="17.2" y1="6.8" x2="18.8" y2="5.2"/></g></svg>Configuración del Sistema</div>
 <div class="v-glass a-card" style="text-align: center; padding: 40px;">
 <p style="margin-bottom: 30px; color: rgba(0,0,0,0.45);">Administración y reseteo de ciclos comerciales.</p>
 <button onclick="reiniciarTodoCero()" style="background: #FF3B30; color: white; border: none; padding: 16px 32px; font-size: 15px; font-weight: 600; border-radius: 12px; cursor: pointer; transition: background 0.2s;">
