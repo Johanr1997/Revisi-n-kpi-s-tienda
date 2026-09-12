@@ -104,15 +104,31 @@ body {
     z-index: 3;
 }
 
-.navbar h2 { position: relative; z-index: 2; font-size: 16px; font-weight: 600; }
+.navbar h2 { position: relative; z-index: 2; font-size: 16px; font-weight: 600; flex-shrink: 0; white-space: nowrap; }
 .nombre-tienda-nav {
     font-weight: 500;
     color: #0071E3;
     margin-left: 2px;
 }
 body.dark-mode .nombre-tienda-nav { color: #4DA3FF; }
-.navbar ul { display: flex; list-style: none; gap: 22px; align-items: center; position: relative; z-index: 2; }
-.navbar ul li { font-size: 13px; font-weight: 500; color: #515154; cursor: pointer; padding: 7px 14px; border-radius: 999px; transition: background 0.2s, color 0.2s; }
+/* El contenedor de pestañas + botones debe poder encogerse por debajo de su ancho
+   de contenido (min-width:0) para que sea la lista de pestañas la que haga scroll
+   horizontal, en vez de desbordar la navbar (que la recorta con overflow:hidden). */
+.navbar > div { min-width: 0; }
+.navbar ul {
+    display: flex;
+    list-style: none;
+    gap: 22px;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.navbar ul::-webkit-scrollbar { display: none; }
+.navbar ul li { font-size: 13px; font-weight: 500; color: #515154; cursor: pointer; padding: 7px 14px; border-radius: 999px; transition: background 0.2s, color 0.2s; white-space: nowrap; flex-shrink: 0; }
 .navbar ul li:hover { background: rgba(255,255,255,0.25); }
 .navbar ul li.active { color: #1D1D1F; font-weight: 600; background: rgba(255,255,255,0.55); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
 
@@ -2117,18 +2133,12 @@ body.dark-mode .ra-acc-badge {
     }
     .navbar ul {
         gap: 6px;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
         flex: 1;
-        scrollbar-width: none;
         justify-content: flex-start;
     }
-    .navbar ul::-webkit-scrollbar { display: none; }
     .navbar ul li {
-        white-space: nowrap;
         font-size: 12px;
         padding: 7px 11px;
-        flex-shrink: 0;
     }
     .theme-toggle-btn { flex-shrink: 0; }
 
