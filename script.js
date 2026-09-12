@@ -2860,6 +2860,29 @@ const TIPOS_TURNO = {
     incapacidad: { label: "Incapacidad",  emoji: "", bg: "rgba(255,59,48,0.14)",  text: "#c92f25" },
     custom:      { label: "Personalizado",emoji: "", bg: "rgba(175,82,222,0.14)", text: "#7d2a9e" }
 };
+
+// Convierte un color elegido a mano (input type="color", ej. "#0071e3") en el mismo
+// patrón visual de fondo suave + texto oscuro saturado que usan los colores por
+// defecto de TIPOS_TURNO, para que un turno con color personalizado (turno.color)
+// se vea consistente con el resto de la app.
+function coloresTurnoDesdeHex(hex) {
+    const limpio = (hex || "").replace("#", "");
+    const completo = limpio.length === 3 ? limpio.split("").map(c => c + c).join("") : limpio;
+    const num = parseInt(completo, 16) || 0;
+    const r = (num >> 16) & 255, g = (num >> 8) & 255, b = num & 255;
+    return {
+        bg: `rgba(${r},${g},${b},0.18)`,
+        text: `rgb(${Math.round(r * 0.55)},${Math.round(g * 0.55)},${Math.round(b * 0.55)})`
+    };
+}
+
+// Dado un turno guardado, devuelve {bg, text}: su color personalizado si tiene uno,
+// o el color por defecto de su tipo (TIPOS_TURNO) en caso contrario.
+function coloresDeTurno(turno) {
+    if (turno && turno.color) return coloresTurnoDesdeHex(turno.color);
+    const base = turno && TIPOS_TURNO[turno.tipo] ? TIPOS_TURNO[turno.tipo] : TIPOS_TURNO.custom;
+    return { bg: base.bg, text: base.text };
+}
  
 const DIAS_SEMANA = [
     { key: "lun", label: "Lun" },
@@ -3192,6 +3215,14 @@ function abrirModalTurno(asesorKey, diaKey, fechaISO, nombreAsesor, diaLabel) {
                             ${t.emoji} ${t.label}
                         </button>`).join("")}
             </div>
+            <label class="cal-checkbox-wrap" for="horarioUsarColor" style="padding-top:14px; padding-bottom:${turnoActual && turnoActual.color ? "10px" : "0"};">
+                <input type="checkbox" id="horarioUsarColor" ${turnoActual && turnoActual.color ? "checked" : ""}>
+                <span>Elegir un color personalizado para este turno</span>
+            </label>
+            <div class="form-group" id="horarioColorBox" style="margin-top:0; margin-bottom:14px; ${turnoActual && turnoActual.color ? "" : "display:none;"}">
+                <label for="horarioColorPersonalizado">Color del turno</label>
+                <input type="color" id="horarioColorPersonalizado" class="horario-color-input" value="${turnoActual && turnoActual.color ? turnoActual.color : "#8E8E93"}">
+            </div>
             <div class="form-group" style="margin-top:16px; margin-bottom:6px;">
                 <label>Accesos rápidos</label>
             </div>
@@ -3224,11 +3255,23 @@ function abrirModalTurno(asesorKey, diaKey, fechaISO, nombreAsesor, diaLabel) {
         overlay.classList.add("modal-out");
         setTimeout(() => overlay.remove(), 280);
     };
- 
+
+    // Color personalizado (opcional): el checkbox muestra/oculta el input de color,
+    // y se aplica sin importar qué opción se elija después (chip fijo, acceso rápido
+    // o texto libre) mientras esté marcado.
+    const chkColor = overlay.querySelector("#horarioUsarColor");
+    const colorBox = overlay.querySelector("#horarioColorBox");
+    const inputColor = overlay.querySelector("#horarioColorPersonalizado");
+    chkColor.addEventListener("change", () => {
+        colorBox.style.display = chkColor.checked ? "" : "none";
+    });
+    const obtenerColorSeleccionado = () => (chkColor.checked ? inputColor.value : null);
+
     // Chips fijos (Libre/Vacaciones/Incapacidad): un clic guarda y cierra de inmediato
     overlay.querySelectorAll(".horario-chip[data-tipo]").forEach(btn => {
         btn.addEventListener("click", () => {
-            guardarTurno(asesorKey, diaKey, semanaISO, { tipo: btn.dataset.tipo, texto: "" });
+            const color = obtenerColorSeleccionado();
+            guardarTurno(asesorKey, diaKey, semanaISO, { tipo: btn.dataset.tipo, texto: "", ...(color ? { color } : {}) });
             cerrar();
         });
     });
@@ -3250,11 +3293,12 @@ function abrirModalTurno(asesorKey, diaKey, fechaISO, nombreAsesor, diaLabel) {
         if (btnPreset) {
             const preset = horarioPresets.find(p => p.id === btnPreset.dataset.presetId);
             if (!preset) return;
-            guardarTurno(asesorKey, diaKey, semanaISO, { tipo: "custom", texto: preset.texto });
+            const color = obtenerColorSeleccionado();
+            guardarTurno(asesorKey, diaKey, semanaISO, { tipo: "custom", texto: preset.texto, ...(color ? { color } : {}) });
             cerrar();
         }
     });
- 
+
     // Texto libre: requiere presionar "Guardar texto". Si la casilla está marcada, ese
     // mismo texto también se guarda como acceso rápido para la próxima vez.
     overlay.querySelector("#horarioBtnGuardarTexto").addEventListener("click", () => {
@@ -3265,7 +3309,8 @@ function abrirModalTurno(asesorKey, diaKey, fechaISO, nombreAsesor, diaLabel) {
         }
         const chkAcceso = overlay.querySelector("#horarioGuardarComoAcceso");
         if (chkAcceso && chkAcceso.checked) agregarHorarioPreset(texto);
-        guardarTurno(asesorKey, diaKey, semanaISO, { tipo: "custom", texto });
+        const color = obtenerColorSeleccionado();
+        guardarTurno(asesorKey, diaKey, semanaISO, { tipo: "custom", texto, ...(color ? { color } : {}) });
         cerrar();
     });
  
@@ -3350,10 +3395,12 @@ function renderHorario() {
 
                 let contenido;
                 if (turno && turno.tipo === "custom") {
-                    contenido = `<div class="horario-pill" style="background:${TIPOS_TURNO.custom.bg}; color:${TIPOS_TURNO.custom.text};">${turno.texto}</div>`;
+                    const colores = coloresDeTurno(turno);
+                    contenido = `<div class="horario-pill" style="background:${colores.bg}; color:${colores.text};">${turno.texto}</div>`;
                 } else if (turno && TIPOS_TURNO[turno.tipo]) {
                     const t = TIPOS_TURNO[turno.tipo];
-                    contenido = `<div class="horario-pill" style="background:${t.bg}; color:${t.text};">${t.emoji} ${t.label}</div>`;
+                    const colores = coloresDeTurno(turno);
+                    contenido = `<div class="horario-pill" style="background:${colores.bg}; color:${colores.text};">${t.emoji} ${t.label}</div>`;
                 } else {
                     contenido = `<span class="horario-celda-vacia">+</span>`;
                 }
