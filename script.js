@@ -831,8 +831,6 @@ function actualizarRelojYFecha() {
     const ahora = new Date();
     const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     document.getElementById("fecha").textContent = ahora.toLocaleDateString('es-ES', opcionesFecha);
-    const elHora = document.getElementById("hora");
-    if (elHora) elHora.textContent = ahora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
 // GUARDAR INICIO
