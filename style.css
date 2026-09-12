@@ -2592,6 +2592,43 @@ body.dark-mode .horario-chip-preset-del:hover { background: rgba(255,69,58,0.3);
  
 .horario-vacio-msg { color: rgba(0,0,0,0.35); }
 
+/* ═══════════════════════════════════════════════════════ */
+/* CONSEJOS/AYUDA OPCIONALES — bloque <details> retráctil    */
+/* En vez de mostrar siempre los párrafos de explicación,    */
+/* quedan colapsados detrás de un resumen con flecha; el     */
+/* usuario los abre solo si los necesita.                    */
+/* ═══════════════════════════════════════════════════════ */
+.tip-toggle {
+    margin-bottom: 16px;
+}
+.tip-toggle summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #0071E3;
+    user-select: none;
+}
+.tip-toggle summary::-webkit-details-marker { display: none; }
+.tip-toggle summary::before {
+    content: "›";
+    display: inline-block;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+    transition: transform 0.2s ease;
+}
+.tip-toggle[open] summary::before { transform: rotate(90deg); }
+.tip-toggle summary:hover { color: #0077ED; }
+.tip-toggle-body { margin-top: 10px; }
+.tip-toggle-body p { margin: 0 0 10px; }
+.tip-toggle-body p:last-child { margin-bottom: 0; }
+body.dark-mode .tip-toggle summary { color: #0A84FF; }
+body.dark-mode .tip-toggle summary:hover { color: #3399FF; }
+
 /* Selector de color personalizado para un turno (checkbox "Elegir un color..." +
    input type="color") dentro del modal de asignar turno. */
 .horario-color-input {

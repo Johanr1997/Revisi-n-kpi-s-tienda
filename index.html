@@ -602,7 +602,12 @@ Agregar al calendario
  
         <div class="horario-leyenda" id="horarioLeyenda"></div>
 
-        <p style="font-size: 12px; color: rgba(0,0,0,0.4); margin-top: 6px;">Arrastra el ícono ⠿ junto a cada nombre para reordenar (cada grupo se reordena por separado). El botón ✕ de un asesor solo lo quita de esta pestaña, sin borrar sus datos; el ✕ de una persona de "Otras personas" la elimina junto con sus turnos, ya que no tiene ventas ni metas guardadas en ningún otro lugar. Para agregar un asesor nuevo (con ventas), ve a la pestaña ⚙️ Configuración; para alguien que solo necesitas ver aquí, usa el formulario de abajo.</p>
+        <details class="tip-toggle">
+        <summary>💡 Ayuda</summary>
+        <div class="tip-toggle-body">
+        <p style="font-size: 12px; color: rgba(0,0,0,0.4);">Arrastra el ícono ⠿ junto a cada nombre para reordenar (cada grupo se reordena por separado). El botón ✕ de un asesor solo lo quita de esta pestaña, sin borrar sus datos; el ✕ de una persona de "Otras personas" la elimina junto con sus turnos, ya que no tiene ventas ni metas guardadas en ningún otro lugar. Para agregar un asesor nuevo (con ventas), ve a la pestaña ⚙️ Configuración; para alguien que solo necesitas ver aquí, usa el formulario de abajo.</p>
+        </div>
+        </details>
  
         <div class="horario-acciones">
             <button type="button" class="btn-primary horario-btn-accion" onclick="compartirHorarioComoImagen()">Descargar / Compartir imagen</button>
@@ -612,7 +617,12 @@ Agregar al calendario
 
     <div class="v-section-label">Agregar Persona al Horario</div>
     <div class="v-glass a-card">
-        <p style="font-size: 12px; color: rgba(0,0,0,0.4); margin-top: 0; margin-bottom: 16px;">Úsalo para alguien que solo necesitas ver en esta pestaña (ej. personal de otra área, practicante). No tiene ventas, metas, Garex ni Insurama, y no aparece en ninguna otra parte de la app.</p>
+        <details class="tip-toggle">
+        <summary>💡 Ayuda</summary>
+        <div class="tip-toggle-body">
+        <p style="font-size: 12px; color: rgba(0,0,0,0.4);">Úsalo para alguien que solo necesitas ver en esta pestaña (ej. personal de otra área, practicante). No tiene ventas, metas, Garex ni Insurama, y no aparece en ninguna otra parte de la app.</p>
+        </div>
+        </details>
         <div class="r-form-row">
             <div class="form-group" style="flex:1; margin-bottom:0;">
                 <label for="inputNuevaPersonaHorario">Nombre</label>
@@ -631,9 +641,14 @@ Agregar al calendario
 <!-- Panel: Gestión de Asesores -->
 <div class="v-section-label">Gestión de Asesores</div>
 <div class="v-glass a-card">
-<p style="font-size: 13px; color: rgba(0,0,0,0.45); margin-bottom: 20px;">Agrega nuevos asesores, edita sus nombres y asígnales el % de la Meta Mensual de la Tienda que les corresponde; la meta en $ de cada uno se calcula automáticamente. Los datos acumulados de cada asesor se conservan al renombrar. El botón "Borrar" elimina al asesor y todos sus datos de forma PERMANENTE (pedirá confirmación escribiendo su nombre). Para quitar a alguien de la vista semanal sin borrar sus datos, ve a la pestaña Horario.</p>
-<p style="font-size: 12px; color: rgba(0,0,0,0.4); margin-top: -12px; margin-bottom: 8px;">💡 Define primero la Meta Mensual de la Tienda más abajo — de lo contrario, el % no tendrá una base sobre la cual calcular.</p>
-<p style="font-size: 12px; color: rgba(0,0,0,0.4); margin-top: 0; margin-bottom: 20px;">🗓️ Esta lista de asesores es independiente por mes: pertenece al mes que ves arriba en el selector (<strong id="mesSelectorConfigLabel">—</strong>). Al pasar a un mes nuevo empieza en blanco, y tienes que volver a agregar y configurar a tus asesores ahí.</p>
+<details class="tip-toggle">
+<summary>💡 Ayuda</summary>
+<div class="tip-toggle-body">
+<p style="font-size: 13px; color: rgba(0,0,0,0.45);">Agrega nuevos asesores, edita sus nombres y asígnales el % de la Meta Mensual de la Tienda que les corresponde; la meta en $ de cada uno se calcula automáticamente. Los datos acumulados de cada asesor se conservan al renombrar. El botón "Borrar" elimina al asesor y todos sus datos de forma PERMANENTE (pedirá confirmación escribiendo su nombre). Para quitar a alguien de la vista semanal sin borrar sus datos, ve a la pestaña Horario.</p>
+<p style="font-size: 12px; color: rgba(0,0,0,0.4);">💡 Define primero la Meta Mensual de la Tienda más abajo — de lo contrario, el % no tendrá una base sobre la cual calcular.</p>
+<p style="font-size: 12px; color: rgba(0,0,0,0.4);">🗓️ Esta lista de asesores es independiente por mes: pertenece al mes que ves arriba en el selector (<strong id="mesSelectorConfigLabel">—</strong>). Al pasar a un mes nuevo empieza en blanco, y tienes que volver a agregar y configurar a tus asesores ahí.</p>
+</div>
+</details>
 <div id="listaAsesoresConfig" style="margin-bottom: 16px;"></div>
 <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end;">
 <div class="form-group" style="margin-bottom: 0;">
@@ -646,7 +661,12 @@ Agregar al calendario
 <!-- Panel: Metas del Plan SOS -->
 <div class="v-section-label">Metas del Plan SOS</div>
 <div class="v-glass a-card">
-<p style="font-size: 13px; color: rgba(0,0,0,0.45); margin-bottom: 20px;">Estas metas aplican a toda la tienda y se usan para el semáforo de Conversión, Accesorización y Ticket Promedio.</p>
+<details class="tip-toggle">
+<summary>💡 Ayuda</summary>
+<div class="tip-toggle-body">
+<p style="font-size: 13px; color: rgba(0,0,0,0.45);">Estas metas aplican a toda la tienda y se usan para el semáforo de Conversión, Accesorización y Ticket Promedio.</p>
+</div>
+</details>
 <div class="a-grid-categorias" style="grid-template-columns: 1fr 1fr 1fr 1fr; margin-bottom: 16px;">
 <div class="form-group" style="margin-bottom: 0;">
 <label for="cfgMetaConversion">Meta Conversión (%):</label>
@@ -670,7 +690,12 @@ Agregar al calendario
 <!-- Panel: Meta Mensual de la Tienda -->
 <div class="v-section-label">Meta Mensual de la Tienda</div>
 <div class="v-glass a-card">
-<p style="font-size: 13px; color: rgba(0,0,0,0.45); margin-bottom: 20px;">Define la meta mensual de la tienda, desglosada por categoría. Estos valores son independientes de la meta individual de cada asesor.</p>
+<details class="tip-toggle">
+<summary>💡 Ayuda</summary>
+<div class="tip-toggle-body">
+<p style="font-size: 13px; color: rgba(0,0,0,0.45);">Define la meta mensual de la tienda, desglosada por categoría. Estos valores son independientes de la meta individual de cada asesor.</p>
+</div>
+</details>
 <h3 class="a-card-title">Meta de Venta por Categoría ($)</h3>
 <div class="a-grid-categorias" style="margin-bottom: 22px;">
 <div class="form-group"><label>Mac</label><input type="number" id="cfgMetaTiendaVenta_mac" min="0" value="0"></div>
