@@ -1361,6 +1361,40 @@ function renderComparativaMesAMes(resumenMesActual) {
     if (contenedorTicket) contenedorTicket.innerHTML  = formatearComparativaMes(resumenMesActual.ticket,              resumenAnterior ? resumenAnterior.ticket              : null);
 }
 
+// ═══════════════════════════════════════════
+// SEMÁFORO VISUAL (Resumen Ventas): mismos umbrales que Plan SOS
+// (evaluarSemaforoApple) — verde >=100%, amarillo >=85%, rojo por debajo.
+// ═══════════════════════════════════════════
+function claseSemaforoPct(pct) {
+    const n = parseFloat(pct) || 0;
+    if (n >= 100) return "sem-verde";
+    if (n >= 85) return "sem-amarillo";
+    return "sem-rojo";
+}
+function colorSemaforoPct(pct) {
+    const n = parseFloat(pct) || 0;
+    return n >= 100 ? "#34C759" : n >= 85 ? "#FF9500" : "#FF3B30";
+}
+// Anillo de cumplimiento en SVG (reemplaza el % como puro texto en cada tarjeta
+// de Resumen Ventas): dibuja el arco proporcional al % con el color del semáforo.
+function renderAnilloCumplimiento(pct, size = 54) {
+    const stroke = 5;
+    const r = (size - stroke) / 2;
+    const c = 2 * Math.PI * r;
+    const n = Math.max(0, Math.min(parseFloat(pct) || 0, 100));
+    const offset = c - (n / 100) * c;
+    const center = size / 2;
+    return `<div class="ra-ring" style="width:${size}px; height:${size}px;">
+        <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+            <circle cx="${center}" cy="${center}" r="${r}" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="${stroke}"/>
+            <circle cx="${center}" cy="${center}" r="${r}" fill="none" stroke="${colorSemaforoPct(pct)}" stroke-width="${stroke}"
+                stroke-linecap="round" stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"
+                transform="rotate(-90 ${center} ${center})"/>
+        </svg>
+        <span class="ra-ring-label">${Math.round(parseFloat(pct) || 0)}%</span>
+    </div>`;
+}
+
 // RENDERS MÚLTIPLES
 function renderTodo() {
     renderSelectAsesor();
@@ -1469,7 +1503,7 @@ function renderTodo() {
                         <span>${c.label}</span>
                         <span class="ra-muted">$${Math.round(conIVA(llevaCat)).toLocaleString()} / $${Math.round(metaCat).toLocaleString()}</span>
                     </div>
-                    <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno" style="width:${pctCat}%;"></div></div>
+                    <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno ${claseSemaforoPct(pctCat)}" style="width:${pctCat}%;"></div></div>
                 </div>`;
         }).join("");
 
@@ -1492,21 +1526,26 @@ function renderTodo() {
                         <span>${c.label}</span>
                         <span class="ra-muted">${llevaUnidCat} / ${metaUnidCat} uds</span>
                     </div>
-                    <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno" style="width:${pctUnidCat}%;"></div></div>
+                    <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno ${claseSemaforoPct(pctUnidCat)}" style="width:${pctUnidCat}%;"></div></div>
                 </div>`;
         }).join("");
 
         htmlResumenAsesores += `
             <div class="ra-card">
                 <div class="ra-header">
-                    <div>
-                        <strong>${asor.nombre}</strong>
-                        <span class="ra-incentivo"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 15.3c0 1.2 1.1 2 2.5 2s2.5-.8 2.5-2c0-1.4-1.2-1.8-2.5-2.2-1.3-.4-2.5-.8-2.5-2.2 0-1.2 1.1-2 2.5-2s2.5.8 2.5 2"/><line x1="12" y1="6.7" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="17.3"/></svg> Incentivos: $${incentivoTotal.toFixed(2)}</span>
-                        <span class="ra-acc-badge">Accesorización: ${accesorizacionAsor}%</span>
+                    ${renderAnilloCumplimiento(cumplimiento)}
+                    <div class="ra-header-info">
+                        <div class="ra-header-top">
+                            <strong>${asor.nombre}</strong>
+                            <span class="ra-cumplimiento">${cumplimiento}% de cumplimiento</span>
+                        </div>
+                        <div class="ra-header-badges">
+                            <span class="ra-incentivo"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 15.3c0 1.2 1.1 2 2.5 2s2.5-.8 2.5-2c0-1.4-1.2-1.8-2.5-2.2-1.3-.4-2.5-.8-2.5-2.2 0-1.2 1.1-2 2.5-2s2.5.8 2.5 2"/><line x1="12" y1="6.7" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="17.3"/></svg> Incentivos: $${incentivoTotal.toFixed(2)}</span>
+                            <span class="ra-acc-badge">Accesorización: ${accesorizacionAsor}%</span>
+                        </div>
                     </div>
-                    <span class="ra-cumplimiento">${cumplimiento}% de cumplimiento</span>
                 </div>
-                <div class="barra-progreso"><div class="progreso-relleno" style="width:${Math.min(cumplimiento,100)}%;"></div></div>
+                <div class="barra-progreso"><div class="progreso-relleno ${claseSemaforoPct(cumplimiento)}" style="width:${Math.min(cumplimiento,100)}%;"></div></div>
                 <div class="ra-stat-strip">
                     <div class="ra-stat"><span class="ra-stat-label">Venta</span><span class="ra-stat-value">$${conIVA(asor.ventaSemanal).toLocaleString()}</span></div>
                     <div class="ra-stat"><span class="ra-stat-label">Meta</span><span class="ra-stat-value">$${Math.round(conIVA(metaAsor)).toLocaleString()}</span></div>
@@ -1537,33 +1576,33 @@ function renderTodo() {
                 <div class="ra-tab-panel" id="raTab-${key}-acumulados">
                     <div class="ra-section" style="margin-top:0; padding-top:0; border-top:none;">
                         <p class="ra-section-title">Unidades acumuladas — <span class="ra-accent-blue">${totalUnidades} total</span></p>
-                        <div class="ra-grid ra-grid-3">
-                            <div>Mac: <strong>${u.mac}</strong> <span class="ra-muted">($${conIVA(m.mac).toLocaleString()})</span></div>
-                            <div>iPad: <strong>${u.ipad}</strong> <span class="ra-muted">($${conIVA(m.ipad).toLocaleString()})</span></div>
-                            <div>iPhone: <strong>${u.iphone}</strong> <span class="ra-muted">($${conIVA(m.iphone).toLocaleString()})</span></div>
-                            <div>Watch: <strong>${u.watch}</strong> <span class="ra-muted">($${conIVA(m.watch).toLocaleString()})</span></div>
-                            <div>AirPods: <strong>${u.airpods}</strong> <span class="ra-muted">($${conIVA(m.airpods).toLocaleString()})</span></div>
-                            <div>Audio: <strong>${u.audio}</strong> <span class="ra-muted">($${conIVA(m.audio).toLocaleString()})</span></div>
+                        <div class="ra-tile-grid ra-grid-3">
+                            <div class="ra-tile"><span class="ra-tile-label">Mac</span><span class="ra-tile-value">${u.mac}</span><span class="ra-tile-caption">$${conIVA(m.mac).toLocaleString()}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">iPad</span><span class="ra-tile-value">${u.ipad}</span><span class="ra-tile-caption">$${conIVA(m.ipad).toLocaleString()}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">iPhone</span><span class="ra-tile-value">${u.iphone}</span><span class="ra-tile-caption">$${conIVA(m.iphone).toLocaleString()}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">Watch</span><span class="ra-tile-value">${u.watch}</span><span class="ra-tile-caption">$${conIVA(m.watch).toLocaleString()}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">AirPods</span><span class="ra-tile-value">${u.airpods}</span><span class="ra-tile-caption">$${conIVA(m.airpods).toLocaleString()}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">Audio</span><span class="ra-tile-value">${u.audio}</span><span class="ra-tile-caption">$${conIVA(m.audio).toLocaleString()}</span></div>
                         </div>
                     </div>
                     <div class="ra-section">
                         <p class="ra-section-title">Garex colocados — <span class="ra-accent-green">${sumarCantidad(asor.ventasGarex)} total</span></p>
-                        <div class="ra-grid ra-grid-3">
-                            <div>Mac: <strong>${garexAsorPorDispositivo.Mac}</strong></div>
-                            <div>iPad: <strong>${garexAsorPorDispositivo.iPad}</strong></div>
-                            <div>iPhone: <strong>${garexAsorPorDispositivo.iPhone}</strong></div>
-                            <div>Watch: <strong>${garexAsorPorDispositivo.Watch}</strong></div>
-                            <div>AirPods: <strong>${garexAsorPorDispositivo.AirPods}</strong></div>
-                            <div>Audio: <strong>${garexAsorPorDispositivo.Audio}</strong></div>
+                        <div class="ra-tile-grid ra-grid-3">
+                            <div class="ra-tile"><span class="ra-tile-label">Mac</span><span class="ra-tile-value">${garexAsorPorDispositivo.Mac}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">iPad</span><span class="ra-tile-value">${garexAsorPorDispositivo.iPad}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">iPhone</span><span class="ra-tile-value">${garexAsorPorDispositivo.iPhone}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">Watch</span><span class="ra-tile-value">${garexAsorPorDispositivo.Watch}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">AirPods</span><span class="ra-tile-value">${garexAsorPorDispositivo.AirPods}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">Audio</span><span class="ra-tile-value">${garexAsorPorDispositivo.Audio}</span></div>
                         </div>
                     </div>
                     <div class="ra-section">
                         <p class="ra-section-title">Seguros colocados — <span class="ra-accent-green">${sumarCantidad(asor.ventasInsurama)} total</span></p>
-                        <div class="ra-grid ra-grid-4">
-                            <div>Mac: <strong>${segurosAsorPorDispositivo.Mac}</strong></div>
-                            <div>iPad: <strong>${segurosAsorPorDispositivo.iPad}</strong></div>
-                            <div>iPhone: <strong>${segurosAsorPorDispositivo.iPhone}</strong></div>
-                            <div>Watch: <strong>${segurosAsorPorDispositivo.Watch}</strong></div>
+                        <div class="ra-tile-grid ra-grid-4">
+                            <div class="ra-tile"><span class="ra-tile-label">Mac</span><span class="ra-tile-value">${segurosAsorPorDispositivo.Mac}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">iPad</span><span class="ra-tile-value">${segurosAsorPorDispositivo.iPad}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">iPhone</span><span class="ra-tile-value">${segurosAsorPorDispositivo.iPhone}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">Watch</span><span class="ra-tile-value">${segurosAsorPorDispositivo.Watch}</span></div>
                         </div>
                     </div>
                 </div>
@@ -1608,7 +1647,7 @@ function renderTodo() {
                         <span>${c.label}</span>
                         <span class="ra-muted">$${Math.round(conIVA(llevaCat)).toLocaleString()} / $${Math.round(conIVA(metaCat)).toLocaleString()}</span>
                     </div>
-                    <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno" style="width:${pctCat}%;"></div></div>
+                    <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno ${claseSemaforoPct(pctCat)}" style="width:${pctCat}%;"></div></div>
                 </div>`;
         }).join("");
 
@@ -1629,20 +1668,25 @@ function renderTodo() {
                         <span>${c.label}</span>
                         <span class="ra-muted">${llevaUnidCat} / ${metaUnidCat} uds</span>
                     </div>
-                    <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno" style="width:${pctUnidCat}%;"></div></div>
+                    <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno ${claseSemaforoPct(pctUnidCat)}" style="width:${pctUnidCat}%;"></div></div>
                 </div>`;
         }).join("");
 
         elResumenTienda.innerHTML = `
             <div class="ra-card">
                 <div class="ra-header">
-                    <div>
-                        <strong>Toda la Tienda</strong>
-                        <span class="ra-acc-badge">Accesorización: ${calcularAccesorizacion(montosTienda).toFixed(1)}%</span>
+                    ${renderAnilloCumplimiento(porcMetaTienda)}
+                    <div class="ra-header-info">
+                        <div class="ra-header-top">
+                            <strong>Toda la Tienda</strong>
+                            <span class="ra-cumplimiento">${porcMetaTienda}% de cumplimiento</span>
+                        </div>
+                        <div class="ra-header-badges">
+                            <span class="ra-acc-badge">Accesorización: ${calcularAccesorizacion(montosTienda).toFixed(1)}%</span>
+                        </div>
                     </div>
-                    <span class="ra-cumplimiento">${porcMetaTienda}% de cumplimiento</span>
                 </div>
-                <div class="barra-progreso"><div class="progreso-relleno" style="width:${Math.min(porcMetaTienda,100)}%;"></div></div>
+                <div class="barra-progreso"><div class="progreso-relleno ${claseSemaforoPct(porcMetaTienda)}" style="width:${Math.min(porcMetaTienda,100)}%;"></div></div>
                 <div class="ra-stat-strip">
                     <div class="ra-stat"><span class="ra-stat-label">Venta</span><span class="ra-stat-value">$${(conIVA(acumuladoVentaSemanalSolo) + acumuladoGarexMontoSolo).toLocaleString()}</span></div>
                     <div class="ra-stat"><span class="ra-stat-label">Meta</span><span class="ra-stat-value">$${conIVA(metaTotalTienda).toLocaleString()}</span></div>
@@ -1664,9 +1708,9 @@ function renderTodo() {
                 </div>
                 <div class="ra-section">
                     <p class="ra-section-title">Protecciones colocadas</p>
-                    <div class="ra-grid ra-grid-3">
-                        <div>Garex: <strong>${totalGarex}</strong></div>
-                        <div>Seguros: <strong>${totalSeguros}</strong></div>
+                    <div class="ra-tile-grid ra-grid-3">
+                        <div class="ra-tile"><span class="ra-tile-label">Garex</span><span class="ra-tile-value">${totalGarex}</span></div>
+                        <div class="ra-tile"><span class="ra-tile-label">Seguros</span><span class="ra-tile-value">${totalSeguros}</span></div>
                     </div>
                 </div>
             </div>`;
