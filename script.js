@@ -1418,6 +1418,23 @@ const ICONOS_DISPOSITIVO = {
     acc_terceros: iconoDispositivo('<path d="M9 2.5v5"/><path d="M15 2.5v5"/><path d="M6.5 7.5h11v3.5a5.5 5.5 0 01-11 0V7.5z"/><path d="M12 16.5v5"/>')
 };
 
+// Lista única de dispositivos/categorías para "Metas por Categoría": antes había
+// dos arreglos casi idénticos (uno para unidades, otro para monto) que generaban
+// dos filas y dos barras por dispositivo. Ahora es una sola fuente, y
+// "tieneUnidades" marca qué categorías también llevan conteo de unidades
+// (Audio y los dos tipos de accesorios solo se miden en $, no hay meta de
+// unidades configurada para ellos).
+const CATEGORIAS_DISPOSITIVO = [
+    { label: "Mac",              key: "mac",          tieneUnidades: true },
+    { label: "iPad",             key: "ipad",         tieneUnidades: true },
+    { label: "iPhone",           key: "iphone",       tieneUnidades: true },
+    { label: "Watch",            key: "watch",        tieneUnidades: true },
+    { label: "AirPods",          key: "airpods",      tieneUnidades: true },
+    { label: "Audio",            key: "audio",        tieneUnidades: false },
+    { label: "Accesorios Apple", key: "acc_apple",    tieneUnidades: false },
+    { label: "Acc. Terceros",    key: "acc_terceros", tieneUnidades: false }
+];
+
 // RENDERS MÚLTIPLES
 function renderTodo() {
     renderSelectAsesor();
@@ -1506,50 +1523,30 @@ function renderTodo() {
         // Meta por categoría (dispositivo/accesorio) del asesor: % asignado x meta de esa
         // categoría en la Meta Mensual de la Tienda. "Llevan" es lo realmente vendido (m.*).
         const porcentajeAsor = asor.porcentajeMeta || 0;
-        const categoriasMeta = [
-            { label: "Mac",              key: "mac" },
-            { label: "iPad",             key: "ipad" },
-            { label: "iPhone",           key: "iphone" },
-            { label: "Watch",            key: "watch" },
-            { label: "AirPods",          key: "airpods" },
-            { label: "Audio",            key: "audio" },
-            { label: "Accesorios Apple", key: "acc_apple" },
-            { label: "Acc. Terceros",    key: "acc_terceros" }
-        ];
-        const filasMetaCategoria = categoriasMeta.map(c => {
+        // Una sola fila y una sola barra por dispositivo (antes eran dos listas
+        // separadas — Unidades y Monto — cada una con su propia barra). La barra
+        // se llena según el % de MONTO, que es la métrica que usa el resto de la
+        // app; unidades se muestra como dato de apoyo junto a su ícono azul.
+        const filasDispositivos = CATEGORIAS_DISPOSITIVO.map(c => {
             const metaCat = (porcentajeAsor / 100) * (METAS_TIENDA.ventas[c.key] || 0);
             const llevaCat = m[c.key] || 0;
             const pctCat = metaCat > 0 ? Math.min((llevaCat / metaCat) * 100, 100) : 0;
+
+            let unidadesHtml = "";
+            if (c.tieneUnidades) {
+                const metaUnidCat = Math.ceil((porcentajeAsor / 100) * (METAS_TIENDA.unidades[c.key] || 0));
+                const llevaUnidCat = u[c.key] || 0;
+                unidadesHtml = `<span class="ra-meta-cat-unidades">${ICONO_UNIDADES}<strong class="ra-meta-cat-lleva">${llevaUnidCat}</strong><span class="ra-muted"> / ${metaUnidCat} uds</span></span>`;
+            }
+
             return `
                 <div class="ra-meta-cat-row">
-                    <div class="ra-meta-cat-head">
-                        <span>${ICONOS_DISPOSITIVO[c.key] || ""}${c.label}</span>
-                        <span class="ra-muted"><strong class="ra-meta-cat-lleva">$${Math.round(conIVA(llevaCat)).toLocaleString()}</strong> / $${Math.round(metaCat).toLocaleString()}</span>
+                    <div class="ra-meta-cat-name">${ICONOS_DISPOSITIVO[c.key] || ""}${c.label}</div>
+                    <div class="ra-meta-cat-values">
+                        ${unidadesHtml}
+                        <span class="ra-meta-cat-monto">${ICONO_MONTO}<strong class="ra-meta-cat-lleva">$${Math.round(conIVA(llevaCat)).toLocaleString()}</strong><span class="ra-muted"> / $${Math.round(metaCat).toLocaleString()}</span></span>
                     </div>
                     <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno ${claseSemaforoPct(pctCat)}" style="width:${pctCat}%;"></div></div>
-                </div>`;
-        }).join("");
-
-        // Meta de UNIDADES por dispositivo del asesor: % asignado x meta de unidades de tienda,
-        // siempre redondeada hacia arriba (ej. 2.1 -> 3 unidades), para no exigir menos de lo justo.
-        const categoriasUnidades = [
-            { label: "Mac",     key: "mac" },
-            { label: "iPad",    key: "ipad" },
-            { label: "iPhone",  key: "iphone" },
-            { label: "Watch",   key: "watch" },
-            { label: "AirPods", key: "airpods" }
-        ];
-        const filasMetaUnidades = categoriasUnidades.map(c => {
-            const metaUnidCat = Math.ceil((porcentajeAsor / 100) * (METAS_TIENDA.unidades[c.key] || 0));
-            const llevaUnidCat = u[c.key] || 0;
-            const pctUnidCat = metaUnidCat > 0 ? Math.min((llevaUnidCat / metaUnidCat) * 100, 100) : 0;
-            return `
-                <div class="ra-meta-cat-row">
-                    <div class="ra-meta-cat-head">
-                        <span>${ICONOS_DISPOSITIVO[c.key] || ""}${c.label}</span>
-                        <span class="ra-muted"><strong class="ra-meta-cat-lleva">${llevaUnidCat}</strong> / ${metaUnidCat} uds</span>
-                    </div>
-                    <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno ${claseSemaforoPct(pctUnidCat)}" style="width:${pctUnidCat}%;"></div></div>
                 </div>`;
         }).join("");
 
@@ -1583,15 +1580,9 @@ function renderTodo() {
 
                 <div class="ra-tab-panel active" id="raTab-${key}-metas">
                     <div class="ra-section" style="margin-top:0; padding-top:0; border-top:none;">
-                        <p class="ra-section-title">${ICONO_UNIDADES}Unidades por Dispositivo — <span class="ra-accent-blue">${porcentajeAsor}% de la meta de tienda</span></p>
-                        <div class="ra-meta-cat-grid ra-meta-cat-grid-unidades">
-                            ${filasMetaUnidades}
-                        </div>
-                    </div>
-                    <div class="ra-section">
-                        <p class="ra-section-title">${ICONO_MONTO}Dispositivos y Accesorios — <span class="ra-accent-green">${porcentajeAsor}% de la meta de tienda</span></p>
-                        <div class="ra-meta-cat-grid ra-meta-cat-grid-monto">
-                            ${filasMetaCategoria}
+                        <p class="ra-section-title">Metas por Dispositivo — <span class="ra-accent-blue">${porcentajeAsor}% de la meta de tienda</span></p>
+                        <div class="ra-meta-cat-grid">
+                            ${filasDispositivos}
                         </div>
                     </div>
                 </div>
@@ -1650,48 +1641,26 @@ function renderTodo() {
     // asesores), para ver el total vendido además del desglose por asesor de más abajo.
     const elResumenTienda = document.getElementById("resumenTiendaVisual");
     if (elResumenTienda) {
-        const categoriasMetaTienda = [
-            { label: "Mac",              key: "mac" },
-            { label: "iPad",             key: "ipad" },
-            { label: "iPhone",           key: "iphone" },
-            { label: "Watch",            key: "watch" },
-            { label: "AirPods",          key: "airpods" },
-            { label: "Audio",            key: "audio" },
-            { label: "Accesorios Apple", key: "acc_apple" },
-            { label: "Acc. Terceros",    key: "acc_terceros" }
-        ];
-        const filasMetaCategoriaTienda = categoriasMetaTienda.map(c => {
+        const filasDispositivosTienda = CATEGORIAS_DISPOSITIVO.map(c => {
             const metaCat = METAS_TIENDA.ventas[c.key] || 0;
             const llevaCat = montosTienda[c.key] || 0;
             const pctCat = metaCat > 0 ? Math.min((llevaCat / metaCat) * 100, 100) : 0;
+
+            let unidadesHtml = "";
+            if (c.tieneUnidades) {
+                const metaUnidCat = METAS_TIENDA.unidades[c.key] || 0;
+                const llevaUnidCat = unidadesPorDispositivo[c.key] || 0;
+                unidadesHtml = `<span class="ra-meta-cat-unidades">${ICONO_UNIDADES}<strong class="ra-meta-cat-lleva">${llevaUnidCat}</strong><span class="ra-muted"> / ${metaUnidCat} uds</span></span>`;
+            }
+
             return `
                 <div class="ra-meta-cat-row">
-                    <div class="ra-meta-cat-head">
-                        <span>${ICONOS_DISPOSITIVO[c.key] || ""}${c.label}</span>
-                        <span class="ra-muted"><strong class="ra-meta-cat-lleva">$${Math.round(conIVA(llevaCat)).toLocaleString()}</strong> / $${Math.round(conIVA(metaCat)).toLocaleString()}</span>
+                    <div class="ra-meta-cat-name">${ICONOS_DISPOSITIVO[c.key] || ""}${c.label}</div>
+                    <div class="ra-meta-cat-values">
+                        ${unidadesHtml}
+                        <span class="ra-meta-cat-monto">${ICONO_MONTO}<strong class="ra-meta-cat-lleva">$${Math.round(conIVA(llevaCat)).toLocaleString()}</strong><span class="ra-muted"> / $${Math.round(conIVA(metaCat)).toLocaleString()}</span></span>
                     </div>
                     <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno ${claseSemaforoPct(pctCat)}" style="width:${pctCat}%;"></div></div>
-                </div>`;
-        }).join("");
-
-        const categoriasUnidadesTienda = [
-            { label: "Mac",     key: "mac" },
-            { label: "iPad",    key: "ipad" },
-            { label: "iPhone",  key: "iphone" },
-            { label: "Watch",   key: "watch" },
-            { label: "AirPods", key: "airpods" }
-        ];
-        const filasMetaUnidadesTienda = categoriasUnidadesTienda.map(c => {
-            const metaUnidCat = METAS_TIENDA.unidades[c.key] || 0;
-            const llevaUnidCat = unidadesPorDispositivo[c.key] || 0;
-            const pctUnidCat = metaUnidCat > 0 ? Math.min((llevaUnidCat / metaUnidCat) * 100, 100) : 0;
-            return `
-                <div class="ra-meta-cat-row">
-                    <div class="ra-meta-cat-head">
-                        <span>${ICONOS_DISPOSITIVO[c.key] || ""}${c.label}</span>
-                        <span class="ra-muted"><strong class="ra-meta-cat-lleva">${llevaUnidCat}</strong> / ${metaUnidCat} uds</span>
-                    </div>
-                    <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno ${claseSemaforoPct(pctUnidCat)}" style="width:${pctUnidCat}%;"></div></div>
                 </div>`;
         }).join("");
 
@@ -1718,15 +1687,9 @@ function renderTodo() {
                 </div>
 
                 <div class="ra-section" style="margin-top:0; padding-top:0; border-top:none;">
-                    <p class="ra-section-title">${ICONO_UNIDADES}Unidades por Dispositivo — <span class="ra-accent-blue">Meta de tienda</span></p>
-                    <div class="ra-meta-cat-grid ra-meta-cat-grid-unidades">
-                        ${filasMetaUnidadesTienda}
-                    </div>
-                </div>
-                <div class="ra-section">
-                    <p class="ra-section-title">${ICONO_MONTO}Dispositivos y Accesorios — <span class="ra-accent-green">Meta de tienda</span></p>
-                    <div class="ra-meta-cat-grid ra-meta-cat-grid-monto">
-                        ${filasMetaCategoriaTienda}
+                    <p class="ra-section-title">Metas por Dispositivo — <span class="ra-accent-blue">Meta de tienda</span></p>
+                    <div class="ra-meta-cat-grid">
+                        ${filasDispositivosTienda}
                     </div>
                 </div>
                 <div class="ra-section">
