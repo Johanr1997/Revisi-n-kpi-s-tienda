@@ -2066,6 +2066,10 @@ body.dark-mode .ra-meta-cat-grid-monto { background: rgba(48,209,88,0.10); }
     color: #1D1D1F;
 }
 .ra-meta-cat-head span:first-child { font-weight: 600; }
+/* Dentro de "lleva / meta", el valor alcanzado resalta (negrita + color normal)
+   y la meta/separador se queda muted — así el ojo va directo a "cuánto llevas". */
+.ra-meta-cat-lleva { font-weight: 700; color: #1D1D1F; }
+body.dark-mode .ra-meta-cat-lleva { color: #F2F2F7 !important; }
 .ra-mini-bar { height: 5px; }
 
 /* Modo oscuro: resumen de desempeño por asesor */

@@ -1401,6 +1401,23 @@ function renderAnilloCumplimiento(pct, size = 54) {
 const ICONO_UNIDADES = '<span class="ra-accent-blue"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;"><path d="M3 8l9-4 9 4-9 4-9-4z"/><path d="M3 8v8l9 4 9-4V8"/><path d="M12 12v8"/></svg></span>';
 const ICONO_MONTO = '<span class="ra-accent-green"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;"><circle cx="12" cy="12" r="9"/><path d="M9.5 15.3c0 1.2 1.1 2 2.5 2s2.5-.8 2.5-2c0-1.4-1.2-1.8-2.5-2.2-1.3-.4-2.5-.8-2.5-2.2 0-1.2 1.1-2 2.5-2s2.5.8 2.5 2"/><line x1="12" y1="6.7" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="17.3"/></svg></span>';
 
+// Silueta simple por tipo de dispositivo (junto al nombre en cada fila de
+// "Metas por Categoría"), en gris neutro (.ra-muted) para no competir con el
+// color azul/verde que ya distingue unidades de monto a nivel de sección.
+function iconoDispositivo(svgInner) {
+    return `<span class="ra-muted"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;">${svgInner}</svg></span>`;
+}
+const ICONOS_DISPOSITIVO = {
+    mac: iconoDispositivo('<rect x="4" y="4" width="16" height="11" rx="1.2"/><path d="M2.5 18.5h19l-1.8-3H4.3l-1.8 3z"/>'),
+    ipad: iconoDispositivo('<rect x="3" y="5" width="18" height="14" rx="2.2"/><circle cx="12" cy="16.3" r="0.6" fill="currentColor" stroke="none"/>'),
+    iphone: iconoDispositivo('<rect x="6" y="2.5" width="12" height="19" rx="3"/><rect x="8" y="4.5" width="5.5" height="5.5" rx="1.3"/><circle cx="9.6" cy="6.1" r="0.55" fill="currentColor" stroke="none"/><circle cx="11.9" cy="6.1" r="0.55" fill="currentColor" stroke="none"/><circle cx="9.6" cy="8.4" r="0.55" fill="currentColor" stroke="none"/>'),
+    watch: iconoDispositivo('<path d="M9 5.5V3.2a1 1 0 011-1h4a1 1 0 011 1V5.5"/><path d="M9 18.5v2.3a1 1 0 001 1h4a1 1 0 001-1v-2.3"/><rect x="6.5" y="5.5" width="11" height="13" rx="3"/><path d="M17.5 10v3"/>'),
+    airpods: iconoDispositivo('<path d="M8.5 5.5a2.5 2.5 0 012.5 2.5v7.5a1.8 1.8 0 01-3.6 0v-4"/><path d="M15.5 5.5A2.5 2.5 0 0013 8v7.5a1.8 1.8 0 003.6 0v-4"/>'),
+    audio: iconoDispositivo('<path d="M4 15v-3a8 8 0 0116 0v3"/><rect x="2.5" y="14" width="4" height="6" rx="1.8"/><rect x="17.5" y="14" width="4" height="6" rx="1.8"/>'),
+    acc_apple: iconoDispositivo('<path d="M9 2.5v5"/><path d="M15 2.5v5"/><path d="M6.5 7.5h11v3.5a5.5 5.5 0 01-11 0V7.5z"/><path d="M12 16.5v5"/>'),
+    acc_terceros: iconoDispositivo('<path d="M9 2.5v5"/><path d="M15 2.5v5"/><path d="M6.5 7.5h11v3.5a5.5 5.5 0 01-11 0V7.5z"/><path d="M12 16.5v5"/>')
+};
+
 // RENDERS MÚLTIPLES
 function renderTodo() {
     renderSelectAsesor();
@@ -1506,8 +1523,8 @@ function renderTodo() {
             return `
                 <div class="ra-meta-cat-row">
                     <div class="ra-meta-cat-head">
-                        <span>${c.label}</span>
-                        <span class="ra-muted">$${Math.round(conIVA(llevaCat)).toLocaleString()} / $${Math.round(metaCat).toLocaleString()}</span>
+                        <span>${ICONOS_DISPOSITIVO[c.key] || ""}${c.label}</span>
+                        <span class="ra-muted"><strong class="ra-meta-cat-lleva">$${Math.round(conIVA(llevaCat)).toLocaleString()}</strong> / $${Math.round(metaCat).toLocaleString()}</span>
                     </div>
                     <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno ${claseSemaforoPct(pctCat)}" style="width:${pctCat}%;"></div></div>
                 </div>`;
@@ -1529,8 +1546,8 @@ function renderTodo() {
             return `
                 <div class="ra-meta-cat-row">
                     <div class="ra-meta-cat-head">
-                        <span>${c.label}</span>
-                        <span class="ra-muted">${llevaUnidCat} / ${metaUnidCat} uds</span>
+                        <span>${ICONOS_DISPOSITIVO[c.key] || ""}${c.label}</span>
+                        <span class="ra-muted"><strong class="ra-meta-cat-lleva">${llevaUnidCat}</strong> / ${metaUnidCat} uds</span>
                     </div>
                     <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno ${claseSemaforoPct(pctUnidCat)}" style="width:${pctUnidCat}%;"></div></div>
                 </div>`;
@@ -1650,8 +1667,8 @@ function renderTodo() {
             return `
                 <div class="ra-meta-cat-row">
                     <div class="ra-meta-cat-head">
-                        <span>${c.label}</span>
-                        <span class="ra-muted">$${Math.round(conIVA(llevaCat)).toLocaleString()} / $${Math.round(conIVA(metaCat)).toLocaleString()}</span>
+                        <span>${ICONOS_DISPOSITIVO[c.key] || ""}${c.label}</span>
+                        <span class="ra-muted"><strong class="ra-meta-cat-lleva">$${Math.round(conIVA(llevaCat)).toLocaleString()}</strong> / $${Math.round(conIVA(metaCat)).toLocaleString()}</span>
                     </div>
                     <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno ${claseSemaforoPct(pctCat)}" style="width:${pctCat}%;"></div></div>
                 </div>`;
@@ -1671,8 +1688,8 @@ function renderTodo() {
             return `
                 <div class="ra-meta-cat-row">
                     <div class="ra-meta-cat-head">
-                        <span>${c.label}</span>
-                        <span class="ra-muted">${llevaUnidCat} / ${metaUnidCat} uds</span>
+                        <span>${ICONOS_DISPOSITIVO[c.key] || ""}${c.label}</span>
+                        <span class="ra-muted"><strong class="ra-meta-cat-lleva">${llevaUnidCat}</strong> / ${metaUnidCat} uds</span>
                     </div>
                     <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno ${claseSemaforoPct(pctUnidCat)}" style="width:${pctUnidCat}%;"></div></div>
                 </div>`;
