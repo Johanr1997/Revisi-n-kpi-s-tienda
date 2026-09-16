@@ -1395,6 +1395,12 @@ function renderAnilloCumplimiento(pct, size = 54) {
     </div>`;
 }
 
+// Íconos para distinguir de un vistazo las filas de UNIDADES (caja azul) de las
+// de MONTO ($ verde) en "Metas por Categoría" — antes se veían idénticas y
+// solo el texto ("uds" vs "$") decía cuál era cuál.
+const ICONO_UNIDADES = '<span class="ra-accent-blue"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;"><path d="M3 8l9-4 9 4-9 4-9-4z"/><path d="M3 8v8l9 4 9-4V8"/><path d="M12 12v8"/></svg></span>';
+const ICONO_MONTO = '<span class="ra-accent-green"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;"><circle cx="12" cy="12" r="9"/><path d="M9.5 15.3c0 1.2 1.1 2 2.5 2s2.5-.8 2.5-2c0-1.4-1.2-1.8-2.5-2.2-1.3-.4-2.5-.8-2.5-2.2 0-1.2 1.1-2 2.5-2s2.5.8 2.5 2"/><line x1="12" y1="6.7" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="17.3"/></svg></span>';
+
 // RENDERS MÚLTIPLES
 function renderTodo() {
     renderSelectAsesor();
@@ -1560,14 +1566,14 @@ function renderTodo() {
 
                 <div class="ra-tab-panel active" id="raTab-${key}-metas">
                     <div class="ra-section" style="margin-top:0; padding-top:0; border-top:none;">
-                        <p class="ra-section-title">Unidades por Dispositivo — <span class="ra-accent-blue">${porcentajeAsor}% de la meta de tienda</span></p>
-                        <div class="ra-meta-cat-grid">
+                        <p class="ra-section-title">${ICONO_UNIDADES}Unidades por Dispositivo — <span class="ra-accent-blue">${porcentajeAsor}% de la meta de tienda</span></p>
+                        <div class="ra-meta-cat-grid ra-meta-cat-grid-unidades">
                             ${filasMetaUnidades}
                         </div>
                     </div>
                     <div class="ra-section">
-                        <p class="ra-section-title">Dispositivos y Accesorios — <span class="ra-accent-blue">${porcentajeAsor}% de la meta de tienda</span></p>
-                        <div class="ra-meta-cat-grid">
+                        <p class="ra-section-title">${ICONO_MONTO}Dispositivos y Accesorios — <span class="ra-accent-green">${porcentajeAsor}% de la meta de tienda</span></p>
+                        <div class="ra-meta-cat-grid ra-meta-cat-grid-monto">
                             ${filasMetaCategoria}
                         </div>
                     </div>
@@ -1695,14 +1701,14 @@ function renderTodo() {
                 </div>
 
                 <div class="ra-section" style="margin-top:0; padding-top:0; border-top:none;">
-                    <p class="ra-section-title">Unidades por Dispositivo — <span class="ra-accent-blue">Meta de tienda</span></p>
-                    <div class="ra-meta-cat-grid">
+                    <p class="ra-section-title">${ICONO_UNIDADES}Unidades por Dispositivo — <span class="ra-accent-blue">Meta de tienda</span></p>
+                    <div class="ra-meta-cat-grid ra-meta-cat-grid-unidades">
                         ${filasMetaUnidadesTienda}
                     </div>
                 </div>
                 <div class="ra-section">
-                    <p class="ra-section-title">Dispositivos y Accesorios — <span class="ra-accent-blue">Meta de tienda</span></p>
-                    <div class="ra-meta-cat-grid">
+                    <p class="ra-section-title">${ICONO_MONTO}Dispositivos y Accesorios — <span class="ra-accent-green">Meta de tienda</span></p>
+                    <div class="ra-meta-cat-grid ra-meta-cat-grid-monto">
                         ${filasMetaCategoriaTienda}
                     </div>
                 </div>

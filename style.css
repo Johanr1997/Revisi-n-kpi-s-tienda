@@ -2043,12 +2043,20 @@ body.dark-mode .ra-tab-btn { color: #8E8E93; }
 body.dark-mode .ra-tab-btn:hover { color: #F2F2F7; }
 body.dark-mode .ra-tab-btn.active { color: #0A84FF; border-bottom-color: #0A84FF; }
 
-/* Meta por Dispositivo y Accesorios (desglose por categoría dentro de cada asesor) */
+/* Meta por Dispositivo y Accesorios (desglose por categoría dentro de cada asesor).
+   Fondo tintado (azul = unidades, verde = monto) para no confundir de un vistazo
+   cuál de las dos listas se está viendo, aunque tengan el mismo tipo de barra. */
 .ra-meta-cat-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 10px 16px;
+    padding: 10px 12px;
+    border-radius: 10px;
 }
+.ra-meta-cat-grid-unidades { background: rgba(0,113,227,0.06); }
+.ra-meta-cat-grid-monto { background: rgba(52,199,89,0.06); }
+body.dark-mode .ra-meta-cat-grid-unidades { background: rgba(10,132,255,0.10); }
+body.dark-mode .ra-meta-cat-grid-monto { background: rgba(48,209,88,0.10); }
 .ra-meta-cat-row { display: flex; flex-direction: column; gap: 4px; }
 .ra-meta-cat-head {
     display: flex;
