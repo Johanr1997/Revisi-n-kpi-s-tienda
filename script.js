@@ -1518,7 +1518,6 @@ function renderTodo() {
         const incentivoGarex   = sumarIncentivo(asor.ventasGarex);
         const incentivoInsurama = sumarIncentivo(asor.ventasInsurama);
         const incentivoTotal    = incentivoGarex + incentivoInsurama;
-        const accesorizacionAsor = calcularAccesorizacion(m).toFixed(1);
 
         // Meta por categoría (dispositivo/accesorio) del asesor: % asignado x meta de esa
         // categoría en la Meta Mensual de la Tienda. "Llevan" es lo realmente vendido (m.*).
@@ -1561,7 +1560,6 @@ function renderTodo() {
                         </div>
                         <div class="ra-header-badges">
                             <span class="ra-incentivo"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 15.3c0 1.2 1.1 2 2.5 2s2.5-.8 2.5-2c0-1.4-1.2-1.8-2.5-2.2-1.3-.4-2.5-.8-2.5-2.2 0-1.2 1.1-2 2.5-2s2.5.8 2.5 2"/><line x1="12" y1="6.7" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="17.3"/></svg> Incentivos: $${incentivoTotal.toFixed(2)}</span>
-                            <span class="ra-acc-badge">Accesorización: ${accesorizacionAsor}%</span>
                         </div>
                     </div>
                 </div>
@@ -1664,6 +1662,14 @@ function renderTodo() {
                 </div>`;
         }).join("");
 
+        // Accesorización de "Toda la Tienda": la misma que se ve en Plan SOS (respeta
+        // el valor manual si el usuario reemplazó el cálculo automático ahí), en vez
+        // de recalcularla aparte solo con los montos — para no mostrar dos números
+        // distintos de "accesorización de la tienda" en pestañas diferentes.
+        const accesorizacionTienda = appData.inicio.accesorizacionManual
+            ? (appData.inicio.accesorizacionManualValor || 0)
+            : calcularAccesorizacion(montosTienda);
+
         elResumenTienda.innerHTML = `
             <div class="ra-card">
                 <div class="ra-header">
@@ -1674,7 +1680,9 @@ function renderTodo() {
                             <span class="ra-cumplimiento">${porcMetaTienda}% de cumplimiento</span>
                         </div>
                         <div class="ra-header-badges">
-                            <span class="ra-acc-badge">Accesorización: ${calcularAccesorizacion(montosTienda).toFixed(1)}%</span>
+                            <span class="ra-acc-badge">Conversión: ${(appData.inicio.conversion || 0).toFixed(1)}%</span>
+                            <span class="ra-acc-badge">Accesorización: ${accesorizacionTienda.toFixed(1)}%</span>
+                            <span class="ra-acc-badge">Ticket Promedio: $${(appData.inicio.ticket || 0).toLocaleString()}</span>
                         </div>
                     </div>
                 </div>
