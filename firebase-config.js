@@ -56,6 +56,7 @@ const TIENDAS_POR_CORREO = {
     "d.pena@ishopgroup.com":      "Plaza Bratsi",
     "mr.rodriguez@ishopgroup.com":"Monte General",
     "j.valverde@ishopgroup.com":  "Lincoln Plaza"
+    "johanriverar@icloud.com":  "Mango Plaza" 
     // Agrega más líneas así: "correo@ishopgroup.com": "Nombre de la Tienda",
 };
 
