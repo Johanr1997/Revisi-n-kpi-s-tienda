@@ -2896,3 +2896,7 @@ body.dark-mode .ra-dev-monto { border-top-color: rgba(255,255,255,0.1); }
     .ra-dev-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .ra-stat-value { font-size: 19px; }
 }
+
+/* Meta junto al valor en QR / Trade-In del Resumen Ventas */
+.ra-stat-meta { font-size: 14px; font-weight: 500; color: #86868B; letter-spacing: 0; }
+body.dark-mode .ra-stat-meta { color: #8E8E93; }
