@@ -1103,6 +1103,42 @@ function actualizarResumenIngreso() {
     }
 }
 
+// Desglose de una venta tal como se captura en el formulario de Ventas Asesores:
+// QR, Trade-In, montos por categoría y unidades. Se guarda junto con la entrada del
+// calendario para que, al eliminar la venta, se pueda restar TODO lo que sumó y no
+// solo el monto total (antes quedaban unidades, montos por categoría, QR y Trade-In
+// en Resumen Ventas aunque la venta ya estuviera eliminada).
+function leerDetalleVentaFormulario() {
+    const num = (id, entero) => {
+        const el = document.getElementById(id);
+        const n = entero ? parseInt(el ? el.value : 0) : parseFloat(el ? el.value : 0);
+        return n || 0;
+    };
+    const cats = ["mac", "ipad", "iphone", "watch", "airpods", "audio"];
+    const montos = {};
+    ["mac", "ipad", "iphone", "watch", "airpods", "audio", "acc_apple", "acc_terceros"].forEach(k => {
+        // En modo "Venta Total" los montos por categoría no se suman al asesor (ver guardarDatosAsesor).
+        montos[k] = modoMontoVenta !== 'total' ? num("m_" + k, false) : 0;
+    });
+    const unidades = {};
+    cats.forEach(k => { unidades[k] = num("u_" + k, true); });
+    return { qr: num("inputQR", true), tradeIn: num("inputTradeIn", true), montos, unidades };
+}
+
+// Resta del asesor el desglose de una venta eliminada (sin bajar de cero).
+function revertirDetalleVenta(asor, detalle) {
+    if (!asor || !detalle) return;
+    const resta = (actual, valor) => Math.max(0, (actual || 0) - (valor || 0));
+    asor.qr = resta(asor.qr, detalle.qr);
+    asor.tradeIn = resta(asor.tradeIn, detalle.tradeIn);
+    Object.keys(detalle.montos || {}).forEach(k => {
+        if (asor.montos && k in asor.montos) asor.montos[k] = resta(asor.montos[k], detalle.montos[k]);
+    });
+    Object.keys(detalle.unidades || {}).forEach(k => {
+        if (asor.unidades && k in asor.unidades) asor.unidades[k] = resta(asor.unidades[k], detalle.unidades[k]);
+    });
+}
+
 function guardarDatosAsesor() {
     const key = document.getElementById("selectAsesor").value;
     const nombreAsesor = appData.asesores[key].nombre;
@@ -1130,7 +1166,10 @@ function guardarDatosAsesor() {
             // calendario estando en OTRO mes seleccionado, hay que ajustar el acumulado del
             // asesor correcto, no el del mes que esté activo en ese momento.
             mesISO: mesSeleccionado,
-            visibleEnCalendario: reflejarEnCalendario
+            visibleEnCalendario: reflejarEnCalendario,
+            // Desglose completo (QR, Trade-In, montos por categoría y unidades) para poder
+            // revertirlo al eliminar la venta.
+            detalle: leerDetalleVentaFormulario()
         });
         guardarVentasCalendario();
     }
@@ -2875,6 +2914,9 @@ function eliminarVentaCalendario(id, fecha) {
     const mesDeLaVenta = (entrada.mesISO && datosPorMes[entrada.mesISO]) ? entrada.mesISO : mesSeleccionado;
     const asor = entrada.asesorKey ? datosPorMes[mesDeLaVenta].appData.asesores[entrada.asesorKey] : null;
 
+    // Ventas guardadas antes de este arreglo no traen desglose: solo se puede restar el monto.
+    let ventasSinDesglose = 0;
+
     if (entrada.grupoId) {
         const diasDelGrupo = ventasCalendario.filter(v => v.grupoId === entrada.grupoId);
         const borrarTodo = confirm(
@@ -2884,16 +2926,19 @@ function eliminarVentaCalendario(id, fecha) {
 
         if (borrarTodo) {
             if (asor) asor.ventaSemanal = Math.max(0, asor.ventaSemanal - (entrada.montoTotalGrupo || 0));
+            diasDelGrupo.forEach(d => { if (d.detalle) revertirDetalleVenta(asor, d.detalle); else ventasSinDesglose++; });
             ventasCalendario = ventasCalendario.filter(v => v.grupoId !== entrada.grupoId);
         } else {
             const borrarSoloEsteDia = confirm(`¿Eliminar únicamente el registro de este día (${fecha})? Se restará solo su parte proporcional ($${entrada.monto.toFixed(0)}).`);
             if (!borrarSoloEsteDia) return;
             if (asor) asor.ventaSemanal = Math.max(0, asor.ventaSemanal - entrada.monto);
+            if (entrada.detalle) revertirDetalleVenta(asor, entrada.detalle); else ventasSinDesglose++;
             ventasCalendario = ventasCalendario.filter(v => v.id !== id);
         }
     } else {
-        if (!confirm(`¿Eliminar esta venta del ${fecha}? Se restará $${(entrada.monto || 0).toLocaleString()} del total acumulado del asesor. Esta acción no se puede deshacer.`)) return;
+        if (!confirm(`¿Eliminar esta venta del ${fecha}? Se restará $${(entrada.monto || 0).toLocaleString()} del total acumulado del asesor, junto con sus unidades, montos por categoría, QR y Trade-In. Esta acción no se puede deshacer.`)) return;
         if (asor) asor.ventaSemanal = Math.max(0, asor.ventaSemanal - (entrada.monto || 0));
+        if (entrada.detalle) revertirDetalleVenta(asor, entrada.detalle); else ventasSinDesglose++;
         ventasCalendario = ventasCalendario.filter(v => v.id !== id);
     }
 
@@ -2901,6 +2946,10 @@ function eliminarVentaCalendario(id, fecha) {
     sincronizarYRenderizar();
     renderCalendario();
     calClickDia(fecha);
+
+    if (ventasSinDesglose > 0) {
+        mostrarAlerta("Se restó el monto de la venta, pero esta venta se registró antes de que se guardara el desglose, así que sus unidades, montos por categoría, QR y Trade-In no se pudieron restar automáticamente.", "warning");
+    }
 }
 // Tipos de turno rápidos (chips) + tipo "custom" para texto libre.
 // bg/text ya vienen listos para usarse como estilo inline, siguiendo
