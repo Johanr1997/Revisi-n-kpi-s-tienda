@@ -1,15 +1,39 @@
+Claude
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Index · HTML
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Control de Ventas</title>
-
+ 
 <!-- PWA: permite "Agregar a pantalla de inicio" (iPhone/Android) y que la app
      abra a pantalla completa, sin la barra de Safari/Chrome. -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0071E3">
-
+ 
 <!-- iOS: Safari no lee bien el manifest para el modo standalone, así que se
      necesitan estas etiquetas específicas de Apple además del manifest. -->
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,7 +44,7 @@
 <link rel="apple-touch-icon" sizes="167x167" href="icons/apple-touch-icon-167.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-
+ 
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -423,6 +447,7 @@ id="v_arcCircle"/>
 <div class="v-glass v-pill">
 <span class="v-pill-num" id="v_total_tradein">0</span>
 <span class="v-pill-name">Trade-In</span>
+<div class="v-sos-meta" style="margin-top: 2px;">Meta <span id="metaVisualTradeIn">0</span></div>
 </div>
 </div>
 <!-- TOP VENDEDORES -->
@@ -577,44 +602,44 @@ Agregar al calendario
 </div>
 <!-- PESTAÑA HORARIO — LIQUID GLASS -->
 <div id="horario" class="seccion-dashboard" style="position: relative; isolation: isolate;">
-    <div class="h-orb h-orb-blue"></div>
-    <div class="h-orb h-orb-green"></div>
- 
-    <div class="v-section-label">Horario Semanal</div>
- 
-    <div class="v-glass a-card cal-wrapper">
-        <div class="cal-header">
-            <button class="cal-nav-btn" onclick="horarioNavegar(-1)">‹</button>
-            <div class="cal-titulo" id="horarioTitulo"></div>
-            <button class="cal-nav-btn" onclick="horarioNavegar(1)">›</button>
-            <button class="cal-hoy-btn" onclick="horarioIrHoy()">Esta semana</button>
-        </div>
- 
-        <div class="horario-scroll-wrap">
-            <div id="horarioCapturaArea" class="horario-captura-area">
-                <div class="horario-captura-header">
-                    <span id="horarioCapturaTitulo" class="horario-captura-titulo"></span>
-                    <span class="horario-captura-marca">Control de Ventas</span>
-                </div>
-                <div id="horarioGrid" class="horario-grid"></div>
-            </div>
-        </div>
- 
-        <div class="horario-leyenda" id="horarioLeyenda"></div>
-
+    <div class="h-orb h-orb-blue"></div>
+    <div class="h-orb h-orb-green"></div>
+ 
+    <div class="v-section-label">Horario Semanal</div>
+ 
+    <div class="v-glass a-card cal-wrapper">
+        <div class="cal-header">
+            <button class="cal-nav-btn" onclick="horarioNavegar(-1)">‹</button>
+            <div class="cal-titulo" id="horarioTitulo"></div>
+            <button class="cal-nav-btn" onclick="horarioNavegar(1)">›</button>
+            <button class="cal-hoy-btn" onclick="horarioIrHoy()">Esta semana</button>
+        </div>
+ 
+        <div class="horario-scroll-wrap">
+            <div id="horarioCapturaArea" class="horario-captura-area">
+                <div class="horario-captura-header">
+                    <span id="horarioCapturaTitulo" class="horario-captura-titulo"></span>
+                    <span class="horario-captura-marca">Control de Ventas</span>
+                </div>
+                <div id="horarioGrid" class="horario-grid"></div>
+            </div>
+        </div>
+ 
+        <div class="horario-leyenda" id="horarioLeyenda"></div>
+ 
         <details class="tip-toggle">
         <summary><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6.5 6.5 0 0 0-4 11.6c.6.5 1 1.3 1 2.1v.3h6v-.3c0-.8.4-1.6 1-2.1A6.5 6.5 0 0 0 12 3z"/></svg>Ayuda</summary>
         <div class="tip-toggle-body">
         <p style="font-size: 12px; color: rgba(0,0,0,0.4);">Arrastra el ícono de puntos junto a cada nombre para reordenar (cada grupo se reordena por separado). El botón ✕ de un asesor solo lo quita de esta pestaña, sin borrar sus datos; el ✕ de una persona de "Otras personas" la elimina junto con sus turnos, ya que no tiene ventas ni metas guardadas en ningún otro lugar. Para agregar un asesor nuevo (con ventas), ve a la pestaña de Configuración (el ícono de engranaje); para alguien que solo necesitas ver aquí, usa el formulario de abajo.</p>
         </div>
         </details>
- 
-        <div class="horario-acciones">
-            <button type="button" class="btn-primary horario-btn-accion" onclick="compartirHorarioComoImagen()">Descargar / Compartir imagen</button>
-            <button type="button" class="btn-primary horario-btn-accion horario-btn-secundario" onclick="copiarHorarioComoTexto()">Copiar como texto</button>
-        </div>
-    </div>
-
+ 
+        <div class="horario-acciones">
+            <button type="button" class="btn-primary horario-btn-accion" onclick="compartirHorarioComoImagen()">Descargar / Compartir imagen</button>
+            <button type="button" class="btn-primary horario-btn-accion horario-btn-secundario" onclick="copiarHorarioComoTexto()">Copiar como texto</button>
+        </div>
+    </div>
+ 
     <div class="v-section-label">Agregar Persona al Horario</div>
     <div class="v-glass a-card">
         <details class="tip-toggle">
@@ -683,6 +708,10 @@ Agregar al calendario
 <div class="form-group" style="margin-bottom: 0;">
 <label for="cfgMetaQR">Meta Códigos QR:</label>
 <input type="number" id="cfgMetaQR" step="1" placeholder="Ej: 20">
+</div>
+<div class="form-group" style="margin-bottom: 0;">
+<label for="cfgMetaTradeIn">Meta Trade-In:</label>
+<input type="number" id="cfgMetaTradeIn" step="1" placeholder="Ej: 10">
 </div>
 </div>
 <button class="btn-primary" onclick="guardarMetasSOS()">Guardar Metas del Plan SOS</button>
