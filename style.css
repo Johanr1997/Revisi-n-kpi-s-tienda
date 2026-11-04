@@ -1,12 +1,12 @@
 /* =================================================== */
-/* COMPLEMENTOS PARA EL DISEÑO DEL SISTEMA             */
+/* COMPLEMENTOS PARA EL DISEÃ‘O DEL SISTEMA             */
 /* =================================================== */
 :root {
     /* Controla la intensidad (opacidad) de las manchas de color difuminadas del fondo.
-       Editable desde la pestaña Configuración. 0 = fondo plano, 1 = máxima intensidad. */
+       Editable desde la pestaÃ±a ConfiguraciÃ³n. 0 = fondo plano, 1 = mÃ¡xima intensidad. */
     --orb-opacity: 0.6;
 
-    /* Color individual de cada mancha de fondo (orb), por pestaña. Editable desde Configuración. */
+    /* Color individual de cada mancha de fondo (orb), por pestaÃ±a. Editable desde ConfiguraciÃ³n. */
     --orb-sos-green: rgba(134,239,172,0.7);
     --orb-sos-rose: rgba(253,164,175,0.65);
     --orb-asesores-blue: rgba(147,197,253,0.7);
@@ -25,12 +25,12 @@
     --orb-metas-purple: rgba(196,181,253,0.6);
 
     /* Escala compartida de espaciado y radio para que las tarjetas de vidrio
-       se sientan iguales en todas las pestañas, en vez de que cada una use
+       se sientan iguales en todas las pestaÃ±as, en vez de que cada una use
        su propio padding/margen/radio. */
-    --glass-radius: 22px;          /* radio único para toda tarjeta de vidrio (.v-glass) */
-    --card-pad-hero: 28px 32px;    /* héroes (Ventas, Asesores) */
+    --glass-radius: 22px;          /* radio Ãºnico para toda tarjeta de vidrio (.v-glass) */
+    --card-pad-hero: 28px 32px;    /* hÃ©roes (Ventas, Asesores) */
     --card-pad: 24px 26px;         /* tarjetas de contenido normales */
-    --card-gap: 22px;              /* separación vertical entre tarjetas apiladas */
+    --card-gap: 22px;              /* separaciÃ³n vertical entre tarjetas apiladas */
     --inset-radius: 10px;          /* filas/paneles planos anidados dentro de una tarjeta */
     --inset-pad: 12px 14px;
 }
@@ -50,12 +50,12 @@ body {
     padding-top: 90px;
 }
 
-/* ═══════════════════════════════════════════
-   NAVBAR — efecto "Liquid Glass" (cristal líquido refractante)
-   La navbar completa actúa como la burbuja: fondo casi transparente,
-   blur bajo + distorsión SVG (refracción real de lo que hay detrás)
-   y un borde con leve aberración cromática iridiscente.
-   ═══════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   NAVBAR â€” efecto "Liquid Glass" (cristal lÃ­quido refractante)
+   La navbar completa actÃºa como la burbuja: fondo casi transparente,
+   blur bajo + distorsiÃ³n SVG (refracciÃ³n real de lo que hay detrÃ¡s)
+   y un borde con leve aberraciÃ³n cromÃ¡tica iridiscente.
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .navbar {
     width: calc(100% - 60px);
     max-width: 1600px;
@@ -94,7 +94,7 @@ body {
     z-index: 3;
 }
 
-/* Borde con leve aberración cromática, como el reflejo iridiscente del video de referencia */
+/* Borde con leve aberraciÃ³n cromÃ¡tica, como el reflejo iridiscente del video de referencia */
 .navbar::after {
     content: "";
     position: absolute;
@@ -121,8 +121,8 @@ body {
     margin-left: 2px;
 }
 body.dark-mode .nombre-tienda-nav { color: #4DA3FF; }
-/* El contenedor de pestañas + botones debe poder encogerse por debajo de su ancho
-   de contenido (min-width:0) para que sea la lista de pestañas la que haga scroll
+/* El contenedor de pestaÃ±as + botones debe poder encogerse por debajo de su ancho
+   de contenido (min-width:0) para que sea la lista de pestaÃ±as la que haga scroll
    horizontal, en vez de desbordar la navbar (que la recorta con overflow:hidden). */
 .navbar > div { min-width: 0; }
 .navbar ul {
@@ -142,7 +142,7 @@ body.dark-mode .nombre-tienda-nav { color: #4DA3FF; }
 .navbar ul li:hover { background: rgba(255,255,255,0.25); }
 .navbar ul li.active { color: #1D1D1F; font-weight: 600; background: rgba(255,255,255,0.55); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
 
-/* Tab de Configuración: solo ícono, redondo */
+/* Tab de ConfiguraciÃ³n: solo Ã­cono, redondo */
 .tab-icon-only {
     font-size: 16px;
     padding: 7px 12px !important;
@@ -157,9 +157,9 @@ body.dark-mode .nombre-tienda-nav { color: #4DA3FF; }
 .contenido { max-width: 1560px; margin: 0 auto; padding: 20px 48px 60px 48px; }
 .header { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 32px; }
 
-/* ═══════════════════════════════════════════════════════ */
-/* SELECTOR DE MES — cambia entre meses independientes      */
-/* ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* SELECTOR DE MES â€” cambia entre meses independientes      */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .mes-selector {
     display: flex;
     align-items: center;
@@ -242,11 +242,11 @@ body.dark-mode .mes-selector-badge { color: #30D158; background: rgba(48,209,88,
 .seccion-dashboard { display: none; }
 .seccion-dashboard.active-seccion { display: block; }
 
-/* ═══════════════════════════════════════════════════════ */
-/* PESTAÑA VENTAS — LIQUID GLASS (FONDO CLARO)           */
-/* ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* PESTAÃ‘A VENTAS â€” LIQUID GLASS (FONDO CLARO)           */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* Contenedor raíz: orbes de color + superficie */
+/* Contenedor raÃ­z: orbes de color + superficie */
 #ventas-pantalla {
     position: relative;
     isolation: isolate;
@@ -356,7 +356,7 @@ body.dark-mode .mes-selector-badge { color: #30D158; background: rgba(48,209,88,
 }
 .v-hero-sub { font-size: 12px; color: rgba(0,0,0,0.36); }
 
-/* Tráfico pill */
+/* TrÃ¡fico pill */
 .v-traf-pill {
     display: flex; flex-direction: column; align-items: center; gap: 3px;
     background: rgba(255,255,255,0.5);
@@ -383,7 +383,7 @@ body.dark-mode .mes-selector-badge { color: #30D158; background: rgba(48,209,88,
 .v-arc-pct { font-size: 18px; font-weight: 700; color: #1D1D1F; line-height: 1; }
 .v-arc-sub { font-size: 9px; color: rgba(0,0,0,0.32); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
 
-/* Tráfico + arco juntos */
+/* TrÃ¡fico + arco juntos */
 .v-meta-ring-wrap { display: flex; align-items: center; gap: 16px; }
 
 /* SECTION LABEL */
@@ -400,7 +400,7 @@ body.dark-mode .mes-selector-badge { color: #30D158; background: rgba(48,209,88,
     padding: var(--card-pad);
 }
 
-/* Semáforo: punto de color con glow */
+/* SemÃ¡foro: punto de color con glow */
 .v-sos-dot {
     width: 8px; height: 8px;
     border-radius: 50%;
@@ -437,7 +437,7 @@ body.dark-mode .mes-selector-badge { color: #30D158; background: rgba(48,209,88,
 }
 .v-sos-meta { font-size: 10px; color: rgba(0,0,0,0.28); }
 
-/* Comparativa mes a mes: badge "▲/▼ X% vs mes anterior" junto a un KPI */
+/* Comparativa mes a mes: badge "â–²/â–¼ X% vs mes anterior" junto a un KPI */
 .v-cmp-wrap { margin-top: 6px; min-height: 18px; }
 .v-cmp-badge {
     display: inline-flex;
@@ -456,7 +456,7 @@ body.dark-mode .v-cmp-badge.v-cmp-up      { color: #30D158 !important; backgroun
 body.dark-mode .v-cmp-badge.v-cmp-down    { color: #FF6961 !important; background: rgba(255,69,58,0.18) !important; }
 body.dark-mode .v-cmp-badge.v-cmp-neutral { color: rgba(255,255,255,0.65) !important; background: rgba(255,255,255,0.08) !important; }
 
-/* Colores de barra según estado */
+/* Colores de barra segÃºn estado */
 .v-sos-card.verde   .v-sos-fill { background: #34C759; }
 .v-sos-card.amarillo .v-sos-fill { background: #FF9500; }
 .v-sos-card.rojo    .v-sos-fill { background: #FF3B30; }
@@ -558,7 +558,7 @@ body.dark-mode .v-cmp-badge.v-cmp-neutral { color: rgba(255,255,255,0.65) !impor
     transition: width 0.6s cubic-bezier(.4,0,.2,1);
 }
 
-/* Meta diaria (monto restante repartido entre los días que quedan del mes) */
+/* Meta diaria (monto restante repartido entre los dÃ­as que quedan del mes) */
 .v-meta-diaria-box {
     padding: 18px 26px;
     margin-bottom: var(--card-gap);
@@ -649,9 +649,9 @@ body.dark-mode .v-meta-diaria-badge { color: #4DA3FF; background: rgba(10,132,25
     .v-top-grid { grid-template-columns: 1fr; }
 }
 
-/* ═══════════════════════════════════════════════════════ */
-/* PESTAÑA ASESORES — LIQUID GLASS (FONDO CLARO)         */
-/* ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* PESTAÃ‘A ASESORES â€” LIQUID GLASS (FONDO CLARO)         */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .a-orb {
     position: fixed;
@@ -850,9 +850,9 @@ body.dark-mode .a-monto-total-label { color: rgba(255,255,255,0.5); }
     .a-grid-categorias { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ═══════════════════════════════════════════════════════ */
-/* ORBES DE COLOR — PLAN SOS / GAREX / INSURAMA / BITÁCORAS / CONFIGURACIÓN */
-/* ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* ORBES DE COLOR â€” PLAN SOS / GAREX / INSURAMA / BITÃCORAS / CONFIGURACIÃ“N */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .s-orb, .g-orb, .b-orb, .c-orb {
     position: fixed;
@@ -863,27 +863,27 @@ body.dark-mode .a-monto-total-label { color: rgba(255,255,255,0.5); }
     opacity: var(--orb-opacity);
 }
 
-/* Plan SOS — violeta / verde agua */
+/* Plan SOS â€” violeta / verde agua */
 .s-orb-purple { width: 460px; height: 460px; background: radial-gradient(circle, var(--orb-ventas-purple) 0%, transparent 70%); top: -110px; left: -90px; }
 .s-orb-teal   { width: 380px; height: 380px; background: radial-gradient(circle, var(--orb-ventas-teal) 0%, transparent 70%); bottom: 30px; right: -60px; }
 
-/* Garex — verde / azul (incentivo positivo) */
+/* Garex â€” verde / azul (incentivo positivo) */
 .g-orb-green { width: 460px; height: 460px; background: radial-gradient(circle, var(--orb-garex-green) 0%, transparent 70%); top: -100px; right: -90px; }
 .g-orb-blue  { width: 360px; height: 360px; background: radial-gradient(circle, var(--orb-garex-blue) 0%, transparent 70%); bottom: 20px; left: -60px; }
 
-/* Insurama — índigo / rosa */
+/* Insurama â€” Ã­ndigo / rosa */
 .g-orb-indigo { width: 460px; height: 460px; background: radial-gradient(circle, var(--orb-insurama-indigo) 0%, transparent 70%); top: -100px; left: -90px; }
 .g-orb-pink   { width: 360px; height: 360px; background: radial-gradient(circle, var(--orb-insurama-pink) 0%, transparent 70%); bottom: 20px; right: -60px; }
 
-/* Bitácoras — ámbar / azul */
+/* BitÃ¡coras â€” Ã¡mbar / azul */
 .b-orb-amber { width: 440px; height: 440px; background: radial-gradient(circle, var(--orb-bitacora-amber) 0%, transparent 70%); top: -100px; right: -80px; }
 .b-orb-blue  { width: 360px; height: 360px; background: radial-gradient(circle, var(--orb-bitacora-blue) 0%, transparent 70%); bottom: 30px; left: -60px; }
 
-/* Configuración — gris neutro / rojo de advertencia (sutil) */
+/* ConfiguraciÃ³n â€” gris neutro / rojo de advertencia (sutil) */
 .c-orb-gray { width: 440px; height: 440px; background: radial-gradient(circle, var(--orb-calendario-gray) 0%, transparent 70%); top: -100px; left: -90px; }
 .c-orb-red  { width: 320px; height: 320px; background: radial-gradient(circle, var(--orb-calendario-red) 0%, transparent 70%); bottom: 10px; right: -50px; }
 
-/* Recordatorios — naranja cálido / púrpura */
+/* Recordatorios â€” naranja cÃ¡lido / pÃºrpura */
 .r-orb-orange { width: 450px; height: 450px; background: radial-gradient(circle, var(--orb-metas-orange) 0%, transparent 70%); top: -110px; right: -80px; }
 .r-orb-purple { width: 370px; height: 370px; background: radial-gradient(circle, var(--orb-metas-purple) 0%, transparent 70%); bottom: 20px; left: -60px; }
 
@@ -904,7 +904,7 @@ body.dark-mode .a-monto-total-label { color: rgba(255,255,255,0.5); }
     flex-wrap: wrap;
 }
 
-/* Ítem de recordatorio */
+/* Ãtem de recordatorio */
 .r-item {
     display: flex;
     align-items: center;
@@ -949,7 +949,7 @@ body.dark-mode .a-monto-total-label { color: rgba(255,255,255,0.5); }
 }
 .r-item-del:hover { color: #FF3B30; background: rgba(255,59,48,0.08); }
 
-/* Tarjeta de anotación en el Historial de Bitácoras */
+/* Tarjeta de anotaciÃ³n en el Historial de BitÃ¡coras */
 .bitacora-item {
     padding: var(--inset-pad);
     background: #F5F5F7;
@@ -968,7 +968,7 @@ body.dark-mode .bitacora-item { background: rgba(255,255,255,0.06); border-left-
 body.dark-mode .bitacora-item-texto { color: #F2F2F7; }
 body.dark-mode .bitacora-item-fecha { color: rgba(255,255,255,0.6); }
 
-/* Ítem de clínica */
+/* Ãtem de clÃ­nica */
 .c-item {
     display: flex;
     align-items: center;
@@ -1030,9 +1030,9 @@ body.dark-mode .bitacora-item-fecha { color: rgba(255,255,255,0.6); }
     transition: color 0.15s, background 0.15s;
 }
 .c-item-del:hover { color: #FF3B30; background: rgba(255,59,48,0.08); }
-/* ═══════════════════════════════════════════════════════ */
-/* CALENDARIO — BITÁCORAS                                  */
-/* ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* CALENDARIO â€” BITÃCORAS                                  */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .cal-wrapper { padding: 24px 26px 20px; margin-bottom: 22px; }
 
@@ -1195,9 +1195,9 @@ body.dark-mode .bitacora-item-fecha { color: rgba(255,255,255,0.6); }
     flex-shrink: 0;
 }
 
-/* ═══════════════════════════════════════════════════════ */
-/* SELECTOR MODO VENTA (DÍA / SEMANA) — ASESORES         */
-/* ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* SELECTOR MODO VENTA (DÃA / SEMANA) â€” ASESORES         */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .venta-modo-wrap {
     margin-top: 18px;
@@ -1271,9 +1271,9 @@ body.dark-mode .bitacora-item-fecha { color: rgba(255,255,255,0.6); }
 }
 .venta-resumen strong { color: #0071E3; }
 .cal-pill-venta { background: rgba(52,199,89,0.13); color: #1a6e35; }
-/* ═══════════════════════════════════════════════════════ */
-/* ALERTAS / TOASTS — BURBUJA LIQUID GLASS                 */
-/* ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* ALERTAS / TOASTS â€” BURBUJA LIQUID GLASS                 */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .toast-container {
     position: fixed;
@@ -1393,9 +1393,9 @@ body.dark-mode .bitacora-item-fecha { color: rgba(255,255,255,0.6); }
 .toast-info .toast-icon { background: rgba(0,113,227,0.18); color: #0071E3; }
 .toast-info { border-color: rgba(0,113,227,0.35); }
 
-/* ═══════════════════════════════════════════════════════ */
-/* MODAL DE FECHA — BURBUJA LIQUID GLASS                    */
-/* ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* MODAL DE FECHA â€” BURBUJA LIQUID GLASS                    */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .modal-overlay {
     position: fixed;
@@ -1490,9 +1490,9 @@ body.dark-mode .bitacora-item-fecha { color: rgba(255,255,255,0.6); }
 }
 .modal-btn-confirm:hover { background: #0077ED; }
 
-/* ═══════════════════════════════════════════════════════ */
-/* FECHA DE PROTECCIÓN (GAREX/INSURAMA) — integrada al glass */
-/* ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* FECHA DE PROTECCIÃ“N (GAREX/INSURAMA) â€” integrada al glass */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .a-proteccion-fecha-row {
     display: flex;
@@ -1515,12 +1515,12 @@ body.dark-mode .bitacora-item-fecha { color: rgba(255,255,255,0.6); }
     font-size: 12px;
     color: #86868B;
 }
-/* ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 /* MODO OSCURO                                              */
 /* Activado al agregar la clase "dark-mode" al <body>.      */
-/* ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* Botón flotante de cambio de tema (sol/luna) en la navbar */
+/* BotÃ³n flotante de cambio de tema (sol/luna) en la navbar */
 .theme-toggle-btn {
     background: transparent;
     border: 1.5px solid rgba(0,0,0,0.35);
@@ -1538,7 +1538,7 @@ body.dark-mode .bitacora-item-fecha { color: rgba(255,255,255,0.6); }
 }
 .theme-toggle-btn:hover { background: rgba(0,0,0,0.06); transform: scale(1.06); }
 
-/* Indicador de sincronización con la nube (junto a las pestañas de la navbar) */
+/* Indicador de sincronizaciÃ³n con la nube (junto a las pestaÃ±as de la navbar) */
 .sync-status {
     display: inline-flex;
     align-items: center;
@@ -1589,7 +1589,7 @@ body.dark-mode .sync-status.sync-status-sin-conexion { color: #FF6961 !important
     .sync-status { padding: 6px; }
 }
 
-/* Separador visual entre las pestañas y el botón de modo oscuro/claro */
+/* Separador visual entre las pestaÃ±as y el botÃ³n de modo oscuro/claro */
 .navbar-divider {
     width: 1px;
     height: 22px;
@@ -1682,7 +1682,7 @@ body.dark-mode .a-proteccion-fecha-row input[type="date"] {
     color: #F2F2F7;
 }
 
-/* Botón primario y badges de estado */
+/* BotÃ³n primario y badges de estado */
 body.dark-mode .btn-primary { background: #0A84FF; }
 body.dark-mode .btn-primary:hover { background: #3399FF; }
 body.dark-mode .verde { background-color: rgba(48,209,88,0.16); color: #30D158; }
@@ -1690,7 +1690,7 @@ body.dark-mode .amarillo { background-color: rgba(255,159,10,0.16); color: #FF9F
 body.dark-mode .rojo { background-color: rgba(255,69,58,0.16); color: #FF453A; }
 body.dark-mode .barra-progreso { background: rgba(255,255,255,0.1); }
 
-/* Listas: recordatorios y clínicas */
+/* Listas: recordatorios y clÃ­nicas */
 body.dark-mode .r-item,
 body.dark-mode .c-item {
     border-bottom-color: rgba(255,255,255,0.08);
@@ -1709,7 +1709,7 @@ body.dark-mode .toast-bubble {
 }
 body.dark-mode .toast-close:hover { color: rgba(255,255,255,0.7); }
 
-/* Tablas (Garex / Insurama / resúmenes) */
+/* Tablas (Garex / Insurama / resÃºmenes) */
 body.dark-mode table { color: #F2F2F7; }
 body.dark-mode th, body.dark-mode td {
     border-color: rgba(255,255,255,0.08) !important;
@@ -1718,12 +1718,12 @@ body.dark-mode th, body.dark-mode td {
 /* Calendario */
 body.dark-mode .cal-dot { filter: brightness(1.15); }
 
-/* Scrollbar (opcional, estética) */
+/* Scrollbar (opcional, estÃ©tica) */
 body.dark-mode ::-webkit-scrollbar { width: 10px; height: 10px; }
 body.dark-mode ::-webkit-scrollbar-track { background: transparent; }
 body.dark-mode ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 10px; }
 
-/* Texto genérico con colores fijos en negro/gris usados vía estilos inline o clases sueltas */
+/* Texto genÃ©rico con colores fijos en negro/gris usados vÃ­a estilos inline o clases sueltas */
 body.dark-mode [style*="color: rgba(0,0,0"],
 body.dark-mode [style*="color:#1D1D1F"],
 body.dark-mode [style*="color: #1D1D1F"] {
@@ -1817,7 +1817,7 @@ body.dark-mode .a-pill-input {
     color: #F2F2F7 !important;
 }
 
-/* Asegurar visibilidad del ícono de Configuración (⚙︎) y resto de pestañas en modo oscuro */
+/* Asegurar visibilidad del Ã­cono de ConfiguraciÃ³n (âš™ï¸Ž) y resto de pestaÃ±as en modo oscuro */
 body.dark-mode .navbar ul li {
     color: rgba(255,255,255,0.65) !important;
 }
@@ -1831,7 +1831,7 @@ body.dark-mode .navbar ul li.active {
     color: #F2F2F7 !important;
 }
 
-/* Fila de edición de asesor en Configuración */
+/* Fila de ediciÃ³n de asesor en ConfiguraciÃ³n */
 .asesor-config-block {
     margin-bottom: 8px;
 }
@@ -1885,7 +1885,7 @@ body.dark-mode .navbar ul li.active {
     cursor: pointer;
 }
 
-/* Modo oscuro: fila de edición de asesor */
+/* Modo oscuro: fila de ediciÃ³n de asesor */
 body.dark-mode .asesor-config-row {
     background: rgba(255,255,255,0.06);
 }
@@ -1904,7 +1904,7 @@ body.dark-mode .asesor-config-del {
     background: #FF453A;
 }
 
-/* Resumen de desempeño por asesor (pestaña Bitácoras / resumen visual) */
+/* Resumen de desempeÃ±o por asesor (pestaÃ±a BitÃ¡coras / resumen visual) */
 .ra-card {
     padding: var(--card-pad);
     background: #F5F5F7;
@@ -1917,7 +1917,7 @@ body.dark-mode .asesor-config-del {
     gap: 14px;
     margin-bottom: 12px;
 }
-/* Anillo de cumplimiento (semáforo verde/amarillo/rojo, igual que el resto de la app) */
+/* Anillo de cumplimiento (semÃ¡foro verde/amarillo/rojo, igual que el resto de la app) */
 .ra-ring {
     position: relative;
     flex-shrink: 0;
@@ -1970,7 +1970,7 @@ body.dark-mode .ra-ring-label { color: #F2F2F7 !important; }
 .ra-grid-4 { grid-template-columns: repeat(4, 1fr); }
 .ra-muted { color: #86868B; }
 
-/* Franja/tarjetas de estadísticas para la pestaña "Acumulados" (antes texto plano) */
+/* Franja/tarjetas de estadÃ­sticas para la pestaÃ±a "Acumulados" (antes texto plano) */
 .ra-tile-grid { display: grid; gap: 8px; }
 .ra-tile {
     background: rgba(0,0,0,0.03);
@@ -1988,8 +1988,8 @@ body.dark-mode .ra-tile-label { color: #8E8E93 !important; }
 body.dark-mode .ra-tile-value { color: #F2F2F7 !important; }
 body.dark-mode .ra-tile-caption { color: #8E8E93 !important; }
 
-/* Color de las barras de progreso según el semáforo (mismos umbrales que Plan SOS:
-   verde >=100%, amarillo >=85%, rojo por debajo). Nombres "sem-*" a propósito,
+/* Color de las barras de progreso segÃºn el semÃ¡foro (mismos umbrales que Plan SOS:
+   verde >=100%, amarillo >=85%, rojo por debajo). Nombres "sem-*" a propÃ³sito,
    para no chocar con .verde/.amarillo/.rojo (insignias de texto en otras partes
    de la app, que ya tienen su propio significado y su propio override en modo
    oscuro con mayor especificidad). */
@@ -1997,24 +1997,24 @@ body.dark-mode .ra-tile-caption { color: #8E8E93 !important; }
 .progreso-relleno.sem-amarillo { background: #FF9500 !important; }
 .progreso-relleno.sem-rojo { background: #FF3B30 !important; }
 
-/* Franja compacta de estadísticas clave (Venta / Meta / QR / Trade-In) */
+/* Franja compacta de estadÃ­sticas clave (Venta / Meta / QR / Trade-In) */
 .ra-stat-strip {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 4px 10px;
-    margin-top: 10px;
-    padding: 8px 10px;
+    margin-top: 12px;
+    padding: 12px 14px;
     background: rgba(0,0,0,0.03);
-    border-radius: 8px;
+    border-radius: 10px;
 }
 .ra-stat { display: flex; flex-direction: column; gap: 2px; }
-.ra-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.03em; color: #86868B; }
-.ra-stat-value { font-size: 13px; font-weight: 600; color: #1D1D1F; }
+.ra-stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; color: #86868B; }
+.ra-stat-value { font-size: 22px; font-weight: 600; color: #1D1D1F; letter-spacing: -0.01em; line-height: 1.15; }
 body.dark-mode .ra-stat-strip { background: rgba(255,255,255,0.05); }
 body.dark-mode .ra-stat-label { color: #8E8E93; }
 body.dark-mode .ra-stat-value { color: #F2F2F7; }
 
-/* Pestañas dentro de cada tarjeta de resumen de asesor */
+/* PestaÃ±as dentro de cada tarjeta de resumen de asesor */
 .ra-tabs {
     display: flex;
     gap: 6px;
@@ -2043,12 +2043,12 @@ body.dark-mode .ra-tab-btn { color: #8E8E93; }
 body.dark-mode .ra-tab-btn:hover { color: #F2F2F7; }
 body.dark-mode .ra-tab-btn.active { color: #0A84FF; border-bottom-color: #0A84FF; }
 
-/* Meta por Dispositivo (desglose por categoría dentro de cada asesor): una sola
+/* Meta por Dispositivo (desglose por categorÃ­a dentro de cada asesor): una sola
    fila y una sola barra por dispositivo, que combina unidades y monto en vez de
    repetir cada dispositivo en dos listas separadas con dos barras. La barra se
-   llena según el % de MONTO (la métrica que ya usa el resto de la app); el ícono
+   llena segÃºn el % de MONTO (la mÃ©trica que ya usa el resto de la app); el Ã­cono
    de color junto a cada valor (caja azul = unidades, moneda verde = monto) dice
-   cuál es cuál. */
+   cuÃ¡l es cuÃ¡l. */
 .ra-meta-cat-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -2066,12 +2066,12 @@ body.dark-mode .ra-tab-btn.active { color: #0A84FF; border-bottom-color: #0A84FF
     color: #1D1D1F;
 }
 /* Dentro de "lleva / meta", el valor alcanzado resalta (negrita + color normal)
-   y la meta/separador se queda muted — así el ojo va directo a "cuánto llevas". */
+   y la meta/separador se queda muted â€” asÃ­ el ojo va directo a "cuÃ¡nto llevas". */
 .ra-meta-cat-lleva { font-weight: 700; color: #1D1D1F; }
 body.dark-mode .ra-meta-cat-lleva { color: #F2F2F7 !important; }
 .ra-mini-bar { height: 5px; }
 
-/* Modo oscuro: resumen de desempeño por asesor */
+/* Modo oscuro: resumen de desempeÃ±o por asesor */
 body.dark-mode .ra-card { background: rgba(255,255,255,0.06); }
 body.dark-mode .ra-incentivo { background: rgba(48,209,88,0.16); color: #30D158; }
 body.dark-mode .ra-cumplimiento { color: #0A84FF; }
@@ -2085,7 +2085,7 @@ body.dark-mode .ra-muted { color: #8E8E93; }
 body.dark-mode .ra-meta-cat-name { color: #F2F2F7; }
 body.dark-mode .ra-meta-cat-values { color: #F2F2F7; }
 
-/* Encabezado de tablas (Garex / Insurama / detalle de protección) */
+/* Encabezado de tablas (Garex / Insurama / detalle de protecciÃ³n) */
 .tabla-header-row {
     background: #F5F5F7;
     color: #86868B;
@@ -2100,7 +2100,7 @@ body.dark-mode table tbody tr {
     border-bottom-color: rgba(255,255,255,0.08) !important;
 }
 
-/* Separador del check de modo automático en Configuración */
+/* Separador del check de modo automÃ¡tico en ConfiguraciÃ³n */
 body.dark-mode #chkModoOscuroAuto {
     accent-color: #0A84FF;
 }
@@ -2108,14 +2108,14 @@ body.dark-mode label[for="chkModoOscuroAuto"] {
     border-top-color: rgba(255,255,255,0.1) !important;
 }
 
-/* Campos de solo lectura calculados automáticamente (Monto de Ventas, Accesorización) */
+/* Campos de solo lectura calculados automÃ¡ticamente (Monto de Ventas, AccesorizaciÃ³n) */
 body.dark-mode #inputVentaSemanal,
 body.dark-mode #inputAccesorizacion {
     background: rgba(10,132,255,0.14) !important;
     color: #4DA3FF !important;
 }
 
-/* Fila de accesorización automática dentro del box de cumplimiento del asesor */
+/* Fila de accesorizaciÃ³n automÃ¡tica dentro del box de cumplimiento del asesor */
 .cumplimiento-acc-row {
     display: flex;
     justify-content: space-between;
@@ -2128,7 +2128,7 @@ body.dark-mode .cumplimiento-acc-row {
     border-top-color: rgba(255,255,255,0.1);
 }
 
-/* Badge de accesorización automática en el resumen de cada asesor */
+/* Badge de accesorizaciÃ³n automÃ¡tica en el resumen de cada asesor */
 .ra-acc-badge {
     display: inline-block;
     margin-left: 8px;
@@ -2143,9 +2143,9 @@ body.dark-mode .ra-acc-badge {
     background: rgba(10,132,255,0.18);
     color: #4DA3FF;
 }
-/* ═══════════════════════════════════════════════════════ */
-/* TABLAS CON SCROLL HORIZONTAL (evita que se rompan en móvil) */
-/* ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* TABLAS CON SCROLL HORIZONTAL (evita que se rompan en mÃ³vil) */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .tabla-scroll {
     width: 100%;
     overflow-x: auto;
@@ -2153,12 +2153,12 @@ body.dark-mode .ra-acc-badge {
 }
 .tabla-scroll table { min-width: 560px; }
 
-/* ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 /* COMPATIBILIDAD COMPLETA CON PANTALLAS DE CELULAR          */
-/* ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @media (max-width: 640px) {
 
-    /* Evita que el navegador haga zoom automático al enfocar inputs en iOS */
+    /* Evita que el navegador haga zoom automÃ¡tico al enfocar inputs en iOS */
     .form-group input,
     .form-group select,
     .form-group textarea,
@@ -2225,7 +2225,7 @@ body.dark-mode .ra-acc-badge {
 
     .v-pill-row { grid-template-columns: repeat(2, 1fr); }
 
-    /* Fila de edición de asesor: nombre y % apilados, botones en fila propia */
+    /* Fila de ediciÃ³n de asesor: nombre y % apilados, botones en fila propia */
     .asesor-config-row {
         grid-template-columns: 1fr auto;
         grid-template-areas:
@@ -2239,22 +2239,22 @@ body.dark-mode .ra-acc-badge {
     #listaAsesoresConfig button.asesor-config-save { grid-area: guardar; }
     #listaAsesoresConfig button.asesor-config-del { grid-area: borrar; }
 
-    /* Calendario: celdas más compactas para que quepan las 7 columnas */
+    /* Calendario: celdas mÃ¡s compactas para que quepan las 7 columnas */
     .cal-grid { gap: 3px; }
     .cal-celda { padding: 4px; min-height: 56px; }
     .cal-dia-num { font-size: 11px; }
     .cal-evento-pill { font-size: 9px; padding: 1px 4px; }
 
-    /* Tablas: texto un poco más pequeño dentro del contenedor con scroll */
+    /* Tablas: texto un poco mÃ¡s pequeÃ±o dentro del contenedor con scroll */
     .tabla-scroll table { font-size: 11px !important; }
 
-    /* Botones de acción a ancho completo se ven mejor apilados en vertical */
+    /* Botones de acciÃ³n a ancho completo se ven mejor apilados en vertical */
     .modal-actions { flex-direction: column-reverse; }
     .modal-btn { width: 100%; }
 
-    /* Encabezado de calendario: el título (fechas) pasa a su propia fila,
-       arriba de los botones de navegación, para que nunca se aplaste
-       (afecta sobre todo a "Esta semana", cuyo texto es más largo) */
+    /* Encabezado de calendario: el tÃ­tulo (fechas) pasa a su propia fila,
+       arriba de los botones de navegaciÃ³n, para que nunca se aplaste
+       (afecta sobre todo a "Esta semana", cuyo texto es mÃ¡s largo) */
     .cal-header {
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
@@ -2277,9 +2277,9 @@ body.dark-mode .ra-acc-badge {
     .v-pill-row { grid-template-columns: 1fr; }
 }
 
-/* ═══════════════════════════════════════════════════════ */
-/* QUITAR FLECHITAS (spinners) DE TODOS LOS CAMPOS NUMÉRICOS */
-/* ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* QUITAR FLECHITAS (spinners) DE TODOS LOS CAMPOS NUMÃ‰RICOS */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -2290,9 +2290,9 @@ input[type="number"] {
     appearance: textfield;
 }
 
-/* ═══════════════════════════════════════════════════════ */
-/* PANTALLA DE INICIO DE SESIÓN (Firebase Auth)              */
-/* ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* PANTALLA DE INICIO DE SESIÃ“N (Firebase Auth)              */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .login-overlay {
     position: fixed;
     inset: 0;
@@ -2333,7 +2333,7 @@ body.dark-mode .login-box h2 { color: #F2F2F7; }
 body.dark-mode .login-box .form-group label { color: #F2F2F7; }
 body.dark-mode .login-sub, body.dark-mode .login-foot { color: rgba(255,255,255,0.6); }
  
-/* Orbes de color de fondo (mismo patrón que el resto de pestañas) */
+/* Orbes de color de fondo (mismo patrÃ³n que el resto de pestaÃ±as) */
 .h-orb {
     position: fixed;
     border-radius: 50%;
@@ -2345,17 +2345,17 @@ body.dark-mode .login-sub, body.dark-mode .login-foot { color: rgba(255,255,255,
 .h-orb-blue  { width: 460px; height: 460px; background: radial-gradient(circle, var(--orb-asesores-blue) 0%, transparent 70%); top: -100px; left: -90px; }
 .h-orb-green { width: 360px; height: 360px; background: radial-gradient(circle, var(--orb-garex-green) 0%, transparent 70%); bottom: 20px; right: -60px; }
  
-/* Contenedor con scroll horizontal en pantallas angostas (no rompe el diseño en celular) */
+/* Contenedor con scroll horizontal en pantallas angostas (no rompe el diseÃ±o en celular) */
 .horario-scroll-wrap {
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 }
  
-/* Área que se captura como imagen. Estos son los colores CLAROS por defecto
-   (modo claro), y también los que se fuerzan durante la exportación real
-   (clase .modo-captura) sin importar el tema — ver el bloque "MODO OSCURO"
-   más abajo para los estilos que se aplican solo en pantalla. */
+/* Ãrea que se captura como imagen. Estos son los colores CLAROS por defecto
+   (modo claro), y tambiÃ©n los que se fuerzan durante la exportaciÃ³n real
+   (clase .modo-captura) sin importar el tema â€” ver el bloque "MODO OSCURO"
+   mÃ¡s abajo para los estilos que se aplican solo en pantalla. */
 .horario-captura-area {
     background: #FFFFFF;
     border-radius: 16px;
@@ -2382,7 +2382,7 @@ body.dark-mode .login-sub, body.dark-mode .login-foot { color: rgba(255,255,255,
     color: rgba(0,0,0,0.35);
 }
  
-/* Grilla: 1 columna de nombre + 7 columnas de días */
+/* Grilla: 1 columna de nombre + 7 columnas de dÃ­as */
 .horario-grid {
     display: grid;
     grid-template-columns: 150px repeat(7, 1fr);
@@ -2405,7 +2405,7 @@ body.dark-mode .login-sub, body.dark-mode .login-foot { color: rgba(255,255,255,
 .horario-head-asesor { text-align: left; }
 .horario-head-daynum { font-weight: 400; opacity: 0.7; }
 
-/* "Hoy": resalta la columna del día actual dentro de la semana visible (si esa
+/* "Hoy": resalta la columna del dÃ­a actual dentro de la semana visible (si esa
    semana incluye hoy), igual que el punto rojo del mini calendario de Recordatorios */
 .horario-head-cell-hoy { color: #0071E3; }
 .horario-head-daynum-hoy {
@@ -2428,9 +2428,9 @@ body.dark-mode .horario-head-cell-hoy { color: #4DA3FF; }
 body.dark-mode .horario-head-daynum-hoy { background: #0A84FF; }
 body.dark-mode .horario-celda-hoy { box-shadow: 0 0 0 1.5px #0A84FF inset; }
 
-/* El resaltado de "hoy" es útil mientras se trabaja en la app, pero no tiene sentido en
-   la imagen descargada/compartida (el día "actual" depende de cuándo se vea la imagen,
-   no de cuándo se generó) — se anula igual que el modo oscuro justo durante la captura. */
+/* El resaltado de "hoy" es Ãºtil mientras se trabaja en la app, pero no tiene sentido en
+   la imagen descargada/compartida (el dÃ­a "actual" depende de cuÃ¡ndo se vea la imagen,
+   no de cuÃ¡ndo se generÃ³) â€” se anula igual que el modo oscuro justo durante la captura. */
 .horario-captura-area.modo-captura .horario-head-cell-hoy { color: inherit; }
 .horario-captura-area.modo-captura .horario-head-daynum-hoy {
     background: transparent;
@@ -2440,9 +2440,9 @@ body.dark-mode .horario-celda-hoy { box-shadow: 0 0 0 1.5px #0A84FF inset; }
 }
 .horario-captura-area.modo-captura .horario-celda-hoy { box-shadow: none; }
 
-/* Fin de semana (Sáb/Dom): tinte sutil para distinguirlas de un vistazo del resto
+/* Fin de semana (SÃ¡b/Dom): tinte sutil para distinguirlas de un vistazo del resto
    de la semana laboral. Cada fila y el encabezado tienen exactamente 8 hijos (1
-   columna de nombre/asesor + 7 días), así que la posición 7 siempre es Sábado y
+   columna de nombre/asesor + 7 dÃ­as), asÃ­ que la posiciÃ³n 7 siempre es SÃ¡bado y
    la 8 siempre es Domingo. */
 .horario-grid-header > .horario-head-cell:nth-child(7),
 .horario-grid-header > .horario-head-cell:nth-child(8),
@@ -2499,7 +2499,7 @@ body.dark-mode .horario-fila > .horario-celda:nth-child(8):hover {
 }
 .horario-drag-handle:hover { color: rgba(0,0,0,0.55); }
  
-/* Fila que se está arrastrando */
+/* Fila que se estÃ¡ arrastrando */
 .horario-nombre-cell.horario-arrastrando {
     opacity: 0.5;
     box-shadow: 0 0 0 2px #0071E3 inset;
@@ -2507,7 +2507,7 @@ body.dark-mode .horario-fila > .horario-celda:nth-child(8):hover {
 }
 .horario-nombre-cell.horario-arrastrando .horario-drag-handle { cursor: grabbing; }
  
-/* Fila sobre la que se soltaría al momento */
+/* Fila sobre la que se soltarÃ­a al momento */
 .horario-nombre-cell.horario-drop-objetivo {
     background: rgba(0,113,227,0.14);
     box-shadow: 0 0 0 2px #0071E3 inset;
@@ -2580,8 +2580,8 @@ body.dark-mode .horario-fila > .horario-celda:nth-child(8):hover {
     word-break: break-word;
 }
  
-/* Modo captura: oculta el "+" de celdas vacías y quita el hover, para
-   que la imagen generada se vea limpia y sin elementos de edición */
+/* Modo captura: oculta el "+" de celdas vacÃ­as y quita el hover, para
+   que la imagen generada se vea limpia y sin elementos de ediciÃ³n */
 .modo-captura .horario-celda-vacia { visibility: hidden; }
 .modo-captura .horario-celda { cursor: default; }
 .modo-captura .horario-celda:hover { background: #F5F5F7; border-color: #ECECEE; }
@@ -2598,7 +2598,7 @@ body.dark-mode .horario-fila > .horario-celda:nth-child(8):hover {
 .horario-leyenda-item { display: flex; align-items: center; gap: 5px; }
 .horario-leyenda-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
  
-/* Botones de acción (compartir / copiar) */
+/* Botones de acciÃ³n (compartir / copiar) */
 .horario-acciones {
     display: flex;
     gap: 10px;
@@ -2610,7 +2610,7 @@ body.dark-mode .horario-fila > .horario-celda:nth-child(8):hover {
 .horario-btn-secundario { background: #6E6E73; }
 .horario-btn-secundario:hover { background: #7D7D82; }
  
-/* Modal de edición de turno (reutiliza .modal-overlay / .modal-glass ya existentes) */
+/* Modal de ediciÃ³n de turno (reutiliza .modal-overlay / .modal-glass ya existentes) */
 .horario-modal { width: min(420px, 100%); }
 .horario-chips {
     display: flex;
@@ -2631,8 +2631,8 @@ body.dark-mode .horario-fila > .horario-celda:nth-child(8):hover {
 }
 .horario-chip:hover { transform: translateY(-1px); filter: brightness(0.95); }
 
-/* Accesos rápidos (valores fijos reutilizables, ej. "Horario normal" o "10am - 7pm"):
-   mismo look que los chips fijos, pero con una "x" pequeña superpuesta para poder
+/* Accesos rÃ¡pidos (valores fijos reutilizables, ej. "Horario normal" o "10am - 7pm"):
+   mismo look que los chips fijos, pero con una "x" pequeÃ±a superpuesta para poder
    eliminarlos sin cerrar el modal. */
 .horario-chips-presets { margin-top: 2px; }
 .horario-chip-preset-wrap {
@@ -2667,12 +2667,12 @@ body.dark-mode .horario-chip-preset-del:hover { background: rgba(255,69,58,0.3);
  
 .horario-vacio-msg { color: rgba(0,0,0,0.35); }
 
-/* ═══════════════════════════════════════════════════════ */
-/* CONSEJOS/AYUDA OPCIONALES — bloque <details> retráctil    */
-/* En vez de mostrar siempre los párrafos de explicación,    */
-/* quedan colapsados detrás de un resumen con flecha; el     */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* CONSEJOS/AYUDA OPCIONALES â€” bloque <details> retrÃ¡ctil    */
+/* En vez de mostrar siempre los pÃ¡rrafos de explicaciÃ³n,    */
+/* quedan colapsados detrÃ¡s de un resumen con flecha; el     */
 /* usuario los abre solo si los necesita.                    */
-/* ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .tip-toggle {
     margin-bottom: 16px;
 }
@@ -2689,7 +2689,7 @@ body.dark-mode .horario-chip-preset-del:hover { background: rgba(255,69,58,0.3);
 }
 .tip-toggle summary::-webkit-details-marker { display: none; }
 .tip-toggle summary::before {
-    content: "›";
+    content: "â€º";
     display: inline-block;
     font-size: 15px;
     font-weight: 700;
@@ -2735,14 +2735,14 @@ body.dark-mode .horario-captura-area:not(.modo-captura) .horario-separador-label
     color: rgba(255,255,255,0.4);
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   MODO OSCURO — pestaña Horario
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   MODO OSCURO â€” pestaÃ±a Horario
    La grilla se adapta visualmente al modo oscuro para verse bien en
    pantalla, PERO al generar la imagen para compartir (se agrega la
    clase .modo-captura justo durante la captura con html2canvas) se
-   fuerza de vuelta a los colores claros originales, así la imagen
+   fuerza de vuelta a los colores claros originales, asÃ­ la imagen
    compartida siempre se ve igual sin importar el tema de quien la genera.
-   ═══════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 body.dark-mode .horario-captura-area:not(.modo-captura) {
     background: #1C1C1E;
 }
@@ -2801,10 +2801,10 @@ body.dark-mode .horario-btn-secundario { background: #48484A; }
 body.dark-mode .horario-btn-secundario:hover { background: #58585A; }
  
 /* Responsive: en celular, la grilla se compacta para necesitar menos scroll
-   horizontal. El ancho de 640px y los tamaños originales se reservan solo
+   horizontal. El ancho de 640px y los tamaÃ±os originales se reservan solo
    para el momento de generar la imagen a compartir (clase .modo-captura),
-   así la imagen exportada se ve siempre igual sin importar el tamaño de
-   pantalla desde donde se generó. */
+   asÃ­ la imagen exportada se ve siempre igual sin importar el tamaÃ±o de
+   pantalla desde donde se generÃ³. */
 @media (max-width: 640px) {
     .horario-acciones { flex-direction: column; }
     .horario-btn-accion { width: 100%; }
@@ -2823,7 +2823,7 @@ body.dark-mode .horario-btn-secundario:hover { background: #58585A; }
     .horario-captura-area:not(.modo-captura) .horario-pill { font-size: 9.5px; padding: 5px 3px; }
 
     /* Sombra sutil en el borde derecho del contenedor con scroll, como pista
-       visual de que hay más días hacia la derecha */
+       visual de que hay mÃ¡s dÃ­as hacia la derecha */
     .horario-scroll-wrap { position: relative; }
     .horario-scroll-wrap::after {
         content: "";
@@ -2836,4 +2836,63 @@ body.dark-mode .horario-btn-secundario:hover { background: #58585A; }
     body.dark-mode .horario-scroll-wrap::after {
         background: linear-gradient(to right, transparent, rgba(28,28,30,0.92));
     }
+}
+
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* METAS POR DISPOSITIVO â€” anillo con Ã­cono, unidades y monto */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+.ra-dev-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+.ra-dev-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 14px 6px 10px;
+    background: rgba(0,0,0,0.03);
+    border-radius: 10px;
+    min-width: 0;
+}
+.ra-dev-ring {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.ra-dev-svg { position: absolute; inset: 0; }
+.ra-dev-track { stroke: rgba(0,0,0,0.08); }
+.ra-dev-icon { position: relative; display: flex; align-items: center; justify-content: center; }
+.ra-dev-icon .ra-muted { display: flex; color: #6E6E73; }
+.ra-dev-icon svg { width: 26px; height: 26px; margin: 0 !important; vertical-align: 0 !important; }
+.ra-dev-name { font-size: 12px; font-weight: 600; color: #1D1D1F; margin-top: 8px; }
+.ra-dev-units { font-size: 18px; font-weight: 700; line-height: 1.3; color: #1D1D1F; }
+.ra-dev-units .ra-muted { font-size: 14px; font-weight: 500; }
+.ra-dev-units-label { font-size: 11px; color: #86868B; line-height: 1.3; }
+.ra-dev-monto {
+    width: 100%;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(0,0,0,0.07);
+    font-size: 12px;
+    color: #1D1D1F;
+}
+.ra-dev-monto .ra-muted { font-weight: 400; }
+
+body.dark-mode .ra-dev-tile { background: rgba(255,255,255,0.05); }
+body.dark-mode .ra-dev-track { stroke: rgba(255,255,255,0.12); }
+body.dark-mode .ra-dev-icon .ra-muted { color: #AEAEB2; }
+body.dark-mode .ra-dev-name,
+body.dark-mode .ra-dev-units,
+body.dark-mode .ra-dev-monto { color: #F2F2F7; }
+body.dark-mode .ra-dev-units-label { color: #8E8E93; }
+body.dark-mode .ra-dev-monto { border-top-color: rgba(255,255,255,0.1); }
+
+@media (max-width: 640px) {
+    .ra-dev-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ra-stat-value { font-size: 19px; }
 }
