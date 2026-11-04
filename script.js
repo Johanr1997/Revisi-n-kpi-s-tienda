@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (chk) chk.checked = iva13Activo;
 });
 
-const METAS_SOS_DEFAULT = { conversion: 0, accesorizacion: 0, ticket: 0, qr: 0 };
+const METAS_SOS_DEFAULT = { conversion: 0, accesorizacion: 0, ticket: 0, qr: 0, tradeIn: 0 };
 // METAS_SOS se declara más abajo junto con METAS_TIENDA y appData, como parte del mes
 // actualmente seleccionado dentro de datosPorMes (ver "MODELO DE DATOS POR MES").
 
@@ -46,13 +46,16 @@ function guardarMetasSOS() {
     const acc   = parseFloat(document.getElementById("cfgMetaAccesorizacion").value);
     const tick  = parseFloat(document.getElementById("cfgMetaTicket").value);
     const qr    = parseFloat(document.getElementById("cfgMetaQR").value);
+    // La meta de Trade-In es opcional: si el campo está vacío se guarda como 0 (sin meta).
+    const elTradeIn = document.getElementById("cfgMetaTradeIn");
+    const tradeIn = elTradeIn ? (parseFloat(elTradeIn.value) || 0) : (METAS_SOS.tradeIn || 0);
 
-    if (isNaN(conv) || isNaN(acc) || isNaN(tick) || isNaN(qr) || conv <= 0 || acc <= 0 || tick <= 0 || qr < 0) {
-        mostrarAlerta("Por favor ingresa valores válidos para las metas (la meta de QR puede ser 0).", "warning");
+    if (isNaN(conv) || isNaN(acc) || isNaN(tick) || isNaN(qr) || conv <= 0 || acc <= 0 || tick <= 0 || qr < 0 || tradeIn < 0) {
+        mostrarAlerta("Por favor ingresa valores válidos para las metas (las metas de QR y Trade-In pueden ser 0).", "warning");
         return;
     }
 
-    METAS_SOS = { conversion: conv, accesorizacion: acc, ticket: tick, qr: qr };
+    METAS_SOS = { conversion: conv, accesorizacion: acc, ticket: tick, qr: qr, tradeIn: tradeIn };
     datosPorMes[mesSeleccionado].metasSOS = METAS_SOS;
     guardarDatosPorMes();
 
@@ -61,6 +64,8 @@ function guardarMetasSOS() {
     document.getElementById("metaVisualAcc").textContent   = `${acc.toFixed(1)}%`;
     document.getElementById("metaVisualTick").textContent  = `$${tick.toLocaleString()}`;
     document.getElementById("metaVisualQR").textContent    = `${qr}`;
+    const badgeTI = document.getElementById("metaVisualTradeIn");
+    if (badgeTI) badgeTI.textContent = `${tradeIn}`;
 
     sincronizarYRenderizar();
     mostrarAlerta("Metas del Plan SOS actualizadas correctamente.", "success");
@@ -377,6 +382,7 @@ function normalizarMesData(datos) {
 
     if (!datos.metasSOS) datos.metasSOS = { ...METAS_SOS_DEFAULT };
     if (datos.metasSOS.qr === undefined) datos.metasSOS.qr = 0;
+    if (datos.metasSOS.tradeIn === undefined) datos.metasSOS.tradeIn = 0;
 
     if (!datos.metasTienda) datos.metasTienda = clonarMetasTiendaDefault();
     const baseTienda = clonarMetasTiendaDefault();
@@ -672,11 +678,15 @@ function cargarMetasSOSEnInputs() {
     document.getElementById("cfgMetaAccesorizacion").value = METAS_SOS.accesorizacion;
     document.getElementById("cfgMetaTicket").value         = METAS_SOS.ticket;
     document.getElementById("cfgMetaQR").value             = METAS_SOS.qr;
+    const cfgTI = document.getElementById("cfgMetaTradeIn");
+    if (cfgTI) cfgTI.value = METAS_SOS.tradeIn || 0;
 
     document.getElementById("metaVisualConv").textContent  = `${METAS_SOS.conversion.toFixed(1)}%`;
     document.getElementById("metaVisualAcc").textContent   = `${METAS_SOS.accesorizacion.toFixed(1)}%`;
     document.getElementById("metaVisualTick").textContent  = `$${METAS_SOS.ticket.toLocaleString()}`;
     document.getElementById("metaVisualQR").textContent    = `${METAS_SOS.qr}`;
+    const badgeTI = document.getElementById("metaVisualTradeIn");
+    if (badgeTI) badgeTI.textContent = `${METAS_SOS.tradeIn || 0}`;
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -1479,6 +1489,11 @@ const CATEGORIAS_DISPOSITIVO = [
 // El anillo se llena según UNIDADES (la métrica prioritaria). Las categorías sin meta
 // de unidades (Audio, accesorios) —o sin meta de unidades configurada— usan el % de MONTO.
 // El color sigue el mismo semáforo del resto de la app (verde >=100, amarillo >=85, rojo).
+// Valor grande + "/ meta" en gris (solo si la meta está configurada) para QR y Trade-In.
+function statConMeta(valor, meta) {
+    return `${valor}${meta > 0 ? `<span class="ra-stat-meta"> / ${meta}</span>` : ""}`;
+}
+
 function renderAnilloDispositivo(pct, iconoHtml, size = 68, stroke = 6) {
     const r = (size - stroke) / 2;
     const c = 2 * Math.PI * r;
@@ -1630,8 +1645,8 @@ function renderTodo() {
                 <div class="ra-stat-strip">
                     <div class="ra-stat"><span class="ra-stat-label">Venta</span><span class="ra-stat-value">$${conIVA(asor.ventaSemanal).toLocaleString()}</span></div>
                     <div class="ra-stat"><span class="ra-stat-label">Meta</span><span class="ra-stat-value">$${Math.round(conIVA(metaAsor)).toLocaleString()}</span></div>
-                    <div class="ra-stat"><span class="ra-stat-label">QR Colocados</span><span class="ra-stat-value">${asor.qr}</span></div>
-                    <div class="ra-stat"><span class="ra-stat-label">Trade-In</span><span class="ra-stat-value">${asor.tradeIn}</span></div>
+                    <div class="ra-stat"><span class="ra-stat-label">QR Colocados</span><span class="ra-stat-value">${statConMeta(asor.qr, Math.ceil((porcentajeAsor / 100) * (METAS_SOS.qr || 0)))}</span></div>
+                    <div class="ra-stat"><span class="ra-stat-label">Trade-In</span><span class="ra-stat-value">${statConMeta(asor.tradeIn, Math.ceil((porcentajeAsor / 100) * (METAS_SOS.tradeIn || 0)))}</span></div>
                 </div>
 
                 <div class="ra-tabs" role="tablist">
@@ -1736,8 +1751,8 @@ function renderTodo() {
                 <div class="ra-stat-strip">
                     <div class="ra-stat"><span class="ra-stat-label">Venta</span><span class="ra-stat-value">$${(conIVA(acumuladoVentaSemanalSolo) + acumuladoGarexMontoSolo).toLocaleString()}</span></div>
                     <div class="ra-stat"><span class="ra-stat-label">Meta</span><span class="ra-stat-value">$${conIVA(metaTotalTienda).toLocaleString()}</span></div>
-                    <div class="ra-stat"><span class="ra-stat-label">QR Colocados</span><span class="ra-stat-value">${totalQR}</span></div>
-                    <div class="ra-stat"><span class="ra-stat-label">Trade-In</span><span class="ra-stat-value">${totalTradeIn}</span></div>
+                    <div class="ra-stat"><span class="ra-stat-label">QR Colocados</span><span class="ra-stat-value">${statConMeta(totalQR, METAS_SOS.qr || 0)}</span></div>
+                    <div class="ra-stat"><span class="ra-stat-label">Trade-In</span><span class="ra-stat-value">${statConMeta(totalTradeIn, METAS_SOS.tradeIn || 0)}</span></div>
                 </div>
 
                 <div class="ra-section" style="margin-top:0; padding-top:0; border-top:none;">
