@@ -1451,8 +1451,8 @@ const ICONOS_DISPOSITIVO = {
     ipad: iconoDispositivo('<rect x="3" y="5" width="18" height="14" rx="2.2"/><circle cx="12" cy="16.3" r="0.6" fill="currentColor" stroke="none"/>'),
     iphone: iconoDispositivo('<rect x="6" y="2.5" width="12" height="19" rx="3"/><rect x="8" y="4.5" width="5.5" height="5.5" rx="1.3"/><circle cx="9.6" cy="6.1" r="0.55" fill="currentColor" stroke="none"/><circle cx="11.9" cy="6.1" r="0.55" fill="currentColor" stroke="none"/><circle cx="9.6" cy="8.4" r="0.55" fill="currentColor" stroke="none"/>'),
     watch: iconoDispositivo('<path d="M9 5.5V3.2a1 1 0 011-1h4a1 1 0 011 1V5.5"/><path d="M9 18.5v2.3a1 1 0 001 1h4a1 1 0 001-1v-2.3"/><rect x="6.5" y="5.5" width="11" height="13" rx="3"/><path d="M17.5 10v3"/>'),
-    airpods: iconoDispositivo('<path d="M8.5 5.5a2.5 2.5 0 012.5 2.5v7.5a1.8 1.8 0 01-3.6 0v-4"/><path d="M15.5 5.5A2.5 2.5 0 0013 8v7.5a1.8 1.8 0 003.6 0v-4"/>'),
-    audio: iconoDispositivo('<path d="M4 15v-3a8 8 0 0116 0v3"/><rect x="2.5" y="14" width="4" height="6" rx="1.8"/><rect x="17.5" y="14" width="4" height="6" rx="1.8"/>'),
+    airpods: iconoDispositivo('<path d="M11.2 8V18.8a1.2 1.2 0 01-2.4 0V11.8A4.2 4.2 0 1 1 11.2 8z"/><path d="M12.8 8V18.8a1.2 1.2 0 002.4 0V11.8A4.2 4.2 0 1 0 12.8 8z"/>'),
+    audio: iconoDispositivo('<path d="M9 7.5V6a1 1 0 011-1h4a1 1 0 011 1v1.5"/><rect x="2.5" y="7.5" width="19" height="11" rx="3.5"/><circle cx="8" cy="13" r="2.6"/><circle cx="16" cy="13" r="2.6"/>'),
     acc_apple: iconoDispositivo('<path d="M9 2.5v5"/><path d="M15 2.5v5"/><path d="M6.5 7.5h11v3.5a5.5 5.5 0 01-11 0V7.5z"/><path d="M12 16.5v5"/>'),
     acc_terceros: iconoDispositivo('<path d="M9 2.5v5"/><path d="M15 2.5v5"/><path d="M6.5 7.5h11v3.5a5.5 5.5 0 01-11 0V7.5z"/><path d="M12 16.5v5"/>')
 };
