@@ -1435,6 +1435,47 @@ const CATEGORIAS_DISPOSITIVO = [
     { label: "Acc. Terceros",    key: "acc_terceros", tieneUnidades: false }
 ];
 
+// Tarjeta por dispositivo en "Metas por Categoría": un anillo con el ícono del
+// dispositivo adentro, las unidades "lleva / meta" debajo y el monto en plata al pie.
+// El anillo se llena según UNIDADES (la métrica prioritaria). Las categorías sin meta
+// de unidades (Audio, accesorios) —o sin meta de unidades configurada— usan el % de MONTO.
+// El color sigue el mismo semáforo del resto de la app (verde >=100, amarillo >=85, rojo).
+function renderAnilloDispositivo(pct, iconoHtml, size = 68, stroke = 6) {
+    const r = (size - stroke) / 2;
+    const c = 2 * Math.PI * r;
+    const n = Math.max(0, Math.min(parseFloat(pct) || 0, 100));
+    const offset = c - (n / 100) * c;
+    const center = size / 2;
+    return `<div class="ra-dev-ring" style="width:${size}px; height:${size}px;">
+        <svg class="ra-dev-svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" aria-hidden="true">
+            <circle class="ra-dev-track" cx="${center}" cy="${center}" r="${r}" fill="none" stroke-width="${stroke}"/>
+            <circle cx="${center}" cy="${center}" r="${r}" fill="none" stroke="${colorSemaforoPct(pct)}" stroke-width="${stroke}"
+                stroke-linecap="round" stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"
+                transform="rotate(-90 ${center} ${center})"/>
+        </svg>
+        <span class="ra-dev-icon">${iconoHtml}</span>
+    </div>`;
+}
+
+function renderTileDispositivo(cat, llevaUnid, metaUnid, llevaMonto, metaMonto, metaMontoMostrada) {
+    const pctMonto = metaMonto > 0 ? (llevaMonto / metaMonto) * 100 : 0;
+    const usaUnidades = cat.tieneUnidades && metaUnid > 0;
+    const pct = usaUnidades ? (llevaUnid / metaUnid) * 100 : pctMonto;
+
+    const unidadesHtml = cat.tieneUnidades
+        ? `<div class="ra-dev-units"><strong>${llevaUnid}</strong><span class="ra-muted"> / ${metaUnid}</span></div>
+           <div class="ra-dev-units-label">unidades</div>`
+        : `<div class="ra-dev-units-label">solo monto</div>`;
+
+    return `
+        <div class="ra-dev-tile" title="${cat.label}: ${Math.round(pct)}%">
+            ${renderAnilloDispositivo(pct, ICONOS_DISPOSITIVO[cat.key] || "")}
+            <div class="ra-dev-name">${cat.label}</div>
+            ${unidadesHtml}
+            <div class="ra-dev-monto"><strong>$${Math.round(conIVA(llevaMonto)).toLocaleString()}</strong><span class="ra-muted"> / $${Math.round(metaMontoMostrada).toLocaleString()}</span></div>
+        </div>`;
+}
+
 // RENDERS MÚLTIPLES
 function renderTodo() {
     renderSelectAsesor();
@@ -1528,25 +1569,8 @@ function renderTodo() {
         // app; unidades se muestra como dato de apoyo junto a su ícono azul.
         const filasDispositivos = CATEGORIAS_DISPOSITIVO.map(c => {
             const metaCat = (porcentajeAsor / 100) * (METAS_TIENDA.ventas[c.key] || 0);
-            const llevaCat = m[c.key] || 0;
-            const pctCat = metaCat > 0 ? Math.min((llevaCat / metaCat) * 100, 100) : 0;
-
-            let unidadesHtml = "";
-            if (c.tieneUnidades) {
-                const metaUnidCat = Math.ceil((porcentajeAsor / 100) * (METAS_TIENDA.unidades[c.key] || 0));
-                const llevaUnidCat = u[c.key] || 0;
-                unidadesHtml = `<span class="ra-meta-cat-unidades">${ICONO_UNIDADES}<strong class="ra-meta-cat-lleva">${llevaUnidCat}</strong><span class="ra-muted"> / ${metaUnidCat} uds</span></span>`;
-            }
-
-            return `
-                <div class="ra-meta-cat-row">
-                    <div class="ra-meta-cat-name">${ICONOS_DISPOSITIVO[c.key] || ""}${c.label}</div>
-                    <div class="ra-meta-cat-values">
-                        ${unidadesHtml}
-                        <span class="ra-meta-cat-monto">${ICONO_MONTO}<strong class="ra-meta-cat-lleva">$${Math.round(conIVA(llevaCat)).toLocaleString()}</strong><span class="ra-muted"> / $${Math.round(metaCat).toLocaleString()}</span></span>
-                    </div>
-                    <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno ${claseSemaforoPct(pctCat)}" style="width:${pctCat}%;"></div></div>
-                </div>`;
+            const metaUnidCat = c.tieneUnidades ? Math.ceil((porcentajeAsor / 100) * (METAS_TIENDA.unidades[c.key] || 0)) : 0;
+            return renderTileDispositivo(c, u[c.key] || 0, metaUnidCat, m[c.key] || 0, metaCat, metaCat);
         }).join("");
 
         htmlResumenAsesores += `
@@ -1579,7 +1603,7 @@ function renderTodo() {
                 <div class="ra-tab-panel active" id="raTab-${key}-metas">
                     <div class="ra-section" style="margin-top:0; padding-top:0; border-top:none;">
                         <p class="ra-section-title">Metas por Dispositivo — <span class="ra-accent-blue">${porcentajeAsor}% de la meta de tienda</span></p>
-                        <div class="ra-meta-cat-grid">
+                        <div class="ra-dev-grid">
                             ${filasDispositivos}
                         </div>
                     </div>
@@ -1641,25 +1665,8 @@ function renderTodo() {
     if (elResumenTienda) {
         const filasDispositivosTienda = CATEGORIAS_DISPOSITIVO.map(c => {
             const metaCat = METAS_TIENDA.ventas[c.key] || 0;
-            const llevaCat = montosTienda[c.key] || 0;
-            const pctCat = metaCat > 0 ? Math.min((llevaCat / metaCat) * 100, 100) : 0;
-
-            let unidadesHtml = "";
-            if (c.tieneUnidades) {
-                const metaUnidCat = METAS_TIENDA.unidades[c.key] || 0;
-                const llevaUnidCat = unidadesPorDispositivo[c.key] || 0;
-                unidadesHtml = `<span class="ra-meta-cat-unidades">${ICONO_UNIDADES}<strong class="ra-meta-cat-lleva">${llevaUnidCat}</strong><span class="ra-muted"> / ${metaUnidCat} uds</span></span>`;
-            }
-
-            return `
-                <div class="ra-meta-cat-row">
-                    <div class="ra-meta-cat-name">${ICONOS_DISPOSITIVO[c.key] || ""}${c.label}</div>
-                    <div class="ra-meta-cat-values">
-                        ${unidadesHtml}
-                        <span class="ra-meta-cat-monto">${ICONO_MONTO}<strong class="ra-meta-cat-lleva">$${Math.round(conIVA(llevaCat)).toLocaleString()}</strong><span class="ra-muted"> / $${Math.round(conIVA(metaCat)).toLocaleString()}</span></span>
-                    </div>
-                    <div class="barra-progreso ra-mini-bar"><div class="progreso-relleno ${claseSemaforoPct(pctCat)}" style="width:${pctCat}%;"></div></div>
-                </div>`;
+            const metaUnidCat = c.tieneUnidades ? (METAS_TIENDA.unidades[c.key] || 0) : 0;
+            return renderTileDispositivo(c, unidadesPorDispositivo[c.key] || 0, metaUnidCat, montosTienda[c.key] || 0, metaCat, conIVA(metaCat));
         }).join("");
 
         // Accesorización de "Toda la Tienda": la misma que se ve en Plan SOS (respeta
@@ -1696,7 +1703,7 @@ function renderTodo() {
 
                 <div class="ra-section" style="margin-top:0; padding-top:0; border-top:none;">
                     <p class="ra-section-title">Metas por Dispositivo — <span class="ra-accent-blue">Meta de tienda</span></p>
-                    <div class="ra-meta-cat-grid">
+                    <div class="ra-dev-grid">
                         ${filasDispositivosTienda}
                     </div>
                 </div>
