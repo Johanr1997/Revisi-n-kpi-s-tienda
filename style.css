@@ -1,3 +1,4 @@
+
 /* =================================================== */
 /* COMPLEMENTOS PARA EL DISEÃ‘O DEL SISTEMA             */
 /* =================================================== */
@@ -2385,7 +2386,7 @@ body.dark-mode .login-sub, body.dark-mode .login-foot { color: rgba(255,255,255,
 /* Grilla: 1 columna de nombre + 7 columnas de dÃ­as */
 .horario-grid {
     display: grid;
-    grid-template-columns: 150px repeat(7, 1fr);
+    grid-template-columns: 180px repeat(7, 1fr);
     gap: 6px;
 }
 .horario-grid-header,
@@ -2478,9 +2479,12 @@ body.dark-mode .horario-fila > .horario-celda:nth-child(8):hover {
     transition: background 0.15s, box-shadow 0.15s, opacity 0.15s;
 }
 .horario-nombre-texto {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    /* Nombre completo: si no cabe en una línea, baja a la siguiente (sin "...") */
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
     flex: 1;
     min-width: 0;
 }
@@ -2582,6 +2586,7 @@ body.dark-mode .horario-fila > .horario-celda:nth-child(8):hover {
  
 /* Modo captura: oculta el "+" de celdas vacÃ­as y quita el hover, para
    que la imagen generada se vea limpia y sin elementos de ediciÃ³n */
+.modo-captura .horario-nombre-texto { overflow: visible; text-overflow: clip; white-space: normal; overflow-wrap: anywhere; }
 .modo-captura .horario-celda-vacia { visibility: hidden; }
 .modo-captura .horario-celda { cursor: default; }
 .modo-captura .horario-celda:hover { background: #F5F5F7; border-color: #ECECEE; }
@@ -2809,9 +2814,9 @@ body.dark-mode .horario-btn-secundario:hover { background: #58585A; }
     .horario-acciones { flex-direction: column; }
     .horario-btn-accion { width: 100%; }
 
-    .horario-captura-area:not(.modo-captura) { min-width: 560px; padding: 14px; }
+    .horario-captura-area:not(.modo-captura) { min-width: 590px; padding: 14px; }
     .horario-captura-area:not(.modo-captura) .horario-grid {
-        grid-template-columns: 92px repeat(7, minmax(56px, 1fr));
+        grid-template-columns: 116px repeat(7, minmax(56px, 1fr));
         gap: 4px;
     }
     .horario-captura-area:not(.modo-captura) .horario-head-cell { font-size: 10px; padding: 4px 2px 8px; }
