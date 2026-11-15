@@ -1,2913 +1,3657 @@
-/* =================================================== */
-/* COMPLEMENTOS PARA EL DISEÃ‘O DEL SISTEMA             */
-/* =================================================== */
-:root {
-    /* Controla la intensidad (opacidad) de las manchas de color difuminadas del fondo.
-       Editable desde la pestaÃ±a ConfiguraciÃ³n. 0 = fondo plano, 1 = mÃ¡xima intensidad. */
-    --orb-opacity: 0.6;
 
-    /* Color individual de cada mancha de fondo (orb), por pestaÃ±a. Editable desde ConfiguraciÃ³n. */
-    --orb-sos-green: rgba(134,239,172,0.7);
-    --orb-sos-rose: rgba(253,164,175,0.65);
-    --orb-asesores-blue: rgba(147,197,253,0.7);
-    --orb-asesores-yellow: rgba(253,224,138,0.65);
-    --orb-ventas-purple: rgba(196,181,253,0.7);
-    --orb-ventas-teal: rgba(153,246,228,0.65);
-    --orb-garex-green: rgba(134,239,172,0.7);
-    --orb-garex-blue: rgba(147,197,253,0.6);
-    --orb-insurama-indigo: rgba(165,180,252,0.7);
-    --orb-insurama-pink: rgba(253,164,175,0.6);
-    --orb-bitacora-amber: rgba(252,211,77,0.6);
-    --orb-bitacora-blue: rgba(147,197,253,0.6);
-    --orb-calendario-gray: rgba(199,210,254,0.55);
-    --orb-calendario-red: rgba(254,202,202,0.5);
-    --orb-metas-orange: rgba(253,186,116,0.6);
-    --orb-metas-purple: rgba(196,181,253,0.6);
-
-    /* Escala compartida de espaciado y radio para que las tarjetas de vidrio
-       se sientan iguales en todas las pestaÃ±as, en vez de que cada una use
-       su propio padding/margen/radio. */
-    --glass-radius: 22px;          /* radio Ãºnico para toda tarjeta de vidrio (.v-glass) */
-    --card-pad-hero: 28px 32px;    /* hÃ©roes (Ventas, Asesores) */
-    --card-pad: 24px 26px;         /* tarjetas de contenido normales */
-    --card-gap: 22px;              /* separaciÃ³n vertical entre tarjetas apiladas */
-    --inset-radius: 10px;          /* filas/paneles planos anidados dentro de una tarjeta */
-    --inset-pad: 12px 14px;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-}
-
-body {
-    background: #F5F5F7;
-    color: #1D1D1F;
-    min-height: 100vh;
-    padding-top: 90px;
-}
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   NAVBAR â€” efecto "Liquid Glass" (cristal lÃ­quido refractante)
-   La navbar completa actÃºa como la burbuja: fondo casi transparente,
-   blur bajo + distorsiÃ³n SVG (refracciÃ³n real de lo que hay detrÃ¡s)
-   y un borde con leve aberraciÃ³n cromÃ¡tica iridiscente.
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-.navbar {
-    width: calc(100% - 60px);
-    max-width: 1600px;
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(3px) saturate(180%) url(#liquidGlassDistortion);
-    -webkit-backdrop-filter: blur(10px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.65);
-    padding: 0 28px;
-    position: fixed;
-    top: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    height: 56px;
-    z-index: 1000;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-radius: 999px;
-    overflow: hidden;
-    box-shadow:
-        0 8px 30px rgba(0,0,0,0.10),
-        0 1px 2px rgba(0,0,0,0.06),
-        inset 0 1px 1px rgba(255,255,255,0.9),
-        inset 0 -1px 6px rgba(255,255,255,0.35);
-}
-
-/* Reflejo especular sutil, igual que las tarjetas .v-glass */
-.navbar::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 12%; right: 12%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9) 40%, rgba(255,255,255,0.9) 60%, transparent);
-    pointer-events: none;
-    border-radius: inherit;
-    z-index: 3;
-}
-
-/* Borde con leve aberraciÃ³n cromÃ¡tica, como el reflejo iridiscente del video de referencia */
-.navbar::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: conic-gradient(from 180deg,
-        rgba(255,255,255,0.9), rgba(173,216,255,0.55),
-        rgba(255,255,255,0.9), rgba(216,180,255,0.5),
-        rgba(255,255,255,0.9));
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    mask-composite: exclude;
-    pointer-events: none;
-    opacity: 0.55;
-    z-index: 3;
-}
-
-.navbar h2 { position: relative; z-index: 2; font-size: 16px; font-weight: 600; flex-shrink: 0; white-space: nowrap; }
-.nombre-tienda-nav {
-    font-weight: 500;
-    color: #0071E3;
-    margin-left: 2px;
-}
-body.dark-mode .nombre-tienda-nav { color: #4DA3FF; }
-/* El contenedor de pestaÃ±as + botones debe poder encogerse por debajo de su ancho
-   de contenido (min-width:0) para que sea la lista de pestaÃ±as la que haga scroll
-   horizontal, en vez de desbordar la navbar (que la recorta con overflow:hidden). */
-.navbar > div { min-width: 0; }
-.navbar ul {
-    display: flex;
-    list-style: none;
-    gap: 22px;
-    align-items: center;
-    position: relative;
-    z-index: 2;
-    min-width: 0;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-}
-.navbar ul::-webkit-scrollbar { display: none; }
-.navbar ul li { font-size: 13px; font-weight: 500; color: #515154; cursor: pointer; padding: 7px 14px; border-radius: 999px; transition: background 0.2s, color 0.2s; white-space: nowrap; flex-shrink: 0; }
-.navbar ul li:hover { background: rgba(255,255,255,0.25); }
-.navbar ul li.active { color: #1D1D1F; font-weight: 600; background: rgba(255,255,255,0.55); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-
-/* Tab de ConfiguraciÃ³n: solo Ã­cono, redondo */
-.tab-icon-only {
-    font-size: 16px;
-    padding: 7px 12px !important;
-    width: 34px;
-    height: 34px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-}
-
-.contenido { max-width: 1560px; margin: 0 auto; padding: 20px 48px 60px 48px; }
-.header { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 32px; }
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-/* SELECTOR DE MES â€” cambia entre meses independientes      */
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-.mes-selector {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px 8px 14px;
-    border-radius: 999px;
-}
-.mes-selector-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 128px;
-}
-.mes-selector-eyebrow {
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: rgba(0,0,0,0.32);
-}
-.mes-selector-label {
-    font-size: 14px;
-    font-weight: 700;
-    color: #1D1D1F;
-    text-transform: capitalize;
-}
-.mes-selector-badge {
-    font-size: 10px;
-    font-weight: 700;
-    color: #248A3D;
-    background: rgba(52,199,89,0.14);
-    padding: 4px 10px;
-    border-radius: 999px;
-    white-space: nowrap;
-}
-.mes-selector-hoy {
-    width: auto;
-    padding: 6px 14px;
-    white-space: nowrap;
-}
-body.dark-mode .mes-selector-eyebrow { color: rgba(255,255,255,0.55) !important; }
-body.dark-mode .mes-selector-label { color: #F2F2F7 !important; }
-body.dark-mode .mes-selector-badge { color: #30D158; background: rgba(48,209,88,0.18); }
-
-@media (max-width: 640px) {
-    .mes-selector { width: 100%; justify-content: space-between; padding: 8px 8px 8px 12px; }
-    .mes-selector-info { min-width: 0; }
-}
-
-.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-.form-group label { font-size: 12px; font-weight: 600; color: #1D1D1F; }
-.form-group input, .form-group select, .form-group textarea { padding: 10px; font-size: 14px; border-radius: 8px; border: 1px solid #D2D2D7; outline: none; }
-.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #0071E3; box-shadow: 0 0 0 3px rgba(0,113,227,0.15); }
-.form-group input:disabled { opacity: 0.4; cursor: not-allowed; background: rgba(0,0,0,0.03); }
-.form-group textarea { min-height: 70px; }
-
-/* REJILLA AVANZADA FORMULARIO ASESORES */
-.grid-2-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    background: #F5F5F7;
-    padding: var(--inset-pad);
-    border-radius: var(--inset-radius);
-    margin-bottom: 15px;
-}
-.grid-2-col .form-group { margin-bottom: 0; }
-
-.btn-primary { background: #0071E3; color: white; border: none; padding: 12px; font-size: 14px; font-weight: 500; border-radius: 8px; cursor: pointer; width: 100%; }
-.btn-primary:hover { background: #0077ED; }
-.btn-icon-text { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-
-.verde { background-color: #EAF9EE; color: #248A3D; }
-.amarillo { background-color: #FFF7E6; color: #B26A00; }
-.rojo { background-color: #FDF2F2; color: #C53030; }
-
-.barra-progreso { width: 100%; height: 6px; background: #E5E5EA; border-radius: 3px; overflow: hidden; }
-.progreso-relleno { height: 100%; background: #34C759; width: 0%; transition: width 0.5s ease; }
-
-.seccion-dashboard { display: none; }
-.seccion-dashboard.active-seccion { display: block; }
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-/* PESTAÃ‘A VENTAS â€” LIQUID GLASS (FONDO CLARO)           */
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-
-/* Contenedor raÃ­z: orbes de color + superficie */
-#ventas-pantalla {
-    position: relative;
-    isolation: isolate;
-}
-
-/* Orbes difuminados que dan "algo que refractar" al vidrio */
-#ventas-pantalla::before,
-#ventas-pantalla::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: -1;
-}
-#ventas-pantalla::before {
-    width: 520px; height: 520px;
-    background: radial-gradient(circle, rgba(168,216,255,0.72) 0%, transparent 70%);
-    top: -120px; left: -100px;
-    filter: blur(40px);
-}
-#ventas-pantalla::after {
-    width: 420px; height: 420px;
-    background: radial-gradient(circle, rgba(196,181,253,0.65) 0%, transparent 70%);
-    top: 80px; right: -80px;
-    filter: blur(40px);
-}
-
-/* Orbes adicionales via pseudo en el hero */
-.v-orb {
-    position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: -1;
-    filter: blur(50px);
-    opacity: var(--orb-opacity);
-}
-.v-orb-green {
-    width: 380px; height: 380px;
-    background: radial-gradient(circle, var(--orb-sos-green) 0%, transparent 70%);
-    bottom: 60px; left: 60px;
-}
-.v-orb-rose {
-    width: 320px; height: 320px;
-    background: radial-gradient(circle, var(--orb-sos-rose) 0%, transparent 70%);
-    bottom: 40px; right: 80px;
-}
-
-/* Base de vidrio compartida */
-.v-glass {
-    background: rgba(255,255,255,0.55);
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border: 1px solid rgba(255,255,255,0.85);
-    border-radius: var(--glass-radius);
-    position: relative;
-    overflow: hidden;
-    box-shadow:
-        0 2px 20px rgba(0,0,0,0.06),
-        inset 0 1px 0 rgba(255,255,255,0.92);
-}
-
-/* Reflejo especular: borde superior brillante */
-.v-glass::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 10%; right: 10%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9) 40%, rgba(255,255,255,0.9) 60%, transparent);
-    pointer-events: none;
-}
-
-/* Gradiente interno de luz */
-.v-glass::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(145deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.05) 55%, transparent 100%);
-    pointer-events: none;
-}
-
-/* HERO */
-.v-hero {
-    padding: var(--card-pad-hero);
-    margin-bottom: var(--card-gap);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-.v-hero-left { flex: 1; min-width: 200px; }
-.v-eyebrow {
-    display: block;
-    font-size: 10px; font-weight: 700;
-    letter-spacing: 0.13em; text-transform: uppercase;
-    color: rgba(0,0,0,0.32);
-    margin-bottom: 8px;
-}
-.v-hero-number {
-    font-size: clamp(40px, 5.5vw, 60px);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    color: #1D1D1F;
-    line-height: 1;
-    margin-bottom: 6px;
-}
-.v-hero-sub { font-size: 12px; color: rgba(0,0,0,0.36); }
-
-/* TrÃ¡fico pill */
-.v-traf-pill {
-    display: flex; flex-direction: column; align-items: center; gap: 3px;
-    background: rgba(255,255,255,0.5);
-    border: 1px solid rgba(255,255,255,0.8);
-    border-radius: 16px;
-    padding: 12px 20px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
-}
-.v-traf-num { font-size: 24px; font-weight: 700; color: #1D1D1F; line-height: 1; }
-.v-traf-label {
-    font-size: 9px; font-weight: 600;
-    color: rgba(0,0,0,0.32);
-    text-transform: uppercase; letter-spacing: 0.09em;
-}
-
-/* Arco SVG */
-.v-meta-arc { position: relative; width: 100px; height: 100px; flex-shrink: 0; }
-.v-arc-svg { width: 100px; height: 100px; }
-.v-arc-label {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-}
-.v-arc-pct { font-size: 18px; font-weight: 700; color: #1D1D1F; line-height: 1; }
-.v-arc-sub { font-size: 9px; color: rgba(0,0,0,0.32); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
-
-/* TrÃ¡fico + arco juntos */
-.v-meta-ring-wrap { display: flex; align-items: center; gap: 16px; }
-
-/* SECTION LABEL */
-.v-section-label {
-    font-size: 10px; font-weight: 700;
-    letter-spacing: 0.13em; text-transform: uppercase;
-    color: rgba(0,0,0,0.28);
-    margin: 22px 0 10px;
-}
-
-/* SOS CARDS */
-.v-sos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 6px; }
-.v-sos-card {
-    padding: var(--card-pad);
-}
-
-/* SemÃ¡foro: punto de color con glow */
-.v-sos-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    margin-bottom: 12px;
-}
-.v-sos-dot.verde   { background: #34C759; box-shadow: 0 0 8px rgba(52,199,89,0.6); }
-.v-sos-dot.amarillo { background: #FF9500; box-shadow: 0 0 8px rgba(255,149,0,0.6); }
-.v-sos-dot.rojo    { background: #FF3B30; box-shadow: 0 0 8px rgba(255,59,48,0.6); }
-
-.v-sos-name {
-    font-size: 10px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.09em;
-    color: rgba(0,0,0,0.36);
-    margin-bottom: 6px;
-}
-.v-sos-val {
-    font-size: 28px; font-weight: 700;
-    letter-spacing: -0.02em;
-    color: #1D1D1F;
-    line-height: 1;
-    margin-bottom: 10px;
-}
-.v-sos-track {
-    width: 100%; height: 3px;
-    background: rgba(0,0,0,0.07);
-    border-radius: 2px; overflow: hidden;
-    margin-bottom: 8px;
-}
-.v-sos-fill {
-    height: 100%; border-radius: 2px;
-    width: 0%;
-    transition: width 0.6s cubic-bezier(.4,0,.2,1);
-    background: #34C759;
-}
-.v-sos-meta { font-size: 10px; color: rgba(0,0,0,0.28); }
-
-/* Comparativa mes a mes: badge "â–²/â–¼ X% vs mes anterior" junto a un KPI */
-.v-cmp-wrap { margin-top: 6px; min-height: 18px; }
-.v-cmp-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    font-size: 10.5px;
-    font-weight: 700;
-    padding: 3px 9px;
-    border-radius: 999px;
-    white-space: nowrap;
-}
-.v-cmp-badge.v-cmp-up      { color: #248A3D; background: rgba(52,199,89,0.14); }
-.v-cmp-badge.v-cmp-down    { color: #C92F25; background: rgba(255,59,48,0.12); }
-.v-cmp-badge.v-cmp-neutral { color: #6E6E73; background: rgba(0,0,0,0.06); }
-body.dark-mode .v-cmp-badge.v-cmp-up      { color: #30D158 !important; background: rgba(48,209,88,0.18) !important; }
-body.dark-mode .v-cmp-badge.v-cmp-down    { color: #FF6961 !important; background: rgba(255,69,58,0.18) !important; }
-body.dark-mode .v-cmp-badge.v-cmp-neutral { color: rgba(255,255,255,0.65) !important; background: rgba(255,255,255,0.08) !important; }
-
-/* Colores de barra segÃºn estado */
-.v-sos-card.verde   .v-sos-fill { background: #34C759; }
-.v-sos-card.amarillo .v-sos-fill { background: #FF9500; }
-.v-sos-card.rojo    .v-sos-fill { background: #FF3B30; }
-
-/* PILLS */
-.v-pill-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 6px; }
-.v-pill {
-    padding: 20px 12px;
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-}
-.v-pill-num { font-size: 26px; font-weight: 700; color: #1D1D1F; letter-spacing: -0.02em; line-height: 1; }
-.v-pill-name {
-    font-size: 10px; color: rgba(0,0,0,0.32);
-    font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.07em; text-align: center;
-}
-
-/* Mini desglose de attach por dispositivo dentro del pill */
-.v-attach-mini {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 4px 10px;
-    width: 100%;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(0,0,0,0.06);
-}
-.v-attach-mini span {
-    display: flex;
-    justify-content: space-between;
-    font-size: 9px;
-    color: rgba(0,0,0,0.4);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-}
-.v-attach-mini span strong {
-    font-size: 10px;
-    color: #1D1D1F;
-    font-weight: 700;
-    margin-left: 4px;
-}
-
-/* NOTAS */
-.v-notas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 22px; }
-.v-nota-card {
-    padding: var(--card-pad);
-}
-.v-nota-tag {
-    font-size: 10px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.1em;
-    margin-bottom: 10px;
-}
-.v-nota-blue .v-nota-tag  { color: #0071E3; }
-.v-nota-orange .v-nota-tag { color: #C05000; }
-.v-nota-card p { font-size: 13px; color: #1D1D1F; line-height: 1.65; }
-
-@media (max-width: 780px) {
-    .v-sos-grid   { grid-template-columns: 1fr; }
-    .v-pill-row   { grid-template-columns: repeat(2, 1fr); }
-    .v-notas-grid { grid-template-columns: 1fr; }
-    .v-hero       { padding: 22px 20px; }
-}
-
-/* Barra de progreso de meta */
-.v-progreso-meta-box {
-    padding: 20px 26px;
-    margin-bottom: var(--card-gap);
-}
-.v-progreso-meta-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 10px;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: rgba(0,0,0,0.4);
-}
-.v-progreso-meta-header span:last-child {
-    font-size: 13px;
-    font-weight: 600;
-    color: #1D1D1F;
-    text-transform: none;
-    letter-spacing: 0;
-}
-.v-progreso-meta-track {
-    width: 100%;
-    height: 14px;
-    background: rgba(0,0,0,0.07);
-    border-radius: 10px;
-    overflow: hidden;
-}
-.v-progreso-meta-fill {
-    height: 100%;
-    border-radius: 10px;
-    background: linear-gradient(90deg, #34C759, #30D158);
-    transition: width 0.6s cubic-bezier(.4,0,.2,1);
-}
-
-/* Meta diaria (monto restante repartido entre los dÃ­as que quedan del mes) */
-.v-meta-diaria-box {
-    padding: 18px 26px;
-    margin-bottom: var(--card-gap);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-}
-.v-meta-diaria-left { display: flex; flex-direction: column; }
-.v-meta-diaria-num {
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: #1D1D1F;
-    line-height: 1;
-}
-.v-meta-diaria-right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 6px;
-    text-align: right;
-}
-#v_metaDiariaSub { font-size: 12px; color: rgba(0,0,0,0.4); }
-.v-meta-diaria-badge {
-    font-size: 11px;
-    font-weight: 600;
-    color: #0071E3;
-    background: rgba(0,113,227,0.12);
-    padding: 3px 10px;
-    border-radius: 999px;
-}
-body.dark-mode .v-meta-diaria-num { color: #F2F2F7 !important; }
-body.dark-mode #v_metaDiariaSub { color: rgba(255,255,255,0.75) !important; }
-body.dark-mode .v-meta-diaria-badge { color: #4DA3FF; background: rgba(10,132,255,0.18); }
-
-/* Top Vendedores */
-.v-top-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-    margin-bottom: 6px;
-}
-.v-top-card {
-    padding: var(--card-pad);
-}
-.v-top-card-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #1D1D1F;
-    margin-bottom: 14px;
-}
-.v-top-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.v-top-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 13px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
-}
-.v-top-row:last-child { border-bottom: none; padding-bottom: 0; }
-.v-top-rank {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px; height: 20px;
-    border-radius: 50%;
-    font-size: 11px;
-    font-weight: 700;
-    margin-right: 8px;
-    background: rgba(0,0,0,0.06);
-    color: rgba(0,0,0,0.5);
-}
-.v-top-row:nth-child(1) .v-top-rank { background: #FFD60A; color: #5C4400; }
-.v-top-row:nth-child(2) .v-top-rank { background: #D1D1D6; color: #3A3A3C; }
-.v-top-row:nth-child(3) .v-top-rank { background: #FF9F0A; color: #5C3D00; }
-.v-top-name { flex: 1; color: #1D1D1F; font-weight: 500; }
-.v-top-value { font-weight: 700; color: #1D1D1F; }
-.v-top-empty { font-size: 12px; color: rgba(0,0,0,0.35); text-align: center; padding: 10px 0; }
-
-@media (max-width: 780px) {
-    .v-top-grid { grid-template-columns: 1fr; }
-}
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-/* PESTAÃ‘A ASESORES â€” LIQUID GLASS (FONDO CLARO)         */
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-
-.a-orb {
-    position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: -1;
-    filter: blur(50px);
-    opacity: var(--orb-opacity);
-}
-.a-orb-blue {
-    width: 480px; height: 480px;
-    background: radial-gradient(circle, var(--orb-asesores-blue) 0%, transparent 70%);
-    top: -100px; right: -80px;
-}
-.a-orb-yellow {
-    width: 360px; height: 360px;
-    background: radial-gradient(circle, var(--orb-asesores-yellow) 0%, transparent 70%);
-    bottom: 20px; left: -60px;
-}
-
-/* HERO: selector + meta + venta */
-.a-hero {
-    padding: var(--card-pad-hero);
-    margin-bottom: var(--card-gap);
-}
-.a-hero-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-}
-.a-select-group label {
-    font-size: 10px; font-weight: 700;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    color: rgba(0,0,0,0.4);
-    margin-bottom: 4px;
-}
-.a-select-group select,
-.a-select-group input {
-    background: rgba(255,255,255,0.6);
-    border: 1px solid rgba(255,255,255,0.9);
-}
-
-.a-cumplimiento-box {
-    background: rgba(255,255,255,0.45);
-    border: 1px solid rgba(255,255,255,0.8);
-    border-radius: 16px;
-    padding: 14px 18px;
-    margin-top: 18px;
-}
-
-/* PILLS QR / TRADE-IN (editables) */
-.a-pill-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin-bottom: 22px;
-}
-.a-pill {
-    padding: 18px 22px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 14px;
-}
-.a-pill .v-pill-name {
-    flex: 1;
-    text-align: left;
-    font-size: 11px;
-    color: rgba(0,0,0,0.4);
-    letter-spacing: 0.04em;
-}
-.a-pill-input {
-    width: 90px;
-    text-align: right;
-    font-size: 20px;
-    font-weight: 700;
-    color: #1D1D1F;
-    background: rgba(255,255,255,0.6);
-    border: 1px solid rgba(255,255,255,0.9);
-    border-radius: 10px;
-    padding: 8px 10px;
-}
-
-/* TARJETAS DE CONTENIDO (montos, unidades, garex, insurama, resumen) */
-.a-card {
-    padding: var(--card-pad);
-    margin-bottom: var(--card-gap);
-}
-.a-card-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: #1D1D1F;
-    margin-bottom: 14px;
-}
-.a-grid-categorias {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-}
-.a-grid-categorias .form-group label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    color: rgba(0,0,0,0.4);
-    text-transform: uppercase;
-}
-.a-grid-categorias input {
-    background: rgba(255,255,255,0.6);
-    border: 1px solid rgba(255,255,255,0.85);
-}
-
-.a-acc-manual-aviso {
-    margin-top: 16px;
-    padding: 10px 14px;
-    background: rgba(255,149,0,0.1);
-    border: 1px solid rgba(255,149,0,0.3);
-    border-radius: 10px;
-    font-size: 12px;
-    color: #B36200;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-.a-acc-manual-aviso button {
-    background: rgba(255,149,0,0.18);
-    border: 1px solid rgba(255,149,0,0.4);
-    border-radius: 8px;
-    color: #B36200;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 5px 10px;
-    cursor: pointer;
-    white-space: nowrap;
-}
-.a-acc-manual-aviso button:hover { background: rgba(255,149,0,0.28); }
-body.dark-mode .a-acc-manual-aviso { background: rgba(255,159,10,0.12); border-color: rgba(255,159,10,0.35); color: #FFB454; }
-body.dark-mode .a-acc-manual-aviso button { color: #FFB454; }
-
-.a-monto-total-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 18px;
-    padding-top: 16px;
-    border-top: 1px solid rgba(0,0,0,0.08);
-}
-.a-monto-total-label {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: rgba(0,0,0,0.4);
-}
-.a-monto-total-val {
-    font-size: 20px;
-    font-weight: 700;
-    color: #0071E3;
-}
-body.dark-mode .a-monto-total-row { border-top-color: rgba(255,255,255,0.1); }
-body.dark-mode .a-monto-total-label { color: rgba(255,255,255,0.5); }
-
-.a-proteccion-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-}
-.a-proteccion-grid .grid-2-col {
-    background: rgba(255,255,255,0.4);
-}
-
-.a-precio-calculado {
-    background: rgba(52,199,89,0.12);
-    border: 1px solid rgba(52,199,89,0.3);
-    border-radius: 10px;
-    padding: 10px 14px;
-    font-size: 13px;
-    color: #1D1D1F;
-    margin-bottom: 14px;
-}
-.a-precio-calculado strong {
-    color: #248A3D;
-    font-size: 15px;
-}
-
-.a-btn-guardar {
-    width: 100%;
-    margin-bottom: 28px;
-    padding: 14px;
-    font-size: 15px;
-}
-
-@media (max-width: 780px) {
-    .a-hero-row, .a-pill-row, .a-proteccion-grid { grid-template-columns: 1fr; }
-    .a-grid-categorias { grid-template-columns: repeat(2, 1fr); }
-}
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-/* ORBES DE COLOR â€” PLAN SOS / GAREX / INSURAMA / BITÃCORAS / CONFIGURACIÃ“N */
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-
-.s-orb, .g-orb, .b-orb, .c-orb {
-    position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: -1;
-    filter: blur(50px);
-    opacity: var(--orb-opacity);
-}
-
-/* Plan SOS â€” violeta / verde agua */
-.s-orb-purple { width: 460px; height: 460px; background: radial-gradient(circle, var(--orb-ventas-purple) 0%, transparent 70%); top: -110px; left: -90px; }
-.s-orb-teal   { width: 380px; height: 380px; background: radial-gradient(circle, var(--orb-ventas-teal) 0%, transparent 70%); bottom: 30px; right: -60px; }
-
-/* Garex â€” verde / azul (incentivo positivo) */
-.g-orb-green { width: 460px; height: 460px; background: radial-gradient(circle, var(--orb-garex-green) 0%, transparent 70%); top: -100px; right: -90px; }
-.g-orb-blue  { width: 360px; height: 360px; background: radial-gradient(circle, var(--orb-garex-blue) 0%, transparent 70%); bottom: 20px; left: -60px; }
-
-/* Insurama â€” Ã­ndigo / rosa */
-.g-orb-indigo { width: 460px; height: 460px; background: radial-gradient(circle, var(--orb-insurama-indigo) 0%, transparent 70%); top: -100px; left: -90px; }
-.g-orb-pink   { width: 360px; height: 360px; background: radial-gradient(circle, var(--orb-insurama-pink) 0%, transparent 70%); bottom: 20px; right: -60px; }
-
-/* BitÃ¡coras â€” Ã¡mbar / azul */
-.b-orb-amber { width: 440px; height: 440px; background: radial-gradient(circle, var(--orb-bitacora-amber) 0%, transparent 70%); top: -100px; right: -80px; }
-.b-orb-blue  { width: 360px; height: 360px; background: radial-gradient(circle, var(--orb-bitacora-blue) 0%, transparent 70%); bottom: 30px; left: -60px; }
-
-/* ConfiguraciÃ³n â€” gris neutro / rojo de advertencia (sutil) */
-.c-orb-gray { width: 440px; height: 440px; background: radial-gradient(circle, var(--orb-calendario-gray) 0%, transparent 70%); top: -100px; left: -90px; }
-.c-orb-red  { width: 320px; height: 320px; background: radial-gradient(circle, var(--orb-calendario-red) 0%, transparent 70%); bottom: 10px; right: -50px; }
-
-/* Recordatorios â€” naranja cÃ¡lido / pÃºrpura */
-.r-orb-orange { width: 450px; height: 450px; background: radial-gradient(circle, var(--orb-metas-orange) 0%, transparent 70%); top: -110px; right: -80px; }
-.r-orb-purple { width: 370px; height: 370px; background: radial-gradient(circle, var(--orb-metas-purple) 0%, transparent 70%); bottom: 20px; left: -60px; }
-
-.r-orb {
-    position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: -1;
-    filter: blur(50px);
-    opacity: var(--orb-opacity);
-}
-
-/* Fila de formulario de recordatorios */
-.r-form-row {
-    display: flex;
-    gap: 14px;
-    align-items: flex-end;
-    flex-wrap: wrap;
-}
-
-/* Ãtem de recordatorio */
-.r-item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 13px 16px;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
-}
-.r-item:last-child { border-bottom: none; }
-.r-item-fecha {
-    font-size: 12px;
-    font-weight: 700;
-    color: rgba(0,0,0,0.38);
-    min-width: 90px;
-    white-space: nowrap;
-}
-.r-item-badge {
-    font-size: 11px;
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-weight: 600;
-    white-space: nowrap;
-}
-.r-badge-mantenimiento { background: rgba(255,159,10,0.12); color: #B26A00; }
-.r-badge-reunion       { background: rgba(0,113,227,0.10); color: #0071E3; }
-.r-badge-tarea         { background: rgba(52,199,89,0.12); color: #248A3D; }
-.r-badge-otro          { background: rgba(0,0,0,0.06); color: #515154; }
-
-.r-item-texto {
-    flex: 1;
-    font-size: 13px;
-    color: #1D1D1F;
-}
-.r-item-del {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    color: rgba(0,0,0,0.2);
-    padding: 4px 6px;
-    border-radius: 6px;
-    transition: color 0.15s, background 0.15s;
-}
-.r-item-del:hover { color: #FF3B30; background: rgba(255,59,48,0.08); }
-
-/* Tarjeta de anotaciÃ³n en el Historial de BitÃ¡coras */
-.bitacora-item {
-    padding: var(--inset-pad);
-    background: #F5F5F7;
-    border-radius: var(--inset-radius);
-    margin-bottom: 10px;
-    border-left: 3px solid #0071E3;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 10px;
-}
-.bitacora-item-contenido { flex: 1; min-width: 0; }
-.bitacora-item-texto { font-size: 13px; line-height: 1.4; color: #1D1D1F; margin: 0; }
-.bitacora-item-fecha { font-size: 11px; color: #86868B; display: block; margin-top: 4px; }
-body.dark-mode .bitacora-item { background: rgba(255,255,255,0.06); border-left-color: #0A84FF; }
-body.dark-mode .bitacora-item-texto { color: #F2F2F7; }
-body.dark-mode .bitacora-item-fecha { color: rgba(255,255,255,0.6); }
-
-/* Ãtem de clÃ­nica */
-.c-item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px 16px;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
-    transition: background 0.15s;
-}
-.c-item:last-child { border-bottom: none; }
-.c-item-check {
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    border: 2px solid #D2D2D7;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    font-size: 13px;
-    transition: border-color 0.2s, background 0.2s;
-    background: transparent;
-}
-.c-item-check.realizada {
-    border-color: #34C759;
-    background: #34C759;
-    color: white;
-}
-.c-item-nombre {
-    flex: 1;
-    font-size: 13px;
-    font-weight: 600;
-    color: #1D1D1F;
-    transition: color 0.2s;
-}
-.c-item-nombre.realizada { color: rgba(0,0,0,0.32); text-decoration: line-through; }
-.c-item-fecha {
-    font-size: 12px;
-    color: rgba(0,0,0,0.38);
-    white-space: nowrap;
-}
-.c-item-estado {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 999px;
-    white-space: nowrap;
-}
-.c-estado-pendiente { background: rgba(255,159,10,0.12); color: #B26A00; }
-.c-estado-realizada { background: rgba(52,199,89,0.12); color: #248A3D; }
-.c-item-del {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    color: rgba(0,0,0,0.2);
-    padding: 4px 6px;
-    border-radius: 6px;
-    transition: color 0.15s, background 0.15s;
-}
-.c-item-del:hover { color: #FF3B30; background: rgba(255,59,48,0.08); }
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-/* CALENDARIO â€” BITÃCORAS                                  */
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-
-.cal-wrapper { padding: 24px 26px 20px; margin-bottom: 22px; }
-
-.cal-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 18px;
-}
-.cal-titulo {
-    flex: 1 1 auto;
-    min-width: 0;
-    font-size: 17px;
-    font-weight: 700;
-    color: #1D1D1F;
-    text-transform: capitalize;
-}
-.cal-nav-btn {
-    background: rgba(0,0,0,0.05);
-    border: none;
-    border-radius: 50%;
-    width: 32px; height: 32px;
-    flex-shrink: 0;
-    font-size: 20px;
-    cursor: pointer;
-    color: #1D1D1F;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s;
-    line-height: 1;
-}
-.cal-nav-btn:hover { background: rgba(0,0,0,0.1); }
-.cal-hoy-btn {
-    background: rgba(0,113,227,0.10);
-    border: none;
-    border-radius: 999px;
-    padding: 6px 16px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #0071E3;
-    cursor: pointer;
-    flex-shrink: 0;
-    white-space: nowrap;
-    transition: background 0.15s;
-}
-.cal-hoy-btn:hover { background: rgba(0,113,227,0.18); }
-
-.cal-dias-semana {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    margin-bottom: 6px;
-}
-.cal-dias-semana span {
-    text-align: center;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    color: rgba(0,0,0,0.35);
-    text-transform: uppercase;
-    padding: 4px 0;
-}
-
-.cal-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 3px;
-}
-.cal-celda {
-    min-height: 78px;
-    min-width: 0;
-    border-radius: 10px;
-    padding: 6px 7px 4px;
-    cursor: pointer;
-    transition: background 0.15s;
-    position: relative;
-    overflow: hidden;
-}
-.cal-celda:hover { background: rgba(0,0,0,0.04); }
-.cal-celda.otro-mes { opacity: 0.35; }
-.cal-celda.hoy .cal-dia-num {
-    background: #FF3B30;
-    color: #fff;
-    border-radius: 50%;
-    width: 24px; height: 24px;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700;
-}
-.cal-celda.seleccionada { background: rgba(0,113,227,0.07); outline: 2px solid rgba(0,113,227,0.25); }
-.cal-dia-num {
-    font-size: 13px;
-    font-weight: 600;
-    color: #1D1D1F;
-    width: 24px; height: 24px;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 4px;
-}
-.cal-eventos {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-}
-.cal-evento-pill {
-    font-size: 10px;
-    font-weight: 500;
-    padding: 2px 6px;
-    border-radius: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 0;
-    max-width: 100%;
-}
-.cal-pill-recordatorio { background: rgba(0,113,227,0.12); color: #0055b3; }
-.cal-pill-clinica-p    { background: rgba(255,149,0,0.13); color: #8a5000; }
-.cal-pill-clinica-r    { background: rgba(52,199,89,0.13); color: #1a6e35; }
-.cal-pill-bitacora     { background: rgba(134,134,139,0.12); color: #3a3a3c; }
-
-.cal-leyenda {
-    display: flex;
-    align-items: center;
-    gap: 6px 14px;
-    margin-top: 14px;
-    font-size: 11px;
-    color: rgba(0,0,0,0.45);
-    flex-wrap: wrap;
-}
-.cal-leyenda-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    white-space: nowrap;
-}
-.cal-dot {
-    display: inline-block;
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-/* Panel de detalle */
-.cal-detalle-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-}
-.cal-detalle-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 9px 0;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
-    font-size: 13px;
-}
-.cal-detalle-item:last-child { border-bottom: none; }
-.cal-detalle-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    margin-top: 4px;
-    flex-shrink: 0;
-}
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-/* SELECTOR MODO VENTA (DÃA / SEMANA) â€” ASESORES         */
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-
-.venta-modo-wrap {
-    margin-top: 18px;
-    border-top: 1px solid rgba(0,0,0,0.06);
-    padding-top: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.venta-modo-toggle {
-    display: flex;
-    gap: 8px;
-}
-
-.venta-modo-btn {
-    background: rgba(0,0,0,0.05);
-    border: none;
-    border-radius: 999px;
-    padding: 8px 20px;
-    font-size: 13px;
-    font-weight: 500;
-    color: rgba(0,0,0,0.45);
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-}
-.venta-modo-btn.active {
-    background: #0071E3;
-    color: #fff;
-    font-weight: 600;
-}
-.venta-modo-btn:hover:not(.active) {
-    background: rgba(0,0,0,0.09);
-    color: #1D1D1F;
-}
-
-.venta-fecha-panel {
-    display: flex;
-    gap: 14px;
-    align-items: flex-end;
-    flex-wrap: wrap;
-}
-
-.cal-checkbox-wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    color: #1D1D1F;
-    cursor: pointer;
-    padding-bottom: 10px;
-    user-select: none;
-}
-.cal-checkbox-wrap input[type="checkbox"] {
-    width: 17px;
-    height: 17px;
-    accent-color: #0071E3;
-    cursor: pointer;
-}
-
-.venta-resumen {
-    background: rgba(0,113,227,0.07);
-    border: 1px solid rgba(0,113,227,0.18);
-    border-radius: 10px;
-    padding: 9px 16px;
-    font-size: 13px;
-    color: #1D1D1F;
-    flex: 1;
-    min-width: 220px;
-}
-.venta-resumen strong { color: #0071E3; }
-.cal-pill-venta { background: rgba(52,199,89,0.13); color: #1a6e35; }
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-/* ALERTAS / TOASTS â€” BURBUJA LIQUID GLASS                 */
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-
-.toast-container {
-    position: fixed;
-    top: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    pointer-events: none;
-    width: min(420px, calc(100% - 32px));
-}
-
-.toast-bubble {
-    pointer-events: auto;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    padding: 14px 18px;
-    border-radius: 20px;
-    background: rgba(255,255,255,0.55);
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border: 1px solid rgba(255,255,255,0.85);
-    box-shadow:
-        0 8px 30px rgba(0,0,0,0.12),
-        0 1px 2px rgba(0,0,0,0.06),
-        inset 0 1px 0 rgba(255,255,255,0.92);
-    position: relative;
-    overflow: hidden;
-    opacity: 0;
-    transform: translateY(-16px) scale(0.96);
-    animation: toastIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.toast-bubble.toast-out {
-    animation: toastOut 0.35s cubic-bezier(0.4, 0, 1, 1) forwards;
-}
-
-@keyframes toastIn {
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes toastOut {
-    to { opacity: 0; transform: translateY(-12px) scale(0.96); }
-}
-
-/* Reflejo especular superior, igual que .v-glass */
-.toast-bubble::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 10%; right: 10%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95) 40%, rgba(255,255,255,0.95) 60%, transparent);
-    pointer-events: none;
-}
-
-/* Gradiente interno de luz */
-.toast-bubble::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(145deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.05) 55%, transparent 100%);
-    pointer-events: none;
-}
-
-.toast-icon {
-    flex: 0 0 auto;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    font-weight: 700;
-    position: relative;
-    z-index: 1;
-}
-
-.toast-message {
-    flex: 1;
-    font-size: 13.5px;
-    font-weight: 500;
-    line-height: 1.4;
-    color: #1D1D1F;
-    position: relative;
-    z-index: 1;
-}
-
-.toast-close {
-    flex: 0 0 auto;
-    background: none;
-    border: none;
-    color: rgba(0,0,0,0.32);
-    font-size: 15px;
-    cursor: pointer;
-    padding: 2px 4px;
-    line-height: 1;
-    position: relative;
-    z-index: 1;
-}
-.toast-close:hover { color: rgba(0,0,0,0.6); }
-
-.toast-success .toast-icon { background: rgba(52,199,89,0.18); color: #1f8a3d; }
-.toast-success { border-color: rgba(52,199,89,0.35); }
-
-.toast-error .toast-icon { background: rgba(255,59,48,0.18); color: #c92f25; }
-.toast-error { border-color: rgba(255,59,48,0.35); }
-
-.toast-warning .toast-icon { background: rgba(255,149,0,0.2); color: #b26a00; }
-.toast-warning { border-color: rgba(255,149,0,0.35); }
-
-.toast-info .toast-icon { background: rgba(0,113,227,0.18); color: #0071E3; }
-.toast-info { border-color: rgba(0,113,227,0.35); }
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-/* MODAL DE FECHA â€” BURBUJA LIQUID GLASS                    */
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,0.18);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-    opacity: 0;
-    transition: opacity 0.25s ease;
-    padding: 20px;
-}
-.modal-overlay.modal-open { opacity: 1; }
-.modal-overlay.modal-out { opacity: 0; }
-
-.modal-glass {
-    width: min(360px, 100%);
-    padding: 26px 26px 22px;
-    border-radius: 24px;
-    background: rgba(255,255,255,0.65);
-    backdrop-filter: blur(32px) saturate(180%);
-    -webkit-backdrop-filter: blur(32px) saturate(180%);
-    border: 1px solid rgba(255,255,255,0.9);
-    box-shadow:
-        0 20px 60px rgba(0,0,0,0.18),
-        0 1px 2px rgba(0,0,0,0.06),
-        inset 0 1px 0 rgba(255,255,255,0.95);
-    position: relative;
-    overflow: hidden;
-    transform: scale(0.92) translateY(10px);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.modal-overlay.modal-open .modal-glass { transform: scale(1) translateY(0); }
-
-.modal-glass::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 10%; right: 10%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95) 40%, rgba(255,255,255,0.95) 60%, transparent);
-    pointer-events: none;
-}
-.modal-glass::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(145deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.05) 55%, transparent 100%);
-    pointer-events: none;
-}
-
-.modal-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: #1D1D1F;
-    margin-bottom: 16px;
-    position: relative;
-    z-index: 1;
-    line-height: 1.4;
-}
-
-.modal-glass .form-group { position: relative; z-index: 1; }
-
-.modal-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    position: relative;
-    z-index: 1;
-}
-
-.modal-btn {
-    border: none;
-    padding: 10px 18px;
-    font-size: 13.5px;
-    font-weight: 600;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background 0.2s, opacity 0.2s;
-}
-.modal-btn-cancel {
-    background: rgba(0,0,0,0.06);
-    color: #1D1D1F;
-}
-.modal-btn-cancel:hover { background: rgba(0,0,0,0.1); }
-.modal-btn-confirm {
-    background: #0071E3;
-    color: #fff;
-}
-.modal-btn-confirm:hover { background: #0077ED; }
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-/* FECHA DE PROTECCIÃ“N (GAREX/INSURAMA) â€” integrada al glass */
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-
-.a-proteccion-fecha-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    flex-wrap: wrap;
-}
-
-.a-proteccion-fecha-row input[type="date"] {
-    max-width: 200px;
-    background: rgba(255,255,255,0.75);
-    border: 1px solid rgba(0,0,0,0.08);
-    color: #1D1D1F;
-}
-.a-proteccion-fecha-row input[type="date"]:focus {
-    background: rgba(255,255,255,0.95);
-}
-
-.a-proteccion-fecha-hint {
-    font-size: 12px;
-    color: #86868B;
-}
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-/* MODO OSCURO                                              */
-/* Activado al agregar la clase "dark-mode" al <body>.      */
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-
-/* BotÃ³n flotante de cambio de tema (sol/luna) en la navbar */
-.theme-toggle-btn {
-    background: transparent;
-    border: 1.5px solid rgba(0,0,0,0.35);
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    color: #1D1D1F;
-    transition: background 0.2s, transform 0.2s;
-    flex-shrink: 0;
-}
-.theme-toggle-btn:hover { background: rgba(0,0,0,0.06); transform: scale(1.06); }
-
-/* Indicador de sincronizaciÃ³n con la nube (junto a las pestaÃ±as de la navbar) */
-.sync-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 5px 12px;
-    border-radius: 999px;
-    white-space: nowrap;
-    flex-shrink: 0;
-    background: rgba(0,0,0,0.05);
-    color: #6E6E73;
-    transition: background 0.2s, color 0.2s;
-}
-.sync-status-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: currentColor;
-    flex-shrink: 0;
-}
-.sync-status.sync-status-pendiente,
-.sync-status.sync-status-guardando {
-    color: #B37800;
-    background: rgba(255,149,0,0.14);
-}
-.sync-status.sync-status-pendiente .sync-status-dot,
-.sync-status.sync-status-guardando .sync-status-dot {
-    animation: syncPulse 1s ease-in-out infinite;
-}
-.sync-status.sync-status-guardado { color: #248A3D; background: rgba(52,199,89,0.14); }
-.sync-status.sync-status-error,
-.sync-status.sync-status-sin-conexion { color: #C92F25; background: rgba(255,59,48,0.13); }
-
-@keyframes syncPulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.35; }
-}
-
-body.dark-mode .sync-status { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.65); }
-body.dark-mode .sync-status.sync-status-pendiente,
-body.dark-mode .sync-status.sync-status-guardando { color: #FFB340 !important; background: rgba(255,159,10,0.18) !important; }
-body.dark-mode .sync-status.sync-status-guardado { color: #30D158 !important; background: rgba(48,209,88,0.18) !important; }
-body.dark-mode .sync-status.sync-status-error,
-body.dark-mode .sync-status.sync-status-sin-conexion { color: #FF6961 !important; background: rgba(255,69,58,0.18) !important; }
-
-@media (max-width: 640px) {
-    .sync-status .sync-status-text { display: none; }
-    .sync-status { padding: 6px; }
-}
-
-/* Separador visual entre las pestaÃ±as y el botÃ³n de modo oscuro/claro */
-.navbar-divider {
-    width: 1px;
-    height: 22px;
-    background: rgba(0,0,0,0.12);
-    flex-shrink: 0;
-}
-body.dark-mode .navbar-divider { background: rgba(255,255,255,0.15); }
-
-body.dark-mode {
-    background: #000000;
-    color: #F2F2F7;
-}
-
-/* Texto base y encabezados */
-body.dark-mode,
-body.dark-mode .form-group label,
-body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4 {
-    color: #F2F2F7;
-}
-body.dark-mode .v-section-label,
-body.dark-mode .c-item-nombre,
-body.dark-mode .r-item-texto,
-body.dark-mode .a-pill,
-body.dark-mode label {
-    color: #F2F2F7;
-}
-body.dark-mode .a-proteccion-fecha-hint,
-body.dark-mode small,
-body.dark-mode p {
-    color: #9A9AA2;
-}
-
-/* Navbar */
-body.dark-mode .navbar {
-    background: rgba(28, 28, 30, 0.55);
-    border-color: rgba(255,255,255,0.12);
-}
-body.dark-mode .navbar h2 { color: #F2F2F7; }
-body.dark-mode .navbar ul li { color: #ADADB4; }
-body.dark-mode .navbar ul li:hover { background: rgba(255,255,255,0.08); }
-body.dark-mode .navbar ul li.active {
-    color: #F2F2F7;
-    background: rgba(255,255,255,0.14);
-}
-body.dark-mode .theme-toggle-btn {
-    background: transparent;
-    border-color: rgba(255,255,255,0.35);
-    color: #F2F2F7;
-}
-body.dark-mode .theme-toggle-btn:hover { background: rgba(255,255,255,0.10); }
-
-/* Tarjetas tipo "vidrio" (Liquid Glass) */
-body.dark-mode .v-glass {
-    background: rgba(28, 28, 30, 0.65);
-    border-color: rgba(255,255,255,0.10);
-    box-shadow: 0 2px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
-}
-body.dark-mode .v-glass::before { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.18) 60%, transparent); }
-body.dark-mode .v-glass::after { background: linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 55%, transparent 100%); }
-body.dark-mode .grid-2-col { background: rgba(255,255,255,0.05); }
-
-/* Campos de formulario */
-body.dark-mode .form-group input,
-body.dark-mode .form-group select,
-body.dark-mode .form-group textarea,
-body.dark-mode input[type="text"],
-body.dark-mode input[type="date"],
-body.dark-mode input[type="number"],
-body.dark-mode select,
-body.dark-mode textarea {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.15);
-    color: #F2F2F7;
-    color-scheme: dark;
-}
-body.dark-mode .form-group input::placeholder,
-body.dark-mode textarea::placeholder {
-    color: #6E6E73;
-}
-body.dark-mode .form-group input:focus,
-body.dark-mode .form-group select:focus,
-body.dark-mode .form-group textarea:focus {
-    border-color: #0A84FF;
-    box-shadow: 0 0 0 3px rgba(10,132,255,0.22);
-}
-body.dark-mode .form-group input:disabled { opacity: 0.35; background: rgba(255,255,255,0.03); }
-body.dark-mode .a-proteccion-fecha-row input[type="date"] {
-    background: rgba(255,255,255,0.08);
-    border-color: rgba(255,255,255,0.15);
-    color: #F2F2F7;
-}
-
-/* BotÃ³n primario y badges de estado */
-body.dark-mode .btn-primary { background: #0A84FF; }
-body.dark-mode .btn-primary:hover { background: #3399FF; }
-body.dark-mode .verde { background-color: rgba(48,209,88,0.16); color: #30D158; }
-body.dark-mode .amarillo { background-color: rgba(255,159,10,0.16); color: #FF9F0A; }
-body.dark-mode .rojo { background-color: rgba(255,69,58,0.16); color: #FF453A; }
-body.dark-mode .barra-progreso { background: rgba(255,255,255,0.1); }
-
-/* Listas: recordatorios y clÃ­nicas */
-body.dark-mode .r-item,
-body.dark-mode .c-item {
-    border-bottom-color: rgba(255,255,255,0.08);
-}
-body.dark-mode .c-item-nombre.realizada { color: rgba(255,255,255,0.3); }
-body.dark-mode .c-item-fecha,
-body.dark-mode .r-item-fecha {
-    color: #9A9AA2;
-}
-
-/* Toasts (alertas) */
-body.dark-mode .toast-bubble {
-    background: rgba(28,28,30,0.85);
-    color: #F2F2F7;
-    border-color: rgba(255,255,255,0.12);
-}
-body.dark-mode .toast-close:hover { color: rgba(255,255,255,0.7); }
-
-/* Tablas (Garex / Insurama / resÃºmenes) */
-body.dark-mode table { color: #F2F2F7; }
-body.dark-mode th, body.dark-mode td {
-    border-color: rgba(255,255,255,0.08) !important;
-}
-
-/* Calendario */
-body.dark-mode .cal-dot { filter: brightness(1.15); }
-
-/* Scrollbar (opcional, estÃ©tica) */
-body.dark-mode ::-webkit-scrollbar { width: 10px; height: 10px; }
-body.dark-mode ::-webkit-scrollbar-track { background: transparent; }
-body.dark-mode ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 10px; }
-
-/* Texto genÃ©rico con colores fijos en negro/gris usados vÃ­a estilos inline o clases sueltas */
-body.dark-mode [style*="color: rgba(0,0,0"],
-body.dark-mode [style*="color:#1D1D1F"],
-body.dark-mode [style*="color: #1D1D1F"] {
-    color: #F2F2F7 !important;
-}
-body.dark-mode [style*="color: rgba(0,0,0,0.45)"],
-body.dark-mode [style*="color: rgba(0,0,0,0.4)"],
-body.dark-mode [style*="color: rgba(0,0,0,0.35)"],
-body.dark-mode [style*="color: rgba(0,0,0,0.3)"] {
-    color: #9A9AA2 !important;
-}
-body.dark-mode .navbar ul li.active { color: #F2F2F7 !important; }
-body.dark-mode .form-group label { color: #F2F2F7 !important; }
-body.dark-mode .v-eyebrow { color: rgba(255,255,255,0.77) !important; }
-body.dark-mode .v-hero-number { color: #F2F2F7 !important; }
-body.dark-mode .v-hero-sub { color: rgba(255,255,255,0.81) !important; }
-body.dark-mode .v-traf-num { color: #F2F2F7 !important; }
-body.dark-mode .v-traf-label { color: rgba(255,255,255,0.77) !important; }
-body.dark-mode .v-arc-pct { color: #F2F2F7 !important; }
-body.dark-mode .v-arc-sub { color: rgba(255,255,255,0.77) !important; }
-body.dark-mode .v-section-label { color: rgba(255,255,255,0.73) !important; }
-body.dark-mode .v-sos-name { color: rgba(255,255,255,0.81) !important; }
-body.dark-mode .v-sos-val { color: #F2F2F7 !important; }
-body.dark-mode .v-sos-meta { color: rgba(255,255,255,0.73) !important; }
-body.dark-mode .v-pill-num { color: #F2F2F7 !important; }
-body.dark-mode .v-pill-name { color: rgba(255,255,255,0.77) !important; }
-body.dark-mode .v-attach-mini span { color: rgba(255,255,255,0.85) !important; }
-body.dark-mode .v-attach-mini span strong { color: #F2F2F7 !important; }
-body.dark-mode .v-nota-card p { color: #F2F2F7 !important; }
-body.dark-mode .v-progreso-meta-header { color: rgba(255,255,255,0.85) !important; }
-body.dark-mode .v-progreso-meta-header span:last-child { color: #F2F2F7 !important; }
-body.dark-mode .v-top-card-title { color: #F2F2F7 !important; }
-body.dark-mode .v-top-rank { color: rgba(255,255,255,0.95) !important; }
-body.dark-mode .v-top-name { color: #F2F2F7 !important; }
-body.dark-mode .v-top-value { color: #F2F2F7 !important; }
-body.dark-mode .v-top-empty { color: rgba(255,255,255,0.8) !important; }
-body.dark-mode .a-select-group label { color: rgba(255,255,255,0.85) !important; }
-body.dark-mode .a-pill .v-pill-name { color: rgba(255,255,255,0.85) !important; }
-body.dark-mode .a-pill-input { color: #F2F2F7 !important; }
-body.dark-mode .a-card-title { color: #F2F2F7 !important; }
-body.dark-mode .a-grid-categorias .form-group label { color: rgba(255,255,255,0.85) !important; }
-body.dark-mode .a-precio-calculado { color: #F2F2F7 !important; }
-body.dark-mode .a-linea-pendiente,
-body.dark-mode .a-linea-pendiente span,
-body.dark-mode .a-linea-pendiente strong {
-    color: #1D1D1F !important;
-}
-body.dark-mode .a-linea-pendiente span span {
-    color: #86868B !important;
-}
-body.dark-mode .r-item-fecha { color: rgba(255,255,255,0.83) !important; }
-body.dark-mode .r-item-texto { color: #F2F2F7 !important; }
-body.dark-mode .r-item-del { color: rgba(255,255,255,0.65) !important; }
-body.dark-mode .c-item-nombre { color: #F2F2F7 !important; }
-body.dark-mode .c-item-nombre.realizada { color: rgba(255,255,255,0.77) !important; }
-body.dark-mode .c-item-fecha { color: rgba(255,255,255,0.83) !important; }
-body.dark-mode .c-item-del { color: rgba(255,255,255,0.65) !important; }
-body.dark-mode .cal-titulo { color: #F2F2F7 !important; }
-body.dark-mode .cal-pill-recordatorio { background: rgba(10,132,255,0.22); color: #7BBBFF; }
-body.dark-mode .cal-pill-clinica-p    { background: rgba(255,159,10,0.22); color: #FFC067; }
-body.dark-mode .cal-pill-clinica-r    { background: rgba(48,209,88,0.22); color: #7EE29D; }
-body.dark-mode .cal-pill-bitacora     { background: rgba(142,142,147,0.25); color: #E5E5EA; }
-body.dark-mode .cal-pill-venta        { background: rgba(48,209,88,0.22); color: #7EE29D; }
-body.dark-mode .cal-nav-btn { color: #F2F2F7 !important; }
-body.dark-mode .cal-dias-semana span { color: rgba(255,255,255,0.8) !important; }
-body.dark-mode .cal-dia-num { color: #F2F2F7 !important; }
-body.dark-mode .cal-leyenda { color: rgba(255,255,255,0.9) !important; }
-body.dark-mode .venta-modo-btn { color: rgba(255,255,255,0.9) !important; }
-body.dark-mode .venta-modo-btn:hover:not(.active) { color: #F2F2F7 !important; }
-body.dark-mode .cal-checkbox-wrap { color: #F2F2F7 !important; }
-body.dark-mode .venta-resumen { color: #F2F2F7 !important; }
-body.dark-mode .toast-message { color: #F2F2F7 !important; }
-body.dark-mode .toast-close { color: rgba(255,255,255,0.77) !important; }
-body.dark-mode .toast-close:hover { color: rgba(255,255,255,1) !important; }
-body.dark-mode .modal-title { color: #F2F2F7 !important; }
-body.dark-mode .modal-btn-cancel { color: #F2F2F7 !important; }
-body.dark-mode .a-proteccion-fecha-row input[type="date"] { color: #F2F2F7 !important; }
-/* Fondos de "pill"/cajas claras fijas -> oscuras, para que el texto sea legible */
-body.dark-mode .v-traf-pill,
-body.dark-mode .a-select-group select,
-body.dark-mode .a-select-group input,
-body.dark-mode .a-cumplimiento-box,
-body.dark-mode .a-pill-input,
-body.dark-mode .a-grid-categorias input,
-body.dark-mode .a-proteccion-grid .grid-2-col,
-body.dark-mode .navbar ul li.active {
-    background: rgba(255,255,255,0.12) !important;
-    border-color: rgba(255,255,255,0.18) !important;
-}
-body.dark-mode .a-pill-input {
-    color: #F2F2F7 !important;
-}
-
-/* Asegurar visibilidad del Ã­cono de ConfiguraciÃ³n (âš™ï¸Ž) y resto de pestaÃ±as en modo oscuro */
-body.dark-mode .navbar ul li {
-    color: rgba(255,255,255,0.65) !important;
-}
-body.dark-mode .navbar ul li.tab-icon-only {
-    color: rgba(255,255,255,0.85) !important;
-}
-body.dark-mode .navbar ul li:hover {
-    color: #F2F2F7 !important;
-}
-body.dark-mode .navbar ul li.active {
-    color: #F2F2F7 !important;
-}
-
-/* Fila de ediciÃ³n de asesor en ConfiguraciÃ³n */
-.asesor-config-block {
-    margin-bottom: 8px;
-}
-.asesor-config-row {
-    display: grid;
-    grid-template-columns: 1.4fr 0.6fr auto auto;
-    gap: 8px;
-    align-items: center;
-    padding: var(--inset-pad);
-    background: #F5F5F7;
-    border-radius: var(--inset-radius);
-    margin-bottom: 0;
-}
-.asesor-config-input-porcentaje {
-    max-width: 64px;
-    text-align: center;
-    padding: 8px 6px;
-    justify-self: start;
-}
-.asesor-meta-calculada {
-    font-size: 11px;
-    color: #6E6E73;
-    padding: 6px 12px 0;
-}
-.asesor-config-input {
-    font-size: 14px;
-    border: 1px solid #D2D2D7;
-    border-radius: 6px;
-    padding: 8px;
-    outline: none;
-    background: #FFFFFF;
-    color: #1D1D1F;
-}
-.asesor-config-save {
-    background: #0071E3;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 6px;
-    font-size: 13px;
-    cursor: pointer;
-    white-space: nowrap;
-}
-.asesor-config-del {
-    background: #FF3B30;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 6px;
-    font-size: 13px;
-    cursor: pointer;
-}
-
-/* Modo oscuro: fila de ediciÃ³n de asesor */
-body.dark-mode .asesor-config-row {
-    background: rgba(255,255,255,0.06);
-}
-body.dark-mode .asesor-meta-calculada {
-    color: rgba(255,255,255,0.5);
-}
-body.dark-mode .asesor-config-input {
-    background: rgba(255,255,255,0.08);
-    border-color: rgba(255,255,255,0.18);
-    color: #F2F2F7;
-}
-body.dark-mode .asesor-config-save {
-    background: #0A84FF;
-}
-body.dark-mode .asesor-config-del {
-    background: #FF453A;
-}
-
-/* Resumen de desempeÃ±o por asesor (pestaÃ±a BitÃ¡coras / resumen visual) */
-.ra-card {
-    padding: var(--card-pad);
-    background: #F5F5F7;
-    border-radius: var(--inset-radius);
-    margin-bottom: var(--card-gap);
-}
-.ra-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 12px;
-}
-/* Anillo de cumplimiento (semÃ¡foro verde/amarillo/rojo, igual que el resto de la app) */
-.ra-ring {
-    position: relative;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.ra-ring-label {
-    position: absolute;
-    font-size: 13px;
-    font-weight: 700;
-    color: #1D1D1F;
-}
-body.dark-mode .ra-ring-label { color: #F2F2F7 !important; }
-.ra-header-info { flex: 1; min-width: 0; }
-.ra-header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-.ra-header-top strong { font-size: 15px; }
-.ra-header-badges {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    margin-top: 6px;
-}
-.ra-incentivo {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    background: rgba(52,199,89,0.13);
-    color: #1a6e35;
-    padding: 2px 9px;
-    border-radius: 999px;
-}
-.ra-cumplimiento { color: #0071E3; font-weight: 600; font-size: 12px; white-space: nowrap; }
-.ra-sub { font-size: 12px; margin-top: 8px; color: #6E6E73; }
-.ra-section { margin-top: 10px; padding-top: 10px; border-top: 1px solid #E5E5EA; }
-.ra-section-title { font-size: 12px; font-weight: 600; color: #1D1D1F; margin-bottom: 6px; }
-.ra-accent-blue { color: #0071E3; }
-.ra-accent-green { color: #34C759; }
-.ra-grid { display: grid; gap: 4px; font-size: 12px; color: #515154; }
-.ra-grid-3 { grid-template-columns: repeat(3, 1fr); }
-.ra-grid-4 { grid-template-columns: repeat(4, 1fr); }
-.ra-muted { color: #86868B; }
-
-/* Franja/tarjetas de estadÃ­sticas para la pestaÃ±a "Acumulados" (antes texto plano) */
-.ra-tile-grid { display: grid; gap: 8px; }
-.ra-tile {
-    background: rgba(0,0,0,0.03);
-    border-radius: 8px;
-    padding: 8px 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-.ra-tile-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.03em; color: #86868B; }
-.ra-tile-value { font-size: 16px; font-weight: 700; color: #1D1D1F; letter-spacing: -0.01em; }
-.ra-tile-caption { font-size: 10.5px; color: #86868B; }
-body.dark-mode .ra-tile { background: rgba(255,255,255,0.05); }
-body.dark-mode .ra-tile-label { color: #8E8E93 !important; }
-body.dark-mode .ra-tile-value { color: #F2F2F7 !important; }
-body.dark-mode .ra-tile-caption { color: #8E8E93 !important; }
-
-/* Color de las barras de progreso segÃºn el semÃ¡foro (mismos umbrales que Plan SOS:
-   verde >=100%, amarillo >=85%, rojo por debajo). Nombres "sem-*" a propÃ³sito,
-   para no chocar con .verde/.amarillo/.rojo (insignias de texto en otras partes
-   de la app, que ya tienen su propio significado y su propio override en modo
-   oscuro con mayor especificidad). */
-.progreso-relleno.sem-verde { background: #34C759 !important; }
-.progreso-relleno.sem-amarillo { background: #FF9500 !important; }
-.progreso-relleno.sem-rojo { background: #FF3B30 !important; }
-
-/* Franja compacta de estadÃ­sticas clave (Venta / Meta / QR / Trade-In) */
-.ra-stat-strip {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px 10px;
-    margin-top: 12px;
-    padding: 12px 14px;
-    background: rgba(0,0,0,0.03);
-    border-radius: 10px;
-}
-.ra-stat { display: flex; flex-direction: column; gap: 2px; }
-.ra-stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; color: #86868B; }
-.ra-stat-value { font-size: 22px; font-weight: 600; color: #1D1D1F; letter-spacing: -0.01em; line-height: 1.15; }
-body.dark-mode .ra-stat-strip { background: rgba(255,255,255,0.05); }
-body.dark-mode .ra-stat-label { color: #8E8E93; }
-body.dark-mode .ra-stat-value { color: #F2F2F7; }
-
-/* PestaÃ±as dentro de cada tarjeta de resumen de asesor */
-.ra-tabs {
-    display: flex;
-    gap: 6px;
-    margin-top: 12px;
-    border-bottom: 1px solid #E5E5EA;
-}
-.ra-tab-btn {
-    appearance: none;
-    border: none;
-    background: none;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 600;
-    color: #86868B;
-    padding: 8px 4px;
-    margin-bottom: -1px;
-    border-bottom: 2px solid transparent;
-    transition: color 0.15s ease, border-color 0.15s ease;
-}
-.ra-tab-btn:hover { color: #1D1D1F; }
-.ra-tab-btn.active { color: #0071E3; border-bottom-color: #0071E3; }
-.ra-tab-panel { display: none; }
-.ra-tab-panel.active { display: block; }
-body.dark-mode .ra-tabs { border-bottom-color: rgba(255,255,255,0.1); }
-body.dark-mode .ra-tab-btn { color: #8E8E93; }
-body.dark-mode .ra-tab-btn:hover { color: #F2F2F7; }
-body.dark-mode .ra-tab-btn.active { color: #0A84FF; border-bottom-color: #0A84FF; }
-
-/* Meta por Dispositivo (desglose por categorÃ­a dentro de cada asesor): una sola
-   fila y una sola barra por dispositivo, que combina unidades y monto en vez de
-   repetir cada dispositivo en dos listas separadas con dos barras. La barra se
-   llena segÃºn el % de MONTO (la mÃ©trica que ya usa el resto de la app); el Ã­cono
-   de color junto a cada valor (caja azul = unidades, moneda verde = monto) dice
-   cuÃ¡l es cuÃ¡l. */
-.ra-meta-cat-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px 16px;
-}
-.ra-meta-cat-row { display: flex; flex-direction: column; gap: 4px; }
-.ra-meta-cat-name { font-weight: 600; font-size: 12px; color: #1D1D1F; }
-.ra-meta-cat-values {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 3px 10px;
-    font-size: 11.5px;
-    color: #1D1D1F;
-}
-/* Dentro de "lleva / meta", el valor alcanzado resalta (negrita + color normal)
-   y la meta/separador se queda muted â€” asÃ­ el ojo va directo a "cuÃ¡nto llevas". */
-.ra-meta-cat-lleva { font-weight: 700; color: #1D1D1F; }
-body.dark-mode .ra-meta-cat-lleva { color: #F2F2F7 !important; }
-.ra-mini-bar { height: 5px; }
-
-/* Modo oscuro: resumen de desempeÃ±o por asesor */
-body.dark-mode .ra-card { background: rgba(255,255,255,0.06); }
-body.dark-mode .ra-incentivo { background: rgba(48,209,88,0.16); color: #30D158; }
-body.dark-mode .ra-cumplimiento { color: #0A84FF; }
-body.dark-mode .ra-sub { color: #9A9AA2; }
-body.dark-mode .ra-section { border-top-color: rgba(255,255,255,0.1); }
-body.dark-mode .ra-section-title { color: #F2F2F7; }
-body.dark-mode .ra-accent-blue { color: #0A84FF; }
-body.dark-mode .ra-accent-green { color: #30D158; }
-body.dark-mode .ra-grid { color: #D1D1D6; }
-body.dark-mode .ra-muted { color: #8E8E93; }
-body.dark-mode .ra-meta-cat-name { color: #F2F2F7; }
-body.dark-mode .ra-meta-cat-values { color: #F2F2F7; }
-
-/* Encabezado de tablas (Garex / Insurama / detalle de protecciÃ³n) */
-.tabla-header-row {
-    background: #F5F5F7;
-    color: #86868B;
-}
-.tabla-header-row th { font-weight: 600; }
-
-body.dark-mode .tabla-header-row {
-    background: rgba(255,255,255,0.06);
-    color: #9A9AA2;
-}
-body.dark-mode table tbody tr {
-    border-bottom-color: rgba(255,255,255,0.08) !important;
-}
-
-/* Separador del check de modo automÃ¡tico en ConfiguraciÃ³n */
-body.dark-mode #chkModoOscuroAuto {
-    accent-color: #0A84FF;
-}
-body.dark-mode label[for="chkModoOscuroAuto"] {
-    border-top-color: rgba(255,255,255,0.1) !important;
-}
-
-/* Campos de solo lectura calculados automÃ¡ticamente (Monto de Ventas, AccesorizaciÃ³n) */
-body.dark-mode #inputVentaSemanal,
-body.dark-mode #inputAccesorizacion {
-    background: rgba(10,132,255,0.14) !important;
-    color: #4DA3FF !important;
-}
-
-/* Fila de accesorizaciÃ³n automÃ¡tica dentro del box de cumplimiento del asesor */
-.cumplimiento-acc-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 12px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(0,0,0,0.07);
-}
-body.dark-mode .cumplimiento-acc-row {
-    border-top-color: rgba(255,255,255,0.1);
-}
-
-/* Badge de accesorizaciÃ³n automÃ¡tica en el resumen de cada asesor */
-.ra-acc-badge {
-    display: inline-block;
-    margin-left: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    background: rgba(0,113,227,0.12);
-    color: #0071E3;
-    padding: 2px 9px;
-    border-radius: 999px;
-}
-body.dark-mode .ra-acc-badge {
-    background: rgba(10,132,255,0.18);
-    color: #4DA3FF;
-}
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-/* TABLAS CON SCROLL HORIZONTAL (evita que se rompan en mÃ³vil) */
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-.tabla-scroll {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-.tabla-scroll table { min-width: 560px; }
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-/* COMPATIBILIDAD COMPLETA CON PANTALLAS DE CELULAR          */
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-@media (max-width: 640px) {
-
-    /* Evita que el navegador haga zoom automÃ¡tico al enfocar inputs en iOS */
-    .form-group input,
-    .form-group select,
-    .form-group textarea,
-    .asesor-config-input,
-    input[type="number"],
-    input[type="text"],
-    input[type="date"],
-    select {
-        font-size: 16px;
+// METAS SOS — cargadas desde localStorage (editables en Configuración)
+// ═══════════════════════════════════════════════════════════════
+// CHECKBOX "IVA" — SUMA 13% A LOS MONTOS Y METAS DE VENTA
+// ═══════════════════════════════════════════════════════════════
+// Cuando está activo (checkbox "IVA"), suma 13% a:
+//   • Monto acumulado de tienda (venta de dispositivos/accesorios)
+//   • Meta de tienda (mensual)
+//   • Monto acumulado de cada asesor
+//   • Meta de cada asesor (mensual)
+//   • Meta diaria de tienda (y el "faltante para la meta")
+// Garex e Insurama NUNCA se ven afectados: ni sus montos cobrados
+// ni sus incentivos, porque salen de tablas de precios fijas aparte.
+// Es una preferencia visual guardada en este navegador (no se sube a
+// la nube) y NO modifica los datos guardados, solo lo que se muestra.
+let iva13Activo = localStorage.getItem("iva13Activo") === "1";
+
+// Aplica el 13% a un monto si el toggle está activo; si no, lo deja igual.
+function conIVA(monto) {
+    const n = monto || 0;
+    return iva13Activo ? n * 1.13 : n;
+}
+
+// Se llama desde el checkbox "IVA" en la pantalla de Ventas
+function toggleIVA13() {
+    const chk = document.getElementById("checkIVA");
+    iva13Activo = !!(chk && chk.checked);
+    localStorage.setItem("iva13Activo", iva13Activo ? "1" : "0");
+    // Refresca todos los montos visibles con/sin el 13%
+    if (typeof recalcularMontoVentaTotal === "function") recalcularMontoVentaTotal();
+    if (typeof renderTodo === "function") renderTodo();
+    if (typeof actualizarCumplimientoAsesorVisual === "function") actualizarCumplimientoAsesorVisual();
+}
+
+// Sincroniza el estado visual del checkbox con el valor guardado (al cargar la página)
+document.addEventListener("DOMContentLoaded", () => {
+    const chk = document.getElementById("checkIVA");
+    if (chk) chk.checked = iva13Activo;
+});
+
+const METAS_SOS_DEFAULT = { conversion: 0, accesorizacion: 0, ticket: 0, qr: 0, tradeIn: 0 };
+// METAS_SOS se declara más abajo junto con METAS_TIENDA y appData, como parte del mes
+// actualmente seleccionado dentro de datosPorMes (ver "MODELO DE DATOS POR MES").
+
+function guardarMetasSOS() {
+    const conv  = parseFloat(document.getElementById("cfgMetaConversion").value);
+    const acc   = parseFloat(document.getElementById("cfgMetaAccesorizacion").value);
+    const tick  = parseFloat(document.getElementById("cfgMetaTicket").value);
+    const qr    = parseFloat(document.getElementById("cfgMetaQR").value);
+    // La meta de Trade-In es opcional: si el campo está vacío se guarda como 0 (sin meta).
+    const elTradeIn = document.getElementById("cfgMetaTradeIn");
+    const tradeIn = elTradeIn ? (parseFloat(elTradeIn.value) || 0) : (METAS_SOS.tradeIn || 0);
+
+    if (isNaN(conv) || isNaN(acc) || isNaN(tick) || isNaN(qr) || conv <= 0 || acc <= 0 || tick <= 0 || qr < 0 || tradeIn < 0) {
+        mostrarAlerta("Por favor ingresa valores válidos para las metas (las metas de QR y Trade-In pueden ser 0).", "warning");
+        return;
     }
 
-    body { padding-top: 74px; }
+    METAS_SOS = { conversion: conv, accesorizacion: acc, ticket: tick, qr: qr, tradeIn: tradeIn };
+    datosPorMes[mesSeleccionado].metasSOS = METAS_SOS;
+    guardarDatosPorMes();
 
-    /* Navbar: se convierte en una barra deslizable horizontalmente */
-    .navbar {
-        width: calc(100% - 16px);
-        left: 8px;
-        right: 8px;
-        top: 8px;
-        transform: none;
-        border-radius: 20px;
-        height: auto;
-        padding: 10px 12px;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
+    // Actualizar los badges de meta en la pestaña Ventas
+    document.getElementById("metaVisualConv").textContent  = `${conv.toFixed(1)}%`;
+    document.getElementById("metaVisualAcc").textContent   = `${acc.toFixed(1)}%`;
+    document.getElementById("metaVisualTick").textContent  = `$${tick.toLocaleString()}`;
+    document.getElementById("metaVisualQR").textContent    = `${qr}`;
+    const badgeTI = document.getElementById("metaVisualTradeIn");
+    if (badgeTI) badgeTI.textContent = `${tradeIn}`;
+
+    sincronizarYRenderizar();
+    mostrarAlerta("Metas del Plan SOS actualizadas correctamente.", "success");
+}
+
+// META MENSUAL DE LA TIENDA — cargada desde localStorage (editable en Configuración)
+// Independiente de la meta individual de cada asesor. Se usa como referencia de la meta
+// total de la tienda, desglosada por categoría de venta, unidades, Office y servicio técnico.
+const METAS_TIENDA_DEFAULT = {
+    ventas: { mac: 0, ipad: 0, iphone: 0, watch: 0, airpods: 0, acc_apple: 0, acc_terceros: 0, audio: 0, demos: 0, garex: 0 },
+    unidades: { mac: 0, ipad: 0, iphone: 0, watch: 0, airpods: 0 },
+    office: { personal365: 0, homeStudent: 0 },
+    servicioTecnico: { activo: false, meta: 0 }
+};
+
+function clonarMetasTiendaDefault() {
+    return JSON.parse(JSON.stringify(METAS_TIENDA_DEFAULT));
+}
+
+// METAS_TIENDA se declara más abajo junto con METAS_SOS y appData (ver "MODELO DE DATOS
+// POR MES"). clonarMetasTiendaDefault() se sigue usando como base para meses nuevos.
+
+// Carga los valores guardados de METAS_TIENDA en los inputs del panel de Configuración
+function cargarMetaTiendaEnInputs() {
+    document.getElementById("cfgMetaTiendaVenta_mac").value          = METAS_TIENDA.ventas.mac;
+    document.getElementById("cfgMetaTiendaVenta_ipad").value         = METAS_TIENDA.ventas.ipad;
+    document.getElementById("cfgMetaTiendaVenta_iphone").value       = METAS_TIENDA.ventas.iphone;
+    document.getElementById("cfgMetaTiendaVenta_watch").value        = METAS_TIENDA.ventas.watch;
+    document.getElementById("cfgMetaTiendaVenta_airpods").value      = METAS_TIENDA.ventas.airpods;
+    document.getElementById("cfgMetaTiendaVenta_acc_apple").value    = METAS_TIENDA.ventas.acc_apple;
+    document.getElementById("cfgMetaTiendaVenta_acc_terceros").value = METAS_TIENDA.ventas.acc_terceros;
+    document.getElementById("cfgMetaTiendaVenta_audio").value        = METAS_TIENDA.ventas.audio;
+    document.getElementById("cfgMetaTiendaVenta_demos").value        = METAS_TIENDA.ventas.demos;
+    document.getElementById("cfgMetaTiendaVenta_garex").value        = METAS_TIENDA.ventas.garex;
+
+    document.getElementById("cfgMetaTiendaUnidad_mac").value     = METAS_TIENDA.unidades.mac;
+    document.getElementById("cfgMetaTiendaUnidad_ipad").value    = METAS_TIENDA.unidades.ipad;
+    document.getElementById("cfgMetaTiendaUnidad_iphone").value  = METAS_TIENDA.unidades.iphone;
+    document.getElementById("cfgMetaTiendaUnidad_watch").value   = METAS_TIENDA.unidades.watch;
+    document.getElementById("cfgMetaTiendaUnidad_airpods").value = METAS_TIENDA.unidades.airpods;
+
+    document.getElementById("cfgMetaTiendaOfficePersonal365").value  = METAS_TIENDA.office.personal365;
+    document.getElementById("cfgMetaTiendaOfficeHomeStudent").value  = METAS_TIENDA.office.homeStudent;
+
+    document.getElementById("chkServicioTecnicoTienda").checked = METAS_TIENDA.servicioTecnico.activo;
+    document.getElementById("cfgMetaTiendaServicioTecnico").value    = METAS_TIENDA.servicioTecnico.meta;
+    document.getElementById("cfgMetaTiendaServicioTecnico").disabled = !METAS_TIENDA.servicioTecnico.activo;
+}
+
+// Habilita o deshabilita el campo de meta de servicio técnico según el checkbox
+function toggleServicioTecnicoTienda() {
+    const activo = document.getElementById("chkServicioTecnicoTienda").checked;
+    const input = document.getElementById("cfgMetaTiendaServicioTecnico");
+    input.disabled = !activo;
+    if (!activo) input.value = 0;
+}
+
+// Lee todos los inputs del panel, valida y guarda la Meta Mensual de la Tienda
+function guardarMetaTienda() {
+    const idsVenta = ["mac", "ipad", "iphone", "watch", "airpods", "acc_apple", "acc_terceros", "audio", "demos", "garex"];
+    const idsUnidad = ["mac", "ipad", "iphone", "watch", "airpods"];
+
+    const nuevasVentas = {};
+    for (const cat of idsVenta) {
+        const val = parseFloat(document.getElementById(`cfgMetaTiendaVenta_${cat}`).value);
+        if (isNaN(val) || val < 0) {
+            mostrarAlerta("Por favor ingresa valores válidos (0 o mayores) en las metas de venta por categoría.", "warning");
+            return;
+        }
+        nuevasVentas[cat] = val;
     }
-    .navbar h2 { display: none; }
-    .navbar > div {
-        justify-content: space-between;
-        width: 100%;
-    }
-    .navbar ul {
-        gap: 6px;
-        flex: 1;
-        justify-content: flex-start;
-    }
-    .navbar ul li {
-        font-size: 12px;
-        padding: 7px 11px;
-    }
-    .theme-toggle-btn { flex-shrink: 0; }
 
-    /* Contenido general */
-    .contenido { padding: 16px 14px 40px 14px; }
-    .header { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 22px; }
-    .header h1 { font-size: 22px; }
-
-    /* Rejillas de dos columnas -> una sola columna */
-    .grid-2-col,
-    .a-grid-categorias,
-    .ra-grid-3,
-    .ra-grid-4,
-    .ra-meta-cat-grid,
-    .a-proteccion-grid .grid-2-col {
-        grid-template-columns: 1fr !important;
+    const nuevasUnidades = {};
+    for (const cat of idsUnidad) {
+        const val = parseFloat(document.getElementById(`cfgMetaTiendaUnidad_${cat}`).value);
+        if (isNaN(val) || val < 0) {
+            mostrarAlerta("Por favor ingresa valores válidos (0 o mayores) en las metas de unidades.", "warning");
+            return;
+        }
+        nuevasUnidades[cat] = val;
     }
 
-    /* Tarjetas resumen (SOS, top vendedores) ya se ajustan a 1 col a los 780px,
-       pero achicamos paddings para que respiren mejor en pantallas angostas */
-    .v-hero, .v-glass, .a-card {
-        padding: 18px 16px;
+    const personal365 = parseFloat(document.getElementById("cfgMetaTiendaOfficePersonal365").value);
+    const homeStudent = parseFloat(document.getElementById("cfgMetaTiendaOfficeHomeStudent").value);
+    if (isNaN(personal365) || personal365 < 0 || isNaN(homeStudent) || homeStudent < 0) {
+        mostrarAlerta("Por favor ingresa valores válidos (0 o mayores) en las metas de Microsoft Office.", "warning");
+        return;
     }
 
-    .v-pill-row { grid-template-columns: repeat(2, 1fr); }
-
-    /* Fila de ediciÃ³n de asesor: nombre y % apilados, botones en fila propia */
-    .asesor-config-row {
-        grid-template-columns: 1fr auto;
-        grid-template-areas:
-            "nombre nombre"
-            "porcentaje porcentaje"
-            "guardar borrar";
-        row-gap: 8px;
+    const servicioActivo = document.getElementById("chkServicioTecnicoTienda").checked;
+    const servicioMeta = parseFloat(document.getElementById("cfgMetaTiendaServicioTecnico").value) || 0;
+    if (servicioActivo && (isNaN(servicioMeta) || servicioMeta < 0)) {
+        mostrarAlerta("Por favor ingresa un valor válido (0 o mayor) en la meta de Servicio Técnico.", "warning");
+        return;
     }
-    #listaAsesoresConfig input[id^="cfgNombreAsesor_"] { grid-area: nombre; }
-    #listaAsesoresConfig input[id^="cfgPorcentajeAsesor_"] { grid-area: porcentaje; max-width: 100px; }
-    #listaAsesoresConfig button.asesor-config-save { grid-area: guardar; }
-    #listaAsesoresConfig button.asesor-config-del { grid-area: borrar; }
 
-    /* Calendario: celdas mÃ¡s compactas para que quepan las 7 columnas */
-    .cal-grid { gap: 3px; }
-    .cal-celda { padding: 4px; min-height: 56px; }
-    .cal-dia-num { font-size: 11px; }
-    .cal-evento-pill { font-size: 9px; padding: 1px 4px; }
+    METAS_TIENDA = {
+        ventas: nuevasVentas,
+        unidades: nuevasUnidades,
+        office: { personal365: personal365, homeStudent: homeStudent },
+        servicioTecnico: { activo: servicioActivo, meta: servicioActivo ? servicioMeta : 0 }
+    };
+    datosPorMes[mesSeleccionado].metasTienda = METAS_TIENDA;
+    guardarDatosPorMes();
 
-    /* Tablas: texto un poco mÃ¡s pequeÃ±o dentro del contenedor con scroll */
-    .tabla-scroll table { font-size: 11px !important; }
+    // La meta ($) de cada asesor se calcula a partir de su % sobre esta meta de tienda: hay que refrescar todo
+    renderTodo();
+    actualizarCumplimientoAsesorVisual();
 
-    /* Botones de acciÃ³n a ancho completo se ven mejor apilados en vertical */
-    .modal-actions { flex-direction: column-reverse; }
-    .modal-btn { width: 100%; }
+    mostrarAlerta("Meta Mensual de la Tienda actualizada correctamente.", "success");
+}
 
-    /* Encabezado de calendario: el tÃ­tulo (fechas) pasa a su propia fila,
-       arriba de los botones de navegaciÃ³n, para que nunca se aplaste
-       (afecta sobre todo a "Esta semana", cuyo texto es mÃ¡s largo) */
-    .cal-header {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        column-gap: 8px;
-        row-gap: 10px;
-        align-items: center;
+
+
+// GAREX (Garantía Extendida): Mac/iPad/Watch/AirPods/Audio a 36 Meses; iPhone a 12 y 24 Meses
+const TABLA_GAREX = {
+    "Mac":     { "36 Meses": 2.5 },
+    "iPad":    { "36 Meses": 2.5 },
+    "iPhone":  { "12 Meses": 2.5, "24 Meses": 2.5 },
+    "Watch":   { "36 Meses": 2 },
+    "AirPods": { "36 Meses": 1 },
+    "Audio":   { "36 Meses": 1 }
+};
+
+// INSURAMA (Seguros): Mac/iPad/iPhone/Watch a 12/18/24 Meses, según cobertura disponible por dispositivo
+const TABLA_INSURAMA = {
+    "Mac": {
+        "Daño Accidental":                  { "12 Meses": 2.5, "18 Meses": 4,   "24 Meses": 4 },
+        "Robo & Hurto + Daño Accidental":   { "12 Meses": 4.5, "18 Meses": 7,   "24 Meses": 7 }
+    },
+    "iPad": {
+        "Robo & Hurto":                     { "12 Meses": 2.5, "18 Meses": 4,   "24 Meses": 4 },
+        "Robo & Hurto + Daño Accidental":   { "12 Meses": 4.5, "18 Meses": 7,   "24 Meses": 7 }
+    },
+    "iPhone": {
+        "Robo & Hurto":                     { "12 Meses": 3.5, "18 Meses": 5.5, "24 Meses": 5.5 },
+        "Robo & Hurto + Daño Accidental":   { "12 Meses": 7,   "18 Meses": 11,  "24 Meses": 11 }
+    },
+    "Watch": {
+        "Robo & Hurto":                     { "12 Meses": 1,   "18 Meses": 1,   "24 Meses": 1 },
+        "Robo & Hurto + Daño Accidental":   { "12 Meses": 2,   "18 Meses": 3,   "24 Meses": 3 }
     }
-    .cal-titulo { grid-row: 1; grid-column: 1 / -1; text-align: center; font-size: 14px; }
-    .cal-header button.cal-nav-btn:nth-of-type(1) { grid-row: 2; grid-column: 1; justify-self: start; }
-    .cal-header button.cal-nav-btn:nth-of-type(2) { grid-row: 2; grid-column: 2; justify-self: center; }
-    .cal-hoy-btn { grid-row: 2; grid-column: 3; justify-self: end; padding: 6px 10px; font-size: 11px; }
+};
 
-    /* Franja de Venta/Meta/QR/Trade-In dentro del resumen de asesores:
-       2 columnas en vez de 4 para que las etiquetas no se corten */
-    .ra-stat-strip { grid-template-columns: repeat(2, 1fr); }
+// Devuelve el incentivo unitario ($) para una combinación dada, o 0 si no existe
+function obtenerIncentivoGarex(dispositivo, duracion) {
+    return (TABLA_GAREX[dispositivo] && TABLA_GAREX[dispositivo][duracion]) || 0;
 }
-
-@media (max-width: 380px) {
-    .navbar ul li { font-size: 11px; padding: 6px 9px; }
-    .v-pill-row { grid-template-columns: 1fr; }
+function obtenerIncentivoInsurama(dispositivo, cobertura, duracion) {
+    return (TABLA_INSURAMA[dispositivo] && TABLA_INSURAMA[dispositivo][cobertura] && TABLA_INSURAMA[dispositivo][cobertura][duracion]) || 0;
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-/* QUITAR FLECHITAS (spinners) DE TODOS LOS CAMPOS NUMÃ‰RICOS */
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-input[type="number"] {
-    -moz-appearance: textfield;
-    appearance: textfield;
-}
+// ===================================================================
+// PRECIOS AL CLIENTE POR RANGO DE VALOR DEL DISPOSITIVO (Garex/Insurama)
+// Cada par es [limiteSuperiorDelRango, montoACobrar]. Se busca el primer
+// rango cuyo limite sea >= al precio del dispositivo ingresado.
+// ===================================================================
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-/* PANTALLA DE INICIO DE SESIÃ“N (Firebase Auth)              */
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-.login-overlay {
-    position: fixed;
-    inset: 0;
-    background: linear-gradient(160deg, #EFEFF4 0%, #E4E4EA 100%);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    padding: 20px;
-}
-.login-overlay.visible { display: flex; }
-.login-box {
-    width: 100%;
-    max-width: 380px;
-    background: rgba(255,255,255,0.65);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(255,255,255,0.6);
-    border-radius: 20px;
-    padding: 32px 28px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.12);
-}
-.login-box h2 { margin: 0 0 6px; font-size: 22px; color: #1D1D1F; }
-.login-sub { font-size: 13px; color: #6E6E73; margin: 0 0 22px; line-height: 1.4; }
-.login-box .form-group { margin-bottom: 14px; }
-.login-box .form-group label { display: block; font-size: 12px; font-weight: 600; color: #1D1D1F; margin-bottom: 5px; }
-.login-box .form-group input { width: 100%; box-sizing: border-box; }
-.login-box .btn-primary { width: 100%; margin-top: 6px; }
-.login-error { color: #FF3B30; font-size: 12.5px; margin: -4px 0 12px; }
-.login-foot { font-size: 11.5px; color: #86868B; margin: 18px 0 0; text-align: center; line-height: 1.4; }
+// GAREX: "general" aplica para Mac, iPad, Watch, AirPods y Audio (36 Meses)
+//        "iPhone" aplica solo para iPhone (12 y 24 Meses)
+const PRECIOS_GAREX_CLIENTE = {
+    general: { "36 Meses": [[50, 6], [100, 10], [250, 20], [500, 40], [1000, 50], [1500, 60], [2000, 70], [2500, 75], [3000, 85], [5000, 110]] },
+    iPhone: { "12 Meses": [[250, 13.33], [500, 26.67], [1000, 33.33], [1500, 40], [2000, 46.67], [2500, 50]], "24 Meses": [[250, 20], [500, 40], [1000, 50], [1500, 60], [2000, 70], [2500, 75]] }
+};
 
-body.dark-mode .login-overlay { background: linear-gradient(160deg, #050505 0%, #000000 100%); }
-body.dark-mode .login-box {
-    background: rgba(28,28,30,0.65);
-    border-color: rgba(255,255,255,0.1);
-}
-body.dark-mode .login-box h2 { color: #F2F2F7; }
-body.dark-mode .login-box .form-group label { color: #F2F2F7; }
-body.dark-mode .login-sub, body.dark-mode .login-foot { color: rgba(255,255,255,0.6); }
- 
-/* Orbes de color de fondo (mismo patrÃ³n que el resto de pestaÃ±as) */
-.h-orb {
-    position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: -1;
-    filter: blur(50px);
-    opacity: var(--orb-opacity);
-}
-.h-orb-blue  { width: 460px; height: 460px; background: radial-gradient(circle, var(--orb-asesores-blue) 0%, transparent 70%); top: -100px; left: -90px; }
-.h-orb-green { width: 360px; height: 360px; background: radial-gradient(circle, var(--orb-garex-green) 0%, transparent 70%); bottom: 20px; right: -60px; }
- 
-/* Contenedor con scroll horizontal en pantallas angostas (no rompe el diseÃ±o en celular) */
-.horario-scroll-wrap {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
- 
-/* Ãrea que se captura como imagen. Estos son los colores CLAROS por defecto
-   (modo claro), y tambiÃ©n los que se fuerzan durante la exportaciÃ³n real
-   (clase .modo-captura) sin importar el tema â€” ver el bloque "MODO OSCURO"
-   mÃ¡s abajo para los estilos que se aplican solo en pantalla. */
-.horario-captura-area {
-    background: #FFFFFF;
-    border-radius: 16px;
-    padding: 18px;
-    min-width: 640px;
-}
-.horario-captura-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 14px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #ECECEE;
-}
-.horario-captura-titulo {
-    font-size: 15px;
-    font-weight: 700;
-    color: #1D1D1F;
-    text-transform: capitalize;
-}
-.horario-captura-marca {
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(0,0,0,0.35);
-}
- 
-/* Grilla: 1 columna de nombre + 7 columnas de dÃ­as */
-.horario-grid {
-    display: grid;
-    grid-template-columns: 180px repeat(7, 1fr);
-    gap: 6px;
-}
-.horario-grid-header,
-.horario-fila {
-    display: contents;
-}
-.horario-head-cell {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: rgba(0,0,0,0.4);
-    text-align: center;
-    padding: 6px 4px 10px;
-    line-height: 1.5;
-}
-.horario-head-asesor { text-align: left; }
-.horario-head-daynum { font-weight: 400; opacity: 0.7; }
-
-/* "Hoy": resalta la columna del dÃ­a actual dentro de la semana visible (si esa
-   semana incluye hoy), igual que el punto rojo del mini calendario de Recordatorios */
-.horario-head-cell-hoy { color: #0071E3; }
-.horario-head-daynum-hoy {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 17px;
-    height: 17px;
-    padding: 0 3px;
-    border-radius: 999px;
-    background: #0071E3;
-    color: #FFFFFF;
-    font-weight: 700;
-    opacity: 1;
-}
-.horario-celda-hoy {
-    box-shadow: 0 0 0 1.5px #0071E3 inset;
-}
-body.dark-mode .horario-head-cell-hoy { color: #4DA3FF; }
-body.dark-mode .horario-head-daynum-hoy { background: #0A84FF; }
-body.dark-mode .horario-celda-hoy { box-shadow: 0 0 0 1.5px #0A84FF inset; }
-
-/* El resaltado de "hoy" es Ãºtil mientras se trabaja en la app, pero no tiene sentido en
-   la imagen descargada/compartida (el dÃ­a "actual" depende de cuÃ¡ndo se vea la imagen,
-   no de cuÃ¡ndo se generÃ³) â€” se anula igual que el modo oscuro justo durante la captura. */
-.horario-captura-area.modo-captura .horario-head-cell-hoy { color: inherit; }
-.horario-captura-area.modo-captura .horario-head-daynum-hoy {
-    background: transparent;
-    color: inherit;
-    font-weight: 400;
-    opacity: 0.7;
-}
-.horario-captura-area.modo-captura .horario-celda-hoy { box-shadow: none; }
-
-/* Fin de semana (SÃ¡b/Dom): tinte sutil para distinguirlas de un vistazo del resto
-   de la semana laboral. Cada fila y el encabezado tienen exactamente 8 hijos (1
-   columna de nombre/asesor + 7 dÃ­as), asÃ­ que la posiciÃ³n 7 siempre es SÃ¡bado y
-   la 8 siempre es Domingo. */
-.horario-grid-header > .horario-head-cell:nth-child(7),
-.horario-grid-header > .horario-head-cell:nth-child(8),
-.horario-fila > .horario-celda:nth-child(7),
-.horario-fila > .horario-celda:nth-child(8) {
-    background: rgba(0,113,227,0.045);
-}
-.horario-fila > .horario-celda:nth-child(7):hover,
-.horario-fila > .horario-celda:nth-child(8):hover {
-    background: rgba(0,113,227,0.09);
-}
-body.dark-mode .horario-grid-header > .horario-head-cell:nth-child(7),
-body.dark-mode .horario-grid-header > .horario-head-cell:nth-child(8),
-body.dark-mode .horario-fila > .horario-celda:nth-child(7),
-body.dark-mode .horario-fila > .horario-celda:nth-child(8) {
-    background: rgba(10,132,255,0.08);
-}
-body.dark-mode .horario-fila > .horario-celda:nth-child(7):hover,
-body.dark-mode .horario-fila > .horario-celda:nth-child(8):hover {
-    background: rgba(10,132,255,0.14);
-}
- 
-.horario-nombre-cell {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #1D1D1F;
-    padding: 10px 8px;
-    background: #F5F5F7;
-    border-radius: 10px;
-    transition: background 0.15s, box-shadow 0.15s, opacity 0.15s;
-}
-.horario-nombre-texto {
-    /* Nombre completo: si no cabe en una línea, baja a la siguiente (sin "...") */
-    overflow: visible;
-    text-overflow: clip;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    line-height: 1.25;
-    flex: 1;
-    min-width: 0;
-}
-.horario-drag-handle {
-    flex-shrink: 0;
-    width: 20px;
-    height: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(0,0,0,0.28);
-    font-size: 14px;
-    cursor: grab;
-    touch-action: none;
-    user-select: none;
-}
-.horario-drag-handle:hover { color: rgba(0,0,0,0.55); }
- 
-/* Fila que se estÃ¡ arrastrando */
-.horario-nombre-cell.horario-arrastrando {
-    opacity: 0.5;
-    box-shadow: 0 0 0 2px #0071E3 inset;
-    cursor: grabbing;
-}
-.horario-nombre-cell.horario-arrastrando .horario-drag-handle { cursor: grabbing; }
- 
-/* Fila sobre la que se soltarÃ­a al momento */
-.horario-nombre-cell.horario-drop-objetivo {
-    background: rgba(0,113,227,0.14);
-    box-shadow: 0 0 0 2px #0071E3 inset;
-}
- 
-.horario-mini-btn {
-    width: 22px;
-    height: 22px;
-    border: none;
-    border-radius: 6px;
-    background: transparent;
-    color: #6E6E73;
-    font-size: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-    padding: 0;
-    flex-shrink: 0;
-}
-.horario-mini-btn:hover:not(:disabled) { background: #E5E5EA; color: #1D1D1F; }
-.horario-mini-btn:disabled { opacity: 0.25; cursor: default; }
-.horario-mini-btn-del:hover:not(:disabled) { background: rgba(255,59,48,0.14); color: #FF3B30; }
- 
-.horario-avatar {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: #0071E3;
-    color: #FFFFFF;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 700;
-    flex-shrink: 0;
-}
- 
-.horario-celda {
-    min-height: 56px;
-    border-radius: 10px;
-    padding: 5px;
-    cursor: pointer;
-    background: #F5F5F7;
-    border: 1px solid #ECECEE;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.15s, border-color 0.15s;
-}
-.horario-celda:hover {
-    background: #EAEAF0;
-    border-color: #D8D8DE;
-}
-.horario-celda-vacia {
-    color: rgba(0,0,0,0.22);
-    font-size: 18px;
-    font-weight: 300;
-}
- 
-.horario-pill {
-    width: 100%;
-    text-align: center;
-    padding: 7px 4px;
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1.3;
-    word-break: break-word;
-}
- 
-/* Modo captura: oculta el "+" de celdas vacÃ­as y quita el hover, para
-   que la imagen generada se vea limpia y sin elementos de ediciÃ³n */
-/* IMAGEN DESCARGADA: la columna de nombres se ajusta al nombre más largo y el nombre
-   completo va en una sola línea. Se ocultan el ícono de arrastre y la ✕ (no sirven en la imagen). */
-.horario-captura-area.modo-captura { width: max-content; min-width: 640px; }
-.horario-captura-area.modo-captura .horario-grid { grid-template-columns: max-content repeat(7, minmax(90px, 1fr)); }
-.modo-captura .horario-drag-handle,
-.modo-captura .horario-mini-btn { display: none !important; }
-.modo-captura .horario-nombre-cell { padding-right: 14px; }
-.modo-captura .horario-nombre-texto { overflow: visible; text-overflow: clip; white-space: nowrap; flex: none; min-width: max-content; }
-.modo-captura .horario-celda-vacia { visibility: hidden; }
-.modo-captura .horario-celda { cursor: default; }
-.modo-captura .horario-celda:hover { background: #F5F5F7; border-color: #ECECEE; }
- 
-/* Leyenda de tipos de turno */
-.horario-leyenda {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-    margin-top: 14px;
-    font-size: 11px;
-    color: rgba(0,0,0,0.45);
-}
-.horario-leyenda-item { display: flex; align-items: center; gap: 5px; }
-.horario-leyenda-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
- 
-/* Botones de acciÃ³n (compartir / copiar) */
-.horario-acciones {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    margin-top: 18px;
-    flex-wrap: wrap;
-}
-.horario-btn-accion { width: auto; padding: 11px 18px; }
-.horario-btn-secundario { background: #6E6E73; }
-.horario-btn-secundario:hover { background: #7D7D82; }
- 
-/* Modal de ediciÃ³n de turno (reutiliza .modal-overlay / .modal-glass ya existentes) */
-.horario-modal { width: min(420px, 100%); }
-.horario-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 4px;
-    position: relative;
-    z-index: 1;
-}
-.horario-chip {
-    border: none;
-    border-radius: 999px;
-    padding: 9px 15px;
-    font-size: 12.5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.12s ease, filter 0.12s ease;
-}
-.horario-chip:hover { transform: translateY(-1px); filter: brightness(0.95); }
-
-/* Accesos rÃ¡pidos (valores fijos reutilizables, ej. "Horario normal" o "10am - 7pm"):
-   mismo look que los chips fijos, pero con una "x" pequeÃ±a superpuesta para poder
-   eliminarlos sin cerrar el modal. */
-.horario-chips-presets { margin-top: 2px; }
-.horario-chip-preset-wrap {
-    position: relative;
-    display: inline-flex;
-}
-.horario-chip-preset {
-    padding-right: 26px;
-}
-.horario-chip-preset-del {
-    position: absolute;
-    top: 50%;
-    right: 5px;
-    transform: translateY(-50%);
-    width: 16px;
-    height: 16px;
-    border: none;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.12);
-    color: rgba(0,0,0,0.55);
-    font-size: 9px;
-    line-height: 1;
-    cursor: pointer;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.horario-chip-preset-del:hover { background: rgba(255,59,48,0.25); color: #FF3B30; }
-body.dark-mode .horario-chip-preset-del { background: rgba(255,255,255,0.18); color: rgba(255,255,255,0.7); }
-body.dark-mode .horario-chip-preset-del:hover { background: rgba(255,69,58,0.3); color: #FF453A; }
- 
-.horario-vacio-msg { color: rgba(0,0,0,0.35); }
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-/* CONSEJOS/AYUDA OPCIONALES â€” bloque <details> retrÃ¡ctil    */
-/* En vez de mostrar siempre los pÃ¡rrafos de explicaciÃ³n,    */
-/* quedan colapsados detrÃ¡s de un resumen con flecha; el     */
-/* usuario los abre solo si los necesita.                    */
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-.tip-toggle {
-    margin-bottom: 16px;
-}
-.tip-toggle summary {
-    cursor: pointer;
-    list-style: none;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #0071E3;
-    user-select: none;
-}
-.tip-toggle summary::-webkit-details-marker { display: none; }
-.tip-toggle summary::before {
-    content: "â€º";
-    display: inline-block;
-    font-size: 15px;
-    font-weight: 700;
-    line-height: 1;
-    transition: transform 0.2s ease;
-}
-.tip-toggle[open] summary::before { transform: rotate(90deg); }
-.tip-toggle summary:hover { color: #0077ED; }
-.tip-toggle-body { margin-top: 10px; }
-.tip-toggle-body p { margin: 0 0 10px; }
-.tip-toggle-body p:last-child { margin-bottom: 0; }
-body.dark-mode .tip-toggle summary { color: #0A84FF; }
-body.dark-mode .tip-toggle summary:hover { color: #3399FF; }
-
-/* Selector de color personalizado para un turno (checkbox "Elegir un color..." +
-   input type="color") dentro del modal de asignar turno. */
-.horario-color-input {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 40px;
-    padding: 3px;
-    border: 1px solid #D2D2D7;
-    border-radius: 8px;
-    cursor: pointer;
-    background: none;
-}
-.horario-color-input::-webkit-color-swatch-wrapper { padding: 0; }
-.horario-color-input::-webkit-color-swatch { border: none; border-radius: 6px; }
-body.dark-mode .horario-color-input { border-color: rgba(255,255,255,0.15); }
-
-/* Divide visualmente a los asesores reales de las personas agregadas solo al Horario */
-.horario-separador-label {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: rgba(0,0,0,0.35);
-    padding: 10px 4px 4px;
-}
-body.dark-mode .horario-separador-label { color: rgba(255,255,255,0.4); }
-body.dark-mode .horario-captura-area:not(.modo-captura) .horario-separador-label {
-    color: rgba(255,255,255,0.4);
-}
-
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   MODO OSCURO â€” pestaÃ±a Horario
-   La grilla se adapta visualmente al modo oscuro para verse bien en
-   pantalla, PERO al generar la imagen para compartir (se agrega la
-   clase .modo-captura justo durante la captura con html2canvas) se
-   fuerza de vuelta a los colores claros originales, asÃ­ la imagen
-   compartida siempre se ve igual sin importar el tema de quien la genera.
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-body.dark-mode .horario-captura-area:not(.modo-captura) {
-    background: #1C1C1E;
-}
-body.dark-mode .horario-captura-area:not(.modo-captura) .horario-captura-header {
-    border-bottom-color: rgba(255,255,255,0.12);
-}
-body.dark-mode .horario-captura-area:not(.modo-captura) .horario-captura-titulo {
-    color: #F2F2F7;
-}
-body.dark-mode .horario-captura-area:not(.modo-captura) .horario-captura-marca {
-    color: rgba(255,255,255,0.4);
-}
-body.dark-mode .horario-captura-area:not(.modo-captura) .horario-head-cell {
-    color: rgba(255,255,255,0.5);
-}
-body.dark-mode .horario-captura-area:not(.modo-captura) .horario-vacio-msg {
-    color: rgba(255,255,255,0.4);
-}
-body.dark-mode .horario-captura-area:not(.modo-captura) .horario-nombre-cell {
-    background: rgba(255,255,255,0.08);
-    color: #F2F2F7;
-}
-body.dark-mode .horario-captura-area:not(.modo-captura) .horario-nombre-cell.horario-drop-objetivo {
-    background: rgba(10,132,255,0.28);
-}
-body.dark-mode .horario-captura-area:not(.modo-captura) .horario-drag-handle {
-    color: rgba(255,255,255,0.35);
-}
-body.dark-mode .horario-captura-area:not(.modo-captura) .horario-drag-handle:hover {
-    color: rgba(255,255,255,0.7);
-}
-body.dark-mode .horario-captura-area:not(.modo-captura) .horario-mini-btn {
-    color: rgba(255,255,255,0.55);
-}
-body.dark-mode .horario-captura-area:not(.modo-captura) .horario-mini-btn:hover:not(:disabled) {
-    background: rgba(255,255,255,0.14);
-    color: #F2F2F7;
-}
-body.dark-mode .horario-captura-area:not(.modo-captura) .horario-mini-btn-del:hover:not(:disabled) {
-    background: rgba(255,69,58,0.2);
-    color: #FF453A;
-}
-body.dark-mode .horario-captura-area:not(.modo-captura) .horario-celda {
-    background: rgba(255,255,255,0.06);
-    border-color: rgba(255,255,255,0.1);
-}
-body.dark-mode .horario-captura-area:not(.modo-captura) .horario-celda:hover {
-    background: rgba(255,255,255,0.1);
-    border-color: rgba(255,255,255,0.18);
-}
-body.dark-mode .horario-captura-area:not(.modo-captura) .horario-celda-vacia {
-    color: rgba(255,255,255,0.25);
-}
-body.dark-mode .horario-leyenda { color: rgba(255,255,255,0.75) !important; }
-body.dark-mode .horario-btn-secundario { background: #48484A; }
-body.dark-mode .horario-btn-secundario:hover { background: #58585A; }
- 
-/* Responsive: en celular, la grilla se compacta para necesitar menos scroll
-   horizontal. El ancho de 640px y los tamaÃ±os originales se reservan solo
-   para el momento de generar la imagen a compartir (clase .modo-captura),
-   asÃ­ la imagen exportada se ve siempre igual sin importar el tamaÃ±o de
-   pantalla desde donde se generÃ³. */
-@media (max-width: 640px) {
-    .horario-acciones { flex-direction: column; }
-    .horario-btn-accion { width: 100%; }
-
-    .horario-captura-area:not(.modo-captura) { min-width: 590px; padding: 14px; }
-    .horario-captura-area:not(.modo-captura) .horario-grid {
-        grid-template-columns: 116px repeat(7, minmax(56px, 1fr));
-        gap: 4px;
+// INSURAMA: por dispositivo, cobertura y duracion
+const PRECIOS_INSURAMA_CLIENTE = {
+    "Mac": {
+        "Daño Accidental": {
+            "12 Meses": [[800, 45], [1000, 60], [1500, 75], [2000, 130], [2500, 155], [4250, 195], [5000, 280], [6250, 340]],
+            "18 Meses": [[800, 65], [1000, 85], [1500, 110], [2000, 180], [2500, 215], [4250, 275], [5000, 390], [6250, 475]],
+            "24 Meses": [[800, 70], [1000, 100], [1500, 125], [2000, 210], [2500, 245], [4250, 310], [5000, 445], [6250, 540]]
+        },
+        "Robo & Hurto + Daño Accidental": {
+            "12 Meses": [[800, 70], [1000, 95], [1500, 130], [2000, 215], [2500, 280], [4250, 355], [5000, 510], [6250, 615]],
+            "18 Meses": [[800, 95], [1000, 130], [1500, 180], [2000, 305], [2500, 390], [4250, 500], [5000, 710], [6250, 865]],
+            "24 Meses": [[800, 110], [1000, 150], [1500, 210], [2000, 345], [2500, 450], [4250, 570], [5000, 810], [6250, 985]]
+        }
+    },
+    "iPad": {
+        "Robo & Hurto": {
+            "12 Meses": [[450, 25], [650, 40], [900, 55], [1250, 65], [1625, 85], [2000, 105], [2375, 125], [2625, 145], [2875, 160], [3125, 175], [3500, 190], [3875, 210], [5000, 285]],
+            "18 Meses": [[450, 35], [650, 55], [900, 75], [1250, 90], [1625, 116], [2000, 145], [2375, 175], [2625, 200], [2875, 220], [3125, 240], [3500, 265], [3875, 295], [5000, 400]],
+            "24 Meses": [[450, 40], [650, 60], [900, 85], [1250, 100], [1625, 135], [2000, 170], [2375, 200], [2625, 230], [2875, 255], [3125, 275], [3500, 305], [3875, 340], [5000, 455]]
+        },
+        "Robo & Hurto + Daño Accidental": {
+            "12 Meses": [[450, 50], [650, 80], [900, 110], [1250, 130], [1625, 170], [2000, 210], [2375, 260], [2625, 295], [2875, 325], [3125, 350], [3500, 390], [3875, 435], [5000, 570]],
+            "18 Meses": [[450, 70], [650, 110], [900, 155], [1250, 185], [1625, 235], [2000, 300], [2375, 360], [2625, 410], [2875, 450], [3125, 495], [3500, 545], [3875, 605], [5000, 800]],
+            "24 Meses": [[450, 80], [650, 125], [900, 175], [1250, 210], [1625, 270], [2000, 340], [2375, 410], [2625, 470], [2875, 515], [3125, 565], [3500, 620], [3875, 690], [5000, 915]]
+        }
+    },
+    "iPhone": {
+        "Robo & Hurto": {
+            "12 Meses": [[450, 40], [650, 64], [900, 90], [1250, 95], [1625, 140], [2000, 175], [2375, 210], [3000, 255]],
+            "18 Meses": [[450, 55], [650, 90], [900, 125], [1250, 135], [1625, 195], [2000, 245], [2375, 295], [3000, 360]],
+            "24 Meses": [[450, 65], [650, 105], [900, 140], [1250, 150], [1625, 220], [2000, 280], [2375, 340], [3000, 410]]
+        },
+        "Robo & Hurto + Daño Accidental": {
+            "12 Meses": [[450, 80], [650, 130], [900, 185], [1250, 195], [1625, 280], [2000, 355], [2375, 430], [3000, 520]],
+            "18 Meses": [[450, 115], [650, 180], [900, 255], [1250, 275], [1625, 395], [2000, 495], [2375, 600], [3000, 730]],
+            "24 Meses": [[450, 130], [650, 205], [900, 290], [1250, 310], [1625, 450], [2000, 565], [2375, 690], [3000, 835]]
+        }
+    },
+    "Watch": {
+        "Robo & Hurto": {
+            "12 Meses": [[450, 15], [650, 25], [900, 35], [1150, 45], [1400, 55]],
+            "18 Meses": [[450, 20], [650, 30], [900, 45], [1150, 60], [1400, 75]],
+            "24 Meses": [[450, 25], [650, 40], [900, 50], [1150, 70], [1400, 85]]
+        },
+        "Robo & Hurto + Daño Accidental": {
+            "12 Meses": [[450, 45], [650, 70], [900, 95], [1150, 110], [1400, 130]],
+            "18 Meses": [[450, 60], [650, 95], [900, 135], [1150, 155], [1400, 185]],
+            "24 Meses": [[450, 70], [650, 110], [900, 155], [1150, 175], [1400, 210]]
+        }
     }
-    .horario-captura-area:not(.modo-captura) .horario-head-cell { font-size: 10px; padding: 4px 2px 8px; }
-    .horario-captura-area:not(.modo-captura) .horario-nombre-cell { padding: 8px 6px; gap: 5px; font-size: 12px; }
-    .horario-captura-area:not(.modo-captura) .horario-avatar { width: 22px; height: 22px; font-size: 10px; }
-    .horario-captura-area:not(.modo-captura) .horario-drag-handle { width: 16px; }
-    .horario-captura-area:not(.modo-captura) .horario-mini-btn { width: 18px; height: 18px; }
-    .horario-captura-area:not(.modo-captura) .horario-celda { min-height: 46px; padding: 3px; }
-    .horario-captura-area:not(.modo-captura) .horario-pill { font-size: 9.5px; padding: 5px 3px; }
+};
 
-    /* Sombra sutil en el borde derecho del contenedor con scroll, como pista
-       visual de que hay mÃ¡s dÃ­as hacia la derecha */
-    .horario-scroll-wrap { position: relative; }
-    .horario-scroll-wrap::after {
-        content: "";
-        position: absolute;
-        top: 0; right: 0; bottom: 0;
-        width: 26px;
-        background: linear-gradient(to right, transparent, rgba(255,255,255,0.92));
-        pointer-events: none;
+// Busca en una lista de [limiteRango, monto] (ordenada ascendente) el primer
+// rango cuyo limite sea >= al precio del dispositivo. Si el precio excede
+// el rango más alto disponible, se usa el monto del rango más alto (tope).
+function buscarPrecioPorRango(precioDispositivo, listaRangos) {
+    if (!listaRangos || listaRangos.length === 0 || isNaN(precioDispositivo)) return 0;
+    for (const [limite, monto] of listaRangos) {
+        if (precioDispositivo <= limite) return monto;
     }
-    body.dark-mode .horario-scroll-wrap::after {
-        background: linear-gradient(to right, transparent, rgba(28,28,30,0.92));
+    return listaRangos[listaRangos.length - 1][1]; // Tope: precio mayor a todos los rangos
+}
+
+// Devuelve el precio a cobrar al cliente por un Garex, según dispositivo, duración y precio del equipo
+function calcularPrecioGarexCliente(dispositivo, duracion, precioDispositivo) {
+    const tabla = dispositivo === "iPhone" ? PRECIOS_GAREX_CLIENTE.iPhone : PRECIOS_GAREX_CLIENTE.general;
+    return buscarPrecioPorRango(precioDispositivo, tabla[duracion]);
+}
+
+// Devuelve el precio a cobrar al cliente por un Insurama, según dispositivo, cobertura, duración y precio del equipo
+function calcularPrecioInsuramaCliente(dispositivo, cobertura, duracion, precioDispositivo) {
+    const tabla = PRECIOS_INSURAMA_CLIENTE[dispositivo] && PRECIOS_INSURAMA_CLIENTE[dispositivo][cobertura];
+    return buscarPrecioPorRango(precioDispositivo, tabla ? tabla[duracion] : null);
+}
+
+// ESTRUCTURA DE CONTROL CENTRALIZADA
+function nuevoAsesor(nombre) {
+    return {
+        nombre: nombre,
+        porcentajeMeta: 0, // % de la Meta Mensual de la Tienda asignado a este asesor (la meta en $ se calcula automáticamente)
+        ventaSemanal: 0,
+        qr: 0,
+        tradeIn: 0,
+        montos: { mac:0, ipad:0, iphone:0, watch:0, airpods:0, audio:0, acc_apple:0, acc_terceros:0 },
+        unidades: { mac:0, ipad:0, iphone:0, watch:0, airpods:0, audio:0 },
+        ventasGarex: [],     // [{ dispositivo, duracion, cantidad, incentivoUnitario, incentivoTotal }]
+        ventasInsurama: []   // [{ dispositivo, cobertura, duracion, cantidad, incentivoUnitario, incentivoTotal }]
+    };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODELO DE DATOS POR MES
+// ═══════════════════════════════════════════════════════════════
+// Todo lo que se "acumula" mes a mes (Plan SOS, ventas/unidades/Garex/Insurama de cada
+// asesor, la lista de asesores en sí y sus % de meta, las Metas del Plan SOS y la Meta
+// Mensual de la Tienda) vive dentro de datosPorMes["YYYY-MM"]. Cambiar de mes con el
+// selector de la parte superior reasigna appData/METAS_SOS/METAS_TIENDA al bloque del mes
+// elegido; si ese mes no existía, se crea en blanco (asesores "Asesor 1/2/3" y metas en 0),
+// así cada mes arranca desde cero sin pisar los datos de los demás.
+//
+// Lo que NO se reinicia por mes (bitácoras, recordatorios, clínicas, horario semanal) sigue
+// guardado aparte, en variables globales independientes, igual que antes de este cambio.
+
+function mesISOActual() {
+    const hoy = new Date();
+    return `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}`;
+}
+
+// Devuelve un bloque de datos vacío para un mes que todavía no existe en datosPorMes.
+// Incluye horarioData/horarioOcultos porque el horario semanal de turnos también es
+// independiente por mes: como cada mes tiene su propia lista de asesores (mismas claves
+// "asesor0/1/2..." reutilizadas mes a mes para personas distintas), el horario de turnos
+// tiene que vivir junto a esos asesores para no mezclar el turno de una persona de un mes
+// con la de otra persona en otro mes que comparta la misma clave.
+function nuevoMesData() {
+    return {
+        appData: {
+            inicio: { conversion: 0, accesorizacion: 0, accesorizacionManual: false, accesorizacionManualValor: null, ticket: 0, trafico: 0, comentarios: "", oportunidades: "" },
+            asesores: {
+                asesor0: nuevoAsesor("Asesor 1"),
+                asesor1: nuevoAsesor("Asesor 2"),
+                asesor2: nuevoAsesor("Asesor 3")
+            }
+        },
+        metasSOS: { ...METAS_SOS_DEFAULT },
+        metasTienda: clonarMetasTiendaDefault(),
+        horarioData: {},
+        horarioOcultos: [],
+        horarioPersonasExtra: {}
+    };
+}
+
+// Completa campos faltantes de un bloque mensual guardado con una versión anterior de la
+// app (mismo propósito que las migraciones que existían antes de este cambio, aplicadas
+// ahora por mes en vez de una sola vez de forma global).
+let _migracionContadorId = 0;
+function normalizarMesData(datos) {
+    if (!datos.appData) datos.appData = nuevoMesData().appData;
+    if (!datos.appData.inicio) datos.appData.inicio = nuevoMesData().appData.inicio;
+    if (!datos.appData.asesores) datos.appData.asesores = {};
+    Object.keys(datos.appData.asesores).forEach(key => {
+        const a = datos.appData.asesores[key];
+        if (!a.ventasGarex) a.ventasGarex = [];
+        if (!a.ventasInsurama) a.ventasInsurama = [];
+        a.ventasGarex.forEach(v => { if (v.montoVenta === undefined) v.montoVenta = 0; if (v.id === undefined) v.id = "migrado_" + (_migracionContadorId++); });
+        a.ventasInsurama.forEach(v => { if (v.montoVenta === undefined) v.montoVenta = 0; if (v.id === undefined) v.id = "migrado_" + (_migracionContadorId++); });
+        if (a.porcentajeMeta === undefined) a.porcentajeMeta = 0;
+    });
+
+    if (!datos.metasSOS) datos.metasSOS = { ...METAS_SOS_DEFAULT };
+    if (datos.metasSOS.qr === undefined) datos.metasSOS.qr = 0;
+    if (datos.metasSOS.tradeIn === undefined) datos.metasSOS.tradeIn = 0;
+
+    if (!datos.metasTienda) datos.metasTienda = clonarMetasTiendaDefault();
+    const baseTienda = clonarMetasTiendaDefault();
+    datos.metasTienda.ventas = { ...baseTienda.ventas, ...(datos.metasTienda.ventas || {}) };
+    datos.metasTienda.unidades = { ...baseTienda.unidades, ...(datos.metasTienda.unidades || {}) };
+    datos.metasTienda.office = { ...baseTienda.office, ...(datos.metasTienda.office || {}) };
+    datos.metasTienda.servicioTecnico = { ...baseTienda.servicioTecnico, ...(datos.metasTienda.servicioTecnico || {}) };
+
+    if (!datos.horarioData) datos.horarioData = {};
+    if (!datos.horarioOcultos) datos.horarioOcultos = [];
+    if (!datos.horarioPersonasExtra) datos.horarioPersonasExtra = {};
+
+    return datos;
+}
+
+let datosPorMes = JSON.parse(localStorage.getItem("datosPorMes")) || {};
+let mesSeleccionado = localStorage.getItem("mesSeleccionado") || mesISOActual();
+
+// MIGRACIÓN ÚNICA: si el navegador tiene datos guardados con el modelo anterior (un solo
+// mes global, sin datosPorMes), se mueven al mes en que estábamos trabajando para no perder
+// nada de lo ya capturado. bitacoras vivía antes dentro de appData; se traslada a
+// bitacorasData (más abajo) para que quede fuera del ciclo mensual, igual que recordatorios
+// y clínicas.
+if (Object.keys(datosPorMes).length === 0) {
+    const appDataAntiguo = JSON.parse(localStorage.getItem("controlVentasData") || "null");
+    const metasSOSAntiguo = JSON.parse(localStorage.getItem("metasSOS") || "null");
+    const metasTiendaAntiguo = JSON.parse(localStorage.getItem("metasTienda") || "null");
+    if (appDataAntiguo || metasSOSAntiguo || metasTiendaAntiguo) {
+        datosPorMes[mesSeleccionado] = {
+            appData: {
+                inicio: (appDataAntiguo && appDataAntiguo.inicio) || nuevoMesData().appData.inicio,
+                asesores: (appDataAntiguo && appDataAntiguo.asesores) || nuevoMesData().appData.asesores
+            },
+            metasSOS: metasSOSAntiguo || { ...METAS_SOS_DEFAULT },
+            metasTienda: metasTiendaAntiguo || clonarMetasTiendaDefault()
+        };
+        if (appDataAntiguo && appDataAntiguo.bitacoras && !localStorage.getItem("bitacorasData")) {
+            localStorage.setItem("bitacorasData", JSON.stringify(appDataAntiguo.bitacoras));
+        }
     }
 }
 
+if (!datosPorMes[mesSeleccionado]) datosPorMes[mesSeleccionado] = nuevoMesData();
+normalizarMesData(datosPorMes[mesSeleccionado]);
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-/* METAS POR DISPOSITIVO â€” anillo con Ã­cono, unidades y monto */
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-.ra-dev-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 10px;
-}
-.ra-dev-tile {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 14px 6px 10px;
-    background: rgba(0,0,0,0.03);
-    border-radius: 10px;
-    min-width: 0;
-}
-.ra-dev-ring {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-.ra-dev-svg { position: absolute; inset: 0; }
-.ra-dev-track { stroke: rgba(0,0,0,0.08); }
-.ra-dev-icon { position: relative; display: flex; align-items: center; justify-content: center; }
-.ra-dev-icon .ra-muted { display: flex; color: #6E6E73; }
-.ra-dev-icon svg { width: 26px; height: 26px; margin: 0 !important; vertical-align: 0 !important; }
-.ra-dev-name { font-size: 12px; font-weight: 600; color: #1D1D1F; margin-top: 8px; }
-.ra-dev-units { font-size: 18px; font-weight: 700; line-height: 1.3; color: #1D1D1F; }
-.ra-dev-units .ra-muted { font-size: 14px; font-weight: 500; }
-.ra-dev-units-label { font-size: 11px; color: #86868B; line-height: 1.3; }
-.ra-dev-monto {
-    width: 100%;
-    margin-top: 6px;
-    padding-top: 6px;
-    border-top: 1px solid rgba(0,0,0,0.07);
-    font-size: 12px;
-    color: #1D1D1F;
-}
-.ra-dev-monto .ra-muted { font-weight: 400; }
-
-body.dark-mode .ra-dev-tile { background: rgba(255,255,255,0.05); }
-body.dark-mode .ra-dev-track { stroke: rgba(255,255,255,0.12); }
-body.dark-mode .ra-dev-icon .ra-muted { color: #AEAEB2; }
-body.dark-mode .ra-dev-name,
-body.dark-mode .ra-dev-units,
-body.dark-mode .ra-dev-monto { color: #F2F2F7; }
-body.dark-mode .ra-dev-units-label { color: #8E8E93; }
-body.dark-mode .ra-dev-monto { border-top-color: rgba(255,255,255,0.1); }
-
-@media (max-width: 640px) {
-    .ra-dev-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .ra-stat-value { font-size: 19px; }
+// MIGRACIÓN ÚNICA (horario): el horario semanal de turnos también pasó a ser independiente
+// por mes (ver nuevoMesData). Si el navegador tenía un horario guardado con el modelo
+// anterior (un solo horario global, en las claves "horarioData"/"horarioOcultos"), se
+// traslada al mes en que estábamos trabajando la primera vez que se carga esta versión,
+// para no perder los turnos ya cargados.
+if (!localStorage.getItem("horarioMigradoAMes")) {
+    const horarioDataAntiguo = JSON.parse(localStorage.getItem("horarioData") || "null");
+    const horarioOcultosAntiguo = JSON.parse(localStorage.getItem("horarioOcultos") || "null");
+    const yaTieneHorarioPropio = Object.keys(datosPorMes[mesSeleccionado].horarioData || {}).length > 0;
+    if (!yaTieneHorarioPropio && ((horarioDataAntiguo && Object.keys(horarioDataAntiguo).length > 0) || (horarioOcultosAntiguo && horarioOcultosAntiguo.length > 0))) {
+        datosPorMes[mesSeleccionado].horarioData = horarioDataAntiguo || {};
+        datosPorMes[mesSeleccionado].horarioOcultos = horarioOcultosAntiguo || [];
+    }
+    localStorage.setItem("horarioMigradoAMes", "1");
 }
 
-/* Meta junto al valor en QR / Trade-In del Resumen Ventas */
-.ra-stat-meta { font-size: 14px; font-weight: 500; color: #86868B; letter-spacing: 0; }
-body.dark-mode .ra-stat-meta { color: #8E8E93; }
+let appData = datosPorMes[mesSeleccionado].appData;
+let METAS_SOS = datosPorMes[mesSeleccionado].metasSOS;
+let METAS_TIENDA = datosPorMes[mesSeleccionado].metasTienda;
+
+// Bitácoras: antes vivían dentro de appData (por lo que se reiniciaban con cada mes); ahora
+// son su propia lista global, igual que recordatoriosData y clinicasData, porque son un
+// historial de notas operativas que no depende del mes de ventas que se esté viendo.
+let bitacorasData = JSON.parse(localStorage.getItem("bitacorasData")) || [];
+
+function guardarBitacoras() {
+    localStorage.setItem("bitacorasData", JSON.stringify(bitacorasData));
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
+}
+
+// Guarda TODOS los meses (datosPorMes) y cuál está seleccionado. Se usa en vez de guardar
+// appData/METAS_SOS/METAS_TIENDA por separado, porque los tres viven dentro del mismo
+// bloque mensual y ya están enlazados por referencia a datosPorMes[mesSeleccionado].
+function guardarDatosPorMes() {
+    localStorage.setItem("datosPorMes", JSON.stringify(datosPorMes));
+    localStorage.setItem("mesSeleccionado", mesSeleccionado);
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
+}
+
+function formatearMesLabel(mesISO) {
+    const [y, m] = mesISO.split("-").map(Number);
+    const nombre = new Date(y, m - 1, 1).toLocaleDateString("es-ES", { month: "long", year: "numeric" });
+    return nombre.charAt(0).toUpperCase() + nombre.slice(1);
+}
+
+function sumarMesesISO(mesISO, delta) {
+    let [y, m] = mesISO.split("-").map(Number);
+    m += delta;
+    while (m > 12) { m -= 12; y++; }
+    while (m < 1) { m += 12; y--; }
+    return `${y}-${String(m).padStart(2, "0")}`;
+}
+
+// Cambia el mes que se está viendo/editando con las flechas del selector: guarda lo que
+// hubiera pendiente de Garex/Insurama sin guardar (con confirmación, porque se perdería) y
+// salta al mes destino.
+function cambiarMesSeleccionado(delta) {
+    if (lineasGarexPendientes.length > 0 || lineasInsuramaPendientes.length > 0) {
+        const continuar = confirm("Tienes líneas de Garex/Insurama sin guardar. Si cambias de mes se perderán. ¿Deseas continuar?");
+        if (!continuar) return;
+        lineasGarexPendientes = [];
+        lineasInsuramaPendientes = [];
+    }
+    mesSeleccionado = sumarMesesISO(mesSeleccionado, delta);
+    irAlMesSeleccionadoActual();
+}
+
+// Salta directo al mes real de hoy (botón "Mes actual" del selector)
+function irAMesActual() {
+    if (mesSeleccionado === mesISOActual()) return;
+    mesSeleccionado = mesISOActual();
+    irAlMesSeleccionadoActual();
+}
+
+// Aplica el mesSeleccionado vigente: crea el bloque del mes si hace falta, reasigna las
+// variables globales que usa el resto de la app (appData/METAS_SOS/METAS_TIENDA) y vuelve a
+// renderizar todo lo que depende de ellas.
+function irAlMesSeleccionadoActual() {
+    if (!datosPorMes[mesSeleccionado]) datosPorMes[mesSeleccionado] = nuevoMesData();
+    normalizarMesData(datosPorMes[mesSeleccionado]);
+
+    appData = datosPorMes[mesSeleccionado].appData;
+    METAS_SOS = datosPorMes[mesSeleccionado].metasSOS;
+    METAS_TIENDA = datosPorMes[mesSeleccionado].metasTienda;
+    if (typeof datosPorMes[mesSeleccionado].horarioData !== "undefined") horarioData = datosPorMes[mesSeleccionado].horarioData;
+    if (typeof datosPorMes[mesSeleccionado].horarioOcultos !== "undefined") horarioOcultos = datosPorMes[mesSeleccionado].horarioOcultos;
+    if (typeof datosPorMes[mesSeleccionado].horarioPersonasExtra !== "undefined") horarioPersonasExtra = datosPorMes[mesSeleccionado].horarioPersonasExtra;
+
+    // Salta la semana visible del Horario a una que caiga dentro del mes seleccionado (el 1°
+    // del mes, o "hoy" si el mes elegido es el mes real actual), para no quedarse viendo una
+    // semana de otro mes con el horario de un mes distinto.
+    if (typeof horarioFechaBase !== "undefined") {
+        horarioFechaBase = (mesSeleccionado === mesISOActual())
+            ? new Date()
+            : new Date(`${mesSeleccionado}-01T00:00:00`);
+    }
+
+    localStorage.setItem("mesSeleccionado", mesSeleccionado);
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
+
+    renderListaPendiente("garex");
+    renderListaPendiente("insurama");
+    if (typeof cargarDatosInicioEnInputs === "function") cargarDatosInicioEnInputs();
+    if (typeof cargarMetasSOSEnInputs === "function") cargarMetasSOSEnInputs();
+    if (typeof cargarMetaTiendaEnInputs === "function") cargarMetaTiendaEnInputs();
+    renderSelectAsesor(false);
+    actualizarCumplimientoAsesorVisual();
+    renderTodo();
+    // El mini calendario (pestaña Recordatorios) tiene su propia navegación (calAño/calMes),
+    // independiente del selector de mes de arriba. Se sincroniza aquí para que, al cambiar
+    // de mes con el selector, el calendario salte directo a ese mes en vez de quedarse
+    // mostrando el mes que tuviera navegado antes (lo que hacía parecer que "otros meses"
+    // se seguían mezclando).
+    if (typeof sincronizarCalendarioConMesSeleccionado === "function") sincronizarCalendarioConMesSeleccionado();
+    renderCalendario();
+    if (typeof renderRecordatorios === "function") renderRecordatorios();
+    if (typeof renderClinicas === "function") renderClinicas();
+    if (typeof renderHorario === "function") renderHorario();
+    actualizarSelectorMes();
+}
+
+// Actualiza el texto y los botones del selector de mes en el encabezado
+function actualizarSelectorMes() {
+    const label = formatearMesLabel(mesSeleccionado);
+
+    const lbl = document.getElementById("mesSelectorLabel");
+    if (lbl) lbl.textContent = label;
+
+    // Mismo nombre de mes, repetido junto a "Gestión de Asesores" en Configuración, para
+    // que quede claro a qué mes pertenece la lista de asesores que se está editando ahí.
+    const lblConfig = document.getElementById("mesSelectorConfigLabel");
+    if (lblConfig) lblConfig.textContent = label;
+
+    const esMesActual = mesSeleccionado === mesISOActual();
+    const badge = document.getElementById("mesSelectorActualBadge");
+    if (badge) badge.style.display = esMesActual ? "inline-flex" : "none";
+
+    const btnHoy = document.getElementById("mesSelectorHoyBtn");
+    if (btnHoy) btnHoy.style.display = esMesActual ? "none" : "inline-flex";
+}
+
+// Suma las 10 categorías de "Meta de Venta por Categoría" más la meta de Servicio Técnico
+// (si está activo) para obtener la Meta Total de la Tienda ($)
+function calcularMetaTotalTienda() {
+    const v = METAS_TIENDA.ventas;
+    const st = METAS_TIENDA.servicioTecnico;
+    const totalVentas = (v.mac || 0) + (v.ipad || 0) + (v.iphone || 0) + (v.watch || 0) + (v.airpods || 0) +
+           (v.acc_apple || 0) + (v.acc_terceros || 0) + (v.audio || 0) + (v.demos || 0) + (v.garex || 0);
+    const totalServicioTecnico = (st && st.activo) ? (st.meta || 0) : 0;
+    return totalVentas + totalServicioTecnico;
+}
+
+// Calcula la meta mensual ($) de un asesor según el % de la Meta de la Tienda que se le asignó
+function calcularMetaAsesor(asor) {
+    const porcentaje = asor.porcentajeMeta || 0;
+    return (porcentaje / 100) * calcularMetaTotalTienda();
+}
+
+// LÍNEAS PENDIENTES DE AGREGAR (estado temporal en memoria, no se guarda hasta presionar "Actualizar Asesor")
+let lineasGarexPendientes = [];
+let lineasInsuramaPendientes = [];
+
+// ═══════════════════════════════════════════
+// MODO OSCURO
+// ═══════════════════════════════════════════
+const mediaModoOscuroSistema = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+
+const ICONO_SOL = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><line x1="12" y1="1.8" x2="12" y2="4.3"/><line x1="12" y1="19.7" x2="12" y2="22.2"/><line x1="1.8" y1="12" x2="4.3" y2="12"/><line x1="19.7" y1="12" x2="22.2" y2="12"/><line x1="4.6" y1="4.6" x2="6.3" y2="6.3"/><line x1="17.7" y1="17.7" x2="19.4" y2="19.4"/><line x1="4.6" y1="19.4" x2="6.3" y2="17.7"/><line x1="17.7" y1="6.3" x2="19.4" y2="4.6"/></svg>';
+const ICONO_LUNA = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>';
+
+function aplicarModoOscuro(activar) {
+    document.body.classList.toggle("dark-mode", activar);
+
+    const btnNav = document.getElementById("btnThemeToggle");
+    if (btnNav) {
+        btnNav.innerHTML = activar ? ICONO_SOL : ICONO_LUNA;
+        btnNav.title = activar ? "Cambiar a modo claro" : "Cambiar a modo oscuro";
+    }
+    const btnCfg = document.getElementById("btnThemeToggleConfig");
+    if (btnCfg) {
+        btnCfg.innerHTML = (activar ? ICONO_SOL : ICONO_LUNA) + (activar ? " Activar modo claro" : " Activar modo oscuro");
+    }
+    const chkAuto = document.getElementById("chkModoOscuroAuto");
+    if (chkAuto) chkAuto.checked = localStorage.getItem("modoOscuroAuto") !== "0";
+}
+
+// El usuario eligió manualmente un tema: se guarda y deja de seguir al sistema
+function toggleModoOscuro() {
+    const activar = !document.body.classList.contains("dark-mode");
+    localStorage.setItem("modoOscuro", activar ? "1" : "0");
+    localStorage.setItem("modoOscuroAuto", "0");
+    aplicarModoOscuro(activar);
+}
+
+// Activa/desactiva que la app siga automáticamente el modo del sistema operativo
+function toggleModoOscuroAuto() {
+    const chk = document.getElementById("chkModoOscuroAuto");
+    const seguirSistema = chk ? chk.checked : true;
+    localStorage.setItem("modoOscuroAuto", seguirSistema ? "1" : "0");
+    if (seguirSistema) {
+        const prefiereOscuro = mediaModoOscuroSistema ? mediaModoOscuroSistema.matches : false;
+        localStorage.setItem("modoOscuro", prefiereOscuro ? "1" : "0");
+        aplicarModoOscuro(prefiereOscuro);
+        mostrarAlerta("La app ahora seguirá el modo del sistema automáticamente.", "success");
+    } else {
+        mostrarAlerta("Modo automático desactivado. Puedes elegir el tema manualmente.", "success");
+    }
+}
+
+function inicializarModoOscuro() {
+    const seguirSistema = localStorage.getItem("modoOscuroAuto") !== "0"; // por defecto, sí sigue al sistema
+    let activar;
+    if (seguirSistema && mediaModoOscuroSistema) {
+        activar = mediaModoOscuroSistema.matches;
+    } else {
+        activar = localStorage.getItem("modoOscuro") === "1";
+    }
+    aplicarModoOscuro(activar);
+
+    // Si el sistema cambia de tema en vivo y el modo automático sigue activo, la app se actualiza sola
+    if (mediaModoOscuroSistema) {
+        mediaModoOscuroSistema.addEventListener("change", (e) => {
+            if (localStorage.getItem("modoOscuroAuto") !== "0") {
+                localStorage.setItem("modoOscuro", e.matches ? "1" : "0");
+                aplicarModoOscuro(e.matches);
+            }
+        });
+    }
+}
+
+// Recarga los inputs de la pestaña "Plan SOS" (Inicio) con los valores guardados en appData.inicio.
+// Se usa tanto en la carga inicial de la página como después de recibir los datos reales desde la
+// nube (Firebase) en firebase-sync.js, para que estos campos nunca se queden vacíos/desactualizados
+// justo después de iniciar sesión (lo cual podía hacer que "Guardar Datos de Inicio" sobrescribiera
+// silenciosamente la Conversión y el Ticket Promedio guardados con 0).
+function cargarDatosInicioEnInputs() {
+    document.getElementById("inputConversion").value = appData.inicio.conversion || "";
+    document.getElementById("inputTicket").value = appData.inicio.ticket || "";
+    document.getElementById("inputComentarios").value = appData.inicio.comentarios || "";
+    document.getElementById("inputOportunidades").value = appData.inicio.oportunidades || "";
+    actualizarLabelTraficoAcumulado();
+}
+
+// Recarga los inputs y badges de "Metas del Plan SOS" con los valores guardados en METAS_SOS.
+// Igual que la función anterior, se usa en la carga inicial y después de sincronizar con la nube.
+function cargarMetasSOSEnInputs() {
+    document.getElementById("cfgMetaConversion").value    = METAS_SOS.conversion;
+    document.getElementById("cfgMetaAccesorizacion").value = METAS_SOS.accesorizacion;
+    document.getElementById("cfgMetaTicket").value         = METAS_SOS.ticket;
+    document.getElementById("cfgMetaQR").value             = METAS_SOS.qr;
+    const cfgTI = document.getElementById("cfgMetaTradeIn");
+    if (cfgTI) cfgTI.value = METAS_SOS.tradeIn || 0;
+
+    document.getElementById("metaVisualConv").textContent  = `${METAS_SOS.conversion.toFixed(1)}%`;
+    document.getElementById("metaVisualAcc").textContent   = `${METAS_SOS.accesorizacion.toFixed(1)}%`;
+    document.getElementById("metaVisualTick").textContent  = `$${METAS_SOS.ticket.toLocaleString()}`;
+    document.getElementById("metaVisualQR").textContent    = `${METAS_SOS.qr}`;
+    const badgeTI = document.getElementById("metaVisualTradeIn");
+    if (badgeTI) badgeTI.textContent = `${METAS_SOS.tradeIn || 0}`;
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    inicializarModoOscuro();
+    configurarNavegacionPestañas();
+    configurarSelectsProteccion();
+    actualizarRelojYFecha();
+    setInterval(actualizarRelojYFecha, 1000);
+
+    // Cargar datos en inputs de Inicio si ya existen
+    cargarDatosInicioEnInputs();
+
+    // Construir el select de asesores dinámicamente
+    renderSelectAsesor(false);
+    const selInicial = document.getElementById("selectAsesor");
+    if (selInicial) selInicial.addEventListener("change", onSelectAsesorChange);
+
+    // Mostrar el cumplimiento del asesor seleccionado por defecto al cargar
+    actualizarCumplimientoAsesorVisual();
+    renderListaPendiente("garex");
+    renderListaPendiente("insurama");
+
+    renderTodo();
+
+    // Cargar metas SOS en los inputs de Configuración y sincronizar badges de Ventas
+    cargarMetasSOSEnInputs();
+
+    // Cargar la Meta Mensual de la Tienda en los inputs de Configuración
+    cargarMetaTiendaEnInputs();
+
+    // Pintar el selector de mes (‹ Mes Año ›) del encabezado
+    actualizarSelectorMes();
+
+    // Si mesSeleccionado quedó en un mes distinto al real (por ejemplo, se cerró la página
+    // viendo un mes pasado), el mini calendario de Recordatorios debe abrir directo en ese
+    // mes en vez de mostrar siempre el mes real actual.
+    if (typeof sincronizarCalendarioConMesSeleccionado === "function") sincronizarCalendarioConMesSeleccionado();
+});
+
+function onSelectAsesorChange() {
+    if (lineasGarexPendientes.length > 0 || lineasInsuramaPendientes.length > 0) {
+        const continuar = confirm("Tienes líneas de Garex/Insurama sin guardar. Si cambias de asesor se perderán. ¿Deseas continuar?");
+        if (!continuar) {
+            this.value = this.dataset.previo || this.value;
+            return;
+        }
+        lineasGarexPendientes = [];
+        lineasInsuramaPendientes = [];
+        renderListaPendiente("garex");
+        renderListaPendiente("insurama");
+    }
+    const key = this.value;
+    this.dataset.previo = key;
+    actualizarCumplimientoAsesorVisual();
+}
+
+function configurarNavegacionPestañas() {
+    const botones = document.querySelectorAll(".tab-btn");
+    botones.forEach(btn => {
+        btn.addEventListener("click", function () {
+            botones.forEach(b => b.classList.remove("active"));
+            this.classList.add("active");
+
+            const target = this.getAttribute("data-target");
+            document.querySelectorAll(".seccion-dashboard").forEach(sec => sec.classList.remove("active-seccion"));
+            
+            const seccionActiva = document.getElementById(target);
+            if (seccionActiva) seccionActiva.classList.add("active-seccion");
+        });
+    });
+
+}
+
+// CONFIGURAR SELECTS DEPENDIENTES DE GAREX E INSURAMA (según reglas de negocio)
+function configurarSelectsProteccion() {
+    // --- GAREX: Dispositivo -> Duración ---
+    const selectGarexDispositivo = document.getElementById("selectGarexDispositivo");
+    const selectGarexDuracion = document.getElementById("selectGarexDuracion");
+
+    function poblarDuracionesGarex() {
+        const dispositivo = selectGarexDispositivo.value;
+        const duraciones = Object.keys(TABLA_GAREX[dispositivo] || {});
+        selectGarexDuracion.innerHTML = duraciones.map(d => `<option value="${d}">${d}</option>`).join("");
+    }
+
+    if (selectGarexDispositivo) {
+        selectGarexDispositivo.innerHTML = Object.keys(TABLA_GAREX).map(d => `<option value="${d}">${d}</option>`).join("");
+        selectGarexDispositivo.addEventListener("change", () => { poblarDuracionesGarex(); actualizarPrecioGarexCalculado(); });
+        poblarDuracionesGarex();
+    }
+
+    // --- INSURAMA: Dispositivo -> Cobertura -> Duración ---
+    const selectInsuramaDispositivo = document.getElementById("selectInsuramaDispositivo");
+    const selectInsuramaCobertura = document.getElementById("selectInsuramaCobertura");
+    const selectInsuramaDuracion = document.getElementById("selectInsuramaDuracion");
+
+    function poblarCoberturasInsurama() {
+        const dispositivo = selectInsuramaDispositivo.value;
+        const coberturas = Object.keys(TABLA_INSURAMA[dispositivo] || {});
+        selectInsuramaCobertura.innerHTML = coberturas.map(c => `<option value="${c}">${c}</option>`).join("");
+        poblarDuracionesInsurama();
+    }
+
+    function poblarDuracionesInsurama() {
+        const dispositivo = selectInsuramaDispositivo.value;
+        const cobertura = selectInsuramaCobertura.value;
+        const duraciones = Object.keys((TABLA_INSURAMA[dispositivo] || {})[cobertura] || {});
+        selectInsuramaDuracion.innerHTML = duraciones.map(d => `<option value="${d}">${d}</option>`).join("");
+    }
+
+    if (selectInsuramaDispositivo) {
+        selectInsuramaDispositivo.innerHTML = Object.keys(TABLA_INSURAMA).map(d => `<option value="${d}">${d}</option>`).join("");
+        selectInsuramaDispositivo.addEventListener("change", () => { poblarCoberturasInsurama(); actualizarPrecioInsuramaCalculado(); });
+        selectInsuramaCobertura.addEventListener("change", () => { poblarDuracionesInsurama(); actualizarPrecioInsuramaCalculado(); });
+        poblarCoberturasInsurama();
+    }
+
+    // --- Recalcular precio al cliente cuando cambien duración o precio del dispositivo ---
+    const elGarexDuracion = document.getElementById("selectGarexDuracion");
+    const elGarexPrecioDisp = document.getElementById("inputGarexPrecioDispositivo");
+    if (elGarexDuracion) elGarexDuracion.addEventListener("change", actualizarPrecioGarexCalculado);
+    if (elGarexPrecioDisp) elGarexPrecioDisp.addEventListener("input", actualizarPrecioGarexCalculado);
+
+    const elInsuramaDuracion = document.getElementById("selectInsuramaDuracion");
+    const elInsuramaPrecioDisp = document.getElementById("inputInsuramaPrecioDispositivo");
+    if (elInsuramaDuracion) elInsuramaDuracion.addEventListener("change", actualizarPrecioInsuramaCalculado);
+    if (elInsuramaPrecioDisp) elInsuramaPrecioDisp.addEventListener("input", actualizarPrecioInsuramaCalculado);
+
+    actualizarPrecioGarexCalculado();
+    actualizarPrecioInsuramaCalculado();
+}
+
+// Recalcula y muestra el precio Garex al cliente según dispositivo, duración y precio del equipo
+function actualizarPrecioGarexCalculado() {
+    const dispositivo = document.getElementById("selectGarexDispositivo")?.value;
+    const duracion = document.getElementById("selectGarexDuracion")?.value;
+    const precioDispositivo = parseFloat(document.getElementById("inputGarexPrecioDispositivo")?.value) || 0;
+    const precio = calcularPrecioGarexCliente(dispositivo, duracion, precioDispositivo);
+    const el = document.getElementById("v_garexPrecioCalculado");
+    if (el) el.textContent = `$${precio.toLocaleString()}`;
+}
+
+// Recalcula y muestra el precio Insurama al cliente según dispositivo, cobertura, duración y precio del equipo
+function actualizarPrecioInsuramaCalculado() {
+    const dispositivo = document.getElementById("selectInsuramaDispositivo")?.value;
+    const cobertura = document.getElementById("selectInsuramaCobertura")?.value;
+    const duracion = document.getElementById("selectInsuramaDuracion")?.value;
+    const precioDispositivo = parseFloat(document.getElementById("inputInsuramaPrecioDispositivo")?.value) || 0;
+    const precio = calcularPrecioInsuramaCliente(dispositivo, cobertura, duracion, precioDispositivo);
+    const el = document.getElementById("v_insuramaPrecioCalculado");
+    if (el) el.textContent = `$${precio.toLocaleString()}`;
+}
+
+function actualizarRelojYFecha() {
+    const ahora = new Date();
+    const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById("fecha").textContent = ahora.toLocaleDateString('es-ES', opcionesFecha);
+}
+
+// GUARDAR INICIO
+let modoTrafico = 'sumar'; // 'sumar' | 'reemplazar'
+
+function setModoTrafico(modo) {
+    modoTrafico = modo;
+    document.getElementById("btnTraficoSumar").classList.toggle("active", modo === 'sumar');
+    document.getElementById("btnTraficoReemplazar").classList.toggle("active", modo === 'reemplazar');
+}
+
+// MODO DE INGRESO DE VENTA DEL ASESOR: 'categoria' (desglosado por dispositivo) o 'total' (un solo monto)
+let modoMontoVenta = 'categoria';
+
+function setModoMontoVenta(modo) {
+    const btnCategoria = document.getElementById("btnMontoPorCategoria");
+    const btnTotal = document.getElementById("btnMontoTotal");
+    const panelCategoria = document.getElementById("panelMontoPorCategoria");
+    const panelTotal = document.getElementById("panelMontoTotal");
+    if (!btnCategoria || !btnTotal || !panelCategoria || !panelTotal) {
+        console.error("setModoMontoVenta: no se encontraron uno o más elementos en el HTML. Verifica que index.html y script.js estén sincronizados.", { btnCategoria, btnTotal, panelCategoria, panelTotal });
+        return;
+    }
+    modoMontoVenta = modo;
+    btnCategoria.classList.toggle("active", modo === 'categoria');
+    btnTotal.classList.toggle("active", modo === 'total');
+    panelCategoria.style.display = modo === 'categoria' ? '' : 'none';
+    panelTotal.style.display = modo === 'total' ? '' : 'none';
+    recalcularMontoVentaTotal();
+}
+
+function actualizarLabelTraficoAcumulado() {
+    const lbl = document.getElementById("lblTraficoAcumulado");
+    if (lbl) lbl.textContent = (appData.inicio.trafico || 0).toLocaleString();
+}
+
+// Descarta el valor manual de accesorización y vuelve a que se calcule automáticamente
+function restaurarAccesorizacionAutomatica() {
+    appData.inicio.accesorizacionManual = false;
+    appData.inicio.accesorizacionManualValor = null;
+    sincronizarYRenderizar();
+    mostrarAlerta("La accesorización volvió a calcularse automáticamente.", "success");
+}
+
+function guardarDatosReunion() {
+    appData.inicio.conversion = parseFloat(document.getElementById("inputConversion").value) || 0;
+    appData.inicio.ticket = parseFloat(document.getElementById("inputTicket").value) || 0;
+
+    // Accesorización: por defecto se calcula automáticamente en renderTodo() a partir de los
+    // montos de dispositivos y accesorios. Si el usuario ingresa un valor aquí, se le pregunta
+    // si desea reemplazar el porcentaje calculado automáticamente por el valor ingresado.
+    const inputAccManualEl = document.getElementById("inputAccesorizacionManual");
+    const valorAccManual = inputAccManualEl && inputAccManualEl.value !== "" ? parseFloat(inputAccManualEl.value) : null;
+    if (valorAccManual !== null && !isNaN(valorAccManual)) {
+        const actual = appData.inicio.accesorizacion || 0;
+        const reemplazar = confirm(`Actualmente se muestra ${actual.toFixed(1)}% de accesorización (calculado automáticamente). ¿Deseas reemplazarlo por ${valorAccManual.toFixed(1)}% ingresado manualmente?`);
+        if (reemplazar) {
+            appData.inicio.accesorizacionManual = true;
+            appData.inicio.accesorizacionManualValor = valorAccManual;
+        }
+        inputAccManualEl.value = "";
+    }
+
+    const inputTraficoEl = document.getElementById("inputTrafico");
+    if (inputTraficoEl.value !== "") {
+        const valorTrafico = parseInt(inputTraficoEl.value) || 0;
+        appData.inicio.trafico = modoTrafico === 'sumar'
+            ? (appData.inicio.trafico || 0) + valorTrafico
+            : valorTrafico;
+        inputTraficoEl.value = "";
+    }
+
+    appData.inicio.comentarios = document.getElementById("inputComentarios").value;
+    appData.inicio.oportunidades = document.getElementById("inputOportunidades").value;
+
+    actualizarLabelTraficoAcumulado();
+    sincronizarYRenderizar();
+    mostrarAlerta("Datos de pestaña Inicio guardados correctamente.", "success");
+}
+
+// AGREGAR UNA LÍNEA DE GAREX A LA LISTA PENDIENTE (no se guarda en appData todavía)
+function agregarLineaGarex() {
+    const dispositivo = document.getElementById("selectGarexDispositivo").value;
+    const duracion = document.getElementById("selectGarexDuracion").value;
+    const cantidad = parseInt(document.getElementById("inputGarexCantidad").value) || 0;
+    const precioDispositivo = parseFloat(document.getElementById("inputGarexPrecioDispositivo").value) || 0;
+    const precioUnitario = calcularPrecioGarexCliente(dispositivo, duracion, precioDispositivo);
+
+    if (cantidad <= 0) {
+        mostrarAlerta("Ingresa una cantidad mayor a 0 para agregar el Garex a la lista.", "warning");
+        return;
+    }
+    if (precioDispositivo <= 0) {
+        mostrarAlerta("Ingresa el precio del dispositivo para calcular el monto del Garex.", "warning");
+        return;
+    }
+
+    const incentivoUnitario = obtenerIncentivoGarex(dispositivo, duracion);
+    lineasGarexPendientes.push({
+        dispositivo, duracion, cantidad,
+        incentivoUnitario,
+        incentivoTotal: incentivoUnitario * cantidad,
+        montoVentaUnitario: precioUnitario,
+        montoVenta: precioUnitario * cantidad
+    });
+
+    document.getElementById("inputGarexCantidad").value = 0;
+    document.getElementById("inputGarexPrecioDispositivo").value = 0;
+    actualizarPrecioGarexCalculado();
+    renderListaPendiente("garex");
+}
+
+// AGREGAR UNA LÍNEA DE INSURAMA A LA LISTA PENDIENTE (no se guarda en appData todavía)
+function agregarLineaInsurama() {
+    const dispositivo = document.getElementById("selectInsuramaDispositivo").value;
+    const cobertura = document.getElementById("selectInsuramaCobertura").value;
+    const duracion = document.getElementById("selectInsuramaDuracion").value;
+    const cantidad = parseInt(document.getElementById("inputInsuramaCantidad").value) || 0;
+    const precioDispositivo = parseFloat(document.getElementById("inputInsuramaPrecioDispositivo").value) || 0;
+    const precioUnitario = calcularPrecioInsuramaCliente(dispositivo, cobertura, duracion, precioDispositivo);
+
+    if (cantidad <= 0) {
+        mostrarAlerta("Ingresa una cantidad mayor a 0 para agregar el Insurama a la lista.", "warning");
+        return;
+    }
+    if (precioDispositivo <= 0) {
+        mostrarAlerta("Ingresa el precio del dispositivo para calcular el monto del Insurama.", "warning");
+        return;
+    }
+
+    const incentivoUnitario = obtenerIncentivoInsurama(dispositivo, cobertura, duracion);
+    lineasInsuramaPendientes.push({
+        dispositivo, cobertura, duracion, cantidad,
+        incentivoUnitario,
+        incentivoTotal: incentivoUnitario * cantidad,
+        montoVentaUnitario: precioUnitario,
+        montoVenta: precioUnitario * cantidad
+    });
+
+    document.getElementById("inputInsuramaCantidad").value = 0;
+    document.getElementById("inputInsuramaPrecioDispositivo").value = 0;
+    actualizarPrecioInsuramaCalculado();
+    renderListaPendiente("insurama");
+}
+
+// QUITAR UNA LÍNEA PENDIENTE ANTES DE GUARDAR
+function quitarLineaPendiente(tipo, indice) {
+    if (tipo === "garex") lineasGarexPendientes.splice(indice, 1);
+    else lineasInsuramaPendientes.splice(indice, 1);
+    renderListaPendiente(tipo);
+}
+
+// RENDERIZAR LA LISTA TEMPORAL (PENDIENTE DE GUARDAR) DE GAREX O INSURAMA
+function renderListaPendiente(tipo) {
+    const esGarex = tipo === "garex";
+    const lista = esGarex ? lineasGarexPendientes : lineasInsuramaPendientes;
+    const contenedor = document.getElementById(esGarex ? "listaGarexPendiente" : "listaInsuramaPendiente");
+    if (!contenedor) return;
+
+    if (lista.length === 0) {
+        contenedor.innerHTML = `<p style="font-size:12px; color:#86868B; font-style:italic;">Aún no has agregado líneas.</p>`;
+        return;
+    }
+
+    let html = "";
+    lista.forEach((v, i) => {
+        html += `
+            <div class="a-linea-pendiente" style="display:flex; justify-content:space-between; align-items:center; background:#FFFFFF; border-radius:8px; padding:8px 10px; margin-bottom:6px; font-size:12px; color:#1D1D1F !important;">
+                <span style="color:#1D1D1F !important;">
+                    <strong style="color:#1D1D1F !important;">${v.dispositivo}</strong>${v.cobertura ? " · " + v.cobertura : ""} · ${v.duracion} · x${v.cantidad}
+                    <br><span style="color:#86868B !important;">Incentivo: $${v.incentivoTotal.toFixed(2)} | Venta: $${v.montoVenta.toFixed(2)}</span>
+                </span>
+                <button type="button" onclick="quitarLineaPendiente('${tipo}', ${i})" style="background:none; border:none; color:#FF3B30; font-size:16px; cursor:pointer; padding:0 4px;">✕</button>
+            </div>`;
+    });
+    contenedor.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════
+// ALERTAS — BURBUJA LIQUID GLASS (reemplaza alert() nativo)
+// ═══════════════════════════════════════════
+const ICONOS_TOAST = { success: "✓", error: "!", warning: "!", info: "i" };
+
+function mostrarAlerta(mensaje, tipo = "info", duracion = 4200) {
+    const cont = document.getElementById("toastContainer");
+    if (!cont) { window.alert(mensaje); return; }
+
+    const toast = document.createElement("div");
+    toast.className = `toast-bubble toast-${tipo}`;
+    toast.innerHTML = `
+        <span class="toast-icon">${ICONOS_TOAST[tipo] || ICONOS_TOAST.info}</span>
+        <span class="toast-message"></span>
+        <button type="button" class="toast-close" aria-label="Cerrar">✕</button>
+    `;
+    toast.querySelector(".toast-message").textContent = mensaje;
+
+    const cerrar = () => {
+        if (!toast.isConnected) return;
+        toast.classList.add("toast-out");
+        setTimeout(() => toast.remove(), 360);
+    };
+
+    toast.querySelector(".toast-close").addEventListener("click", cerrar);
+    cont.appendChild(toast);
+
+    setTimeout(cerrar, duracion);
+}
+
+// ═══════════════════════════════════════════
+// MODAL DE FECHA — BURBUJA LIQUID GLASS (reemplaza prompt() nativo)
+// ═══════════════════════════════════════════
+function pedirFecha(titulo, fechaDefault) {
+    return new Promise((resolve) => {
+        const overlay = document.createElement("div");
+        overlay.className = "modal-overlay";
+        overlay.innerHTML = `
+            <div class="modal-glass">
+                <h3 class="modal-title"></h3>
+                <div class="form-group" style="margin-bottom:20px;">
+                    <label for="modalFechaInput">Fecha</label>
+                    <input type="date" id="modalFechaInput">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn modal-btn-cancel">Cancelar</button>
+                    <button type="button" class="modal-btn modal-btn-confirm">Confirmar</button>
+                </div>
+            </div>`;
+        overlay.querySelector(".modal-title").textContent = titulo;
+        overlay.querySelector("#modalFechaInput").value = fechaDefault || new Date().toISOString().slice(0, 10);
+
+        document.body.appendChild(overlay);
+        requestAnimationFrame(() => overlay.classList.add("modal-open"));
+
+        const cerrar = (valor) => {
+            overlay.classList.remove("modal-open");
+            overlay.classList.add("modal-out");
+            setTimeout(() => overlay.remove(), 280);
+            resolve(valor);
+        };
+
+        overlay.querySelector(".modal-btn-cancel").addEventListener("click", () => cerrar(null));
+        overlay.querySelector(".modal-btn-confirm").addEventListener("click", () => {
+            const valor = overlay.querySelector("#modalFechaInput").value;
+            cerrar(valor || null);
+        });
+        overlay.addEventListener("click", (e) => { if (e.target === overlay) cerrar(null); });
+        overlay.querySelector("#modalFechaInput").addEventListener("keydown", (e) => {
+            if (e.key === "Enter") overlay.querySelector(".modal-btn-confirm").click();
+        });
+    });
+}
+
+
+
+
+function actualizarResumenIngreso() {
+    const monto = parseFloat(document.getElementById("inputVentaSemanal").value) || 0;
+    const fecha = document.getElementById("inputVentaFechaDia").value;
+    const resumen = document.getElementById("resumenDia");
+    if (monto > 0 && fecha) {
+        const [y,m,d] = fecha.split("-");
+        document.getElementById("resumenDiaMonto").textContent = `$${monto.toLocaleString()}`;
+        document.getElementById("resumenDiaFecha").textContent = `${d}/${m}/${y}`;
+        resumen.style.display = "block";
+    } else {
+        resumen.style.display = "none";
+    }
+}
+
+// Desglose de una venta tal como se captura en el formulario de Ventas Asesores:
+// QR, Trade-In, montos por categoría y unidades. Se guarda junto con la entrada del
+// calendario para que, al eliminar la venta, se pueda restar TODO lo que sumó y no
+// solo el monto total (antes quedaban unidades, montos por categoría, QR y Trade-In
+// en Resumen Ventas aunque la venta ya estuviera eliminada).
+function leerDetalleVentaFormulario() {
+    const num = (id, entero) => {
+        const el = document.getElementById(id);
+        const n = entero ? parseInt(el ? el.value : 0) : parseFloat(el ? el.value : 0);
+        return n || 0;
+    };
+    const cats = ["mac", "ipad", "iphone", "watch", "airpods", "audio"];
+    const montos = {};
+    ["mac", "ipad", "iphone", "watch", "airpods", "audio", "acc_apple", "acc_terceros"].forEach(k => {
+        // En modo "Venta Total" los montos por categoría no se suman al asesor (ver guardarDatosAsesor).
+        montos[k] = modoMontoVenta !== 'total' ? num("m_" + k, false) : 0;
+    });
+    const unidades = {};
+    cats.forEach(k => { unidades[k] = num("u_" + k, true); });
+    return { qr: num("inputQR", true), tradeIn: num("inputTradeIn", true), montos, unidades };
+}
+
+// Resta del asesor el desglose de una venta eliminada (sin bajar de cero).
+function revertirDetalleVenta(asor, detalle) {
+    if (!asor || !detalle) return;
+    const resta = (actual, valor) => Math.max(0, (actual || 0) - (valor || 0));
+    asor.qr = resta(asor.qr, detalle.qr);
+    asor.tradeIn = resta(asor.tradeIn, detalle.tradeIn);
+    Object.keys(detalle.montos || {}).forEach(k => {
+        if (asor.montos && k in asor.montos) asor.montos[k] = resta(asor.montos[k], detalle.montos[k]);
+    });
+    Object.keys(detalle.unidades || {}).forEach(k => {
+        if (asor.unidades && k in asor.unidades) asor.unidades[k] = resta(asor.unidades[k], detalle.unidades[k]);
+    });
+}
+
+function guardarDatosAsesor() {
+    const key = document.getElementById("selectAsesor").value;
+    const nombreAsesor = appData.asesores[key].nombre;
+    const monto = parseFloat(document.getElementById("inputVentaSemanal").value) || 0;
+
+    const fecha = document.getElementById("inputVentaFechaDia").value;
+    const reflejarEnCalendario = document.getElementById("chkReflejarCalendario")?.checked ?? true;
+
+    if (monto > 0 && !fecha) {
+        mostrarAlerta("Por favor ingresa la fecha de la venta.", "warning");
+        return;
+    }
+    if (monto > 0 && fecha) {
+        // Siempre se guarda en el calendario (para poder gestionarla/eliminarla desde ahí),
+        // pero si "reflejarEnCalendario" es falso, no se muestra como pastilla en la celda del día.
+        ventasCalendario.push({
+            id: Date.now(),
+            fecha,
+            label: `${nombreAsesor}: $${monto.toLocaleString()}`,
+            tipo: "venta",
+            monto,
+            asesorKey: key,
+            // Recuerda a qué mes (de datosPorMes) pertenece este asesor, porque los asesores
+            // son independientes por mes: si más adelante se elimina esta venta desde el
+            // calendario estando en OTRO mes seleccionado, hay que ajustar el acumulado del
+            // asesor correcto, no el del mes que esté activo en ese momento.
+            mesISO: mesSeleccionado,
+            visibleEnCalendario: reflejarEnCalendario,
+            // Desglose completo (QR, Trade-In, montos por categoría y unidades) para poder
+            // revertirlo al eliminar la venta.
+            detalle: leerDetalleVentaFormulario()
+        });
+        guardarVentasCalendario();
+    }
+
+    appData.asesores[key].ventaSemanal += monto;
+    appData.asesores[key].qr += parseInt(document.getElementById("inputQR").value) || 0;
+    appData.asesores[key].tradeIn += parseInt(document.getElementById("inputTradeIn").value) || 0;
+
+    // Volcar todas las líneas pendientes de Garex con su fecha de registro
+    const fechaGarexInput = document.getElementById("inputFechaProteccion")?.value;
+    const fechaProteccionISO = fechaGarexInput || new Date().toISOString().slice(0, 10);
+    const [fp_y, fp_m, fp_d] = fechaProteccionISO.split("-");
+    const fechaProteccionDisplay = `${fp_d}/${fp_m}/${fp_y}`;
+    lineasGarexPendientes.forEach((linea, i) => {
+        appData.asesores[key].ventasGarex.push({ ...linea, id: Date.now() + i, fecha: fechaProteccionDisplay, fechaISO: fechaProteccionISO });
+    });
+
+    // Volcar todas las líneas pendientes de Insurama con su fecha de registro
+    lineasInsuramaPendientes.forEach((linea, i) => {
+        appData.asesores[key].ventasInsurama.push({ ...linea, id: Date.now() + 1000 + i, fecha: fechaProteccionDisplay, fechaISO: fechaProteccionISO });
+    });
+
+    // Limpiar las listas pendientes ya volcadas
+    lineasGarexPendientes = [];
+    lineasInsuramaPendientes = [];
+    renderListaPendiente("garex");
+    renderListaPendiente("insurama");
+
+    // Montos por categoría: solo se desglosan si el modo de ingreso es "Por Dispositivo".
+    // En modo "Venta Total" el monto ya se sumó arriba a ventaSemanal, sin desglosarse
+    // por categoría de producto (no se cuenta en los reportes de attach/categoría).
+    if (modoMontoVenta !== 'total') {
+        appData.asesores[key].montos.mac += parseFloat(document.getElementById("m_mac").value) || 0;
+        appData.asesores[key].montos.ipad += parseFloat(document.getElementById("m_ipad").value) || 0;
+        appData.asesores[key].montos.iphone += parseFloat(document.getElementById("m_iphone").value) || 0;
+        appData.asesores[key].montos.watch += parseFloat(document.getElementById("m_watch").value) || 0;
+        appData.asesores[key].montos.airpods += parseFloat(document.getElementById("m_airpods").value) || 0;
+        appData.asesores[key].montos.audio += parseFloat(document.getElementById("m_audio").value) || 0;
+        appData.asesores[key].montos.acc_apple += parseFloat(document.getElementById("m_acc_apple").value) || 0;
+        appData.asesores[key].montos.acc_terceros += parseFloat(document.getElementById("m_acc_terceros").value) || 0;
+    }
+
+    // Unidades
+    appData.asesores[key].unidades.mac += parseInt(document.getElementById("u_mac").value) || 0;
+    appData.asesores[key].unidades.ipad += parseInt(document.getElementById("u_ipad").value) || 0;
+    appData.asesores[key].unidades.iphone += parseInt(document.getElementById("u_iphone").value) || 0;
+    appData.asesores[key].unidades.watch += parseInt(document.getElementById("u_watch").value) || 0;
+    appData.asesores[key].unidades.airpods += parseInt(document.getElementById("u_airpods").value) || 0;
+    appData.asesores[key].unidades.audio += parseInt(document.getElementById("u_audio").value) || 0;
+
+    // Resetear campos
+    ["inputVentaSemanal","inputQR","inputTradeIn",
+     "m_mac","m_ipad","m_iphone","m_watch","m_airpods","m_audio","m_acc_apple","m_acc_terceros",
+     "inputMontoVentaTotalManual",
+     "u_mac","u_ipad","u_iphone","u_watch","u_airpods","u_audio",
+     "inputGarexCantidad","inputGarexPrecioDispositivo","inputInsuramaCantidad","inputInsuramaPrecioDispositivo",
+     "inputVentaFechaDia","inputFechaProteccion"
+    ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+    document.getElementById("resumenDia").style.display = "none";
+    const lblTotalReset = document.getElementById("lblMontoVentaTotal");
+    if (lblTotalReset) lblTotalReset.textContent = "$0";
+    if (document.getElementById("chkReflejarCalendario")) document.getElementById("chkReflejarCalendario").checked = true;
+    actualizarPrecioGarexCalculado();
+    actualizarPrecioInsuramaCalculado();
+
+    sincronizarYRenderizar();
+    actualizarCumplimientoAsesorVisual();
+    renderCalendario();
+    mostrarAlerta("Expediente comercial cargado y acumulado con éxito.", "success");
+}
+
+
+// Suma los montos por dispositivo (o toma el monto total manual) y actualiza inputVentaSemanal
+function recalcularMontoVentaTotal() {
+    let total = 0;
+    if (modoMontoVenta === 'total') {
+        const elTotal = document.getElementById("inputMontoVentaTotalManual");
+        total = parseFloat(elTotal ? elTotal.value : 0) || 0;
+    } else {
+        const ids = ["m_mac","m_ipad","m_iphone","m_watch","m_airpods","m_audio","m_acc_apple","m_acc_terceros"];
+        total = ids.reduce((acc, id) => {
+            const el = document.getElementById(id);
+            return acc + (parseFloat(el ? el.value : 0) || 0);
+        }, 0);
+    }
+    const inputVenta = document.getElementById("inputVentaSemanal");
+    if (inputVenta) {
+        inputVenta.value = total > 0 ? total : "";
+        actualizarResumenIngreso();
+    }
+    // El total guardado (arriba) siempre es el monto real, sin 13%. Lo que se
+    // MUESTRA aquí sí incluye el 13% si el toggle está activo.
+    const lblTotal = document.getElementById("lblMontoVentaTotal");
+    if (lblTotal) lblTotal.textContent = `$${conIVA(total).toLocaleString()}`;
+}
+
+// MOSTRAR % DE CUMPLIMIENTO DE META MENSUAL DEL ASESOR SELECCIONADO (EN VIVO)
+function actualizarCumplimientoAsesorVisual() {
+    const key = document.getElementById("selectAsesor").value;
+    const asor = appData.asesores[key];
+    const contenedor = document.getElementById("cumplimientoAsesorBox");
+    if (!asor || !contenedor) return;
+
+    const ventaAcumulada = asor.ventaSemanal || 0;
+    const meta = calcularMetaAsesor(asor);
+    const cumplimiento = meta > 0 ? ((ventaAcumulada / meta) * 100).toFixed(1) : 0;
+    const accesorizacionAsesor = calcularAccesorizacion(asor.montos).toFixed(1);
+
+    contenedor.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="font-size:13px; font-weight:600; color:#1D1D1F;">Cumplimiento de meta mensual</span>
+            <span style="font-size:18px; font-weight:700; color:#0071E3;">${cumplimiento}%</span>
+        </div>
+        <div class="barra-progreso"><div class="progreso-relleno" style="width:${Math.min(cumplimiento, 100)}%;"></div></div>
+        <p style="font-size:12px; margin-top:8px; color:#6E6E73;">
+            Venta acumulada: $${conIVA(ventaAcumulada).toLocaleString()} | Meta mensual: $${Math.round(conIVA(meta)).toLocaleString()}
+        </p>
+        <div class="cumplimiento-acc-row">
+            <span style="font-size:12px; font-weight:600; color:#1D1D1F;">Accesorización (auto)</span>
+            <span style="font-size:15px; font-weight:700; color:#34C759;">${accesorizacionAsesor}%</span>
+        </div>`;
+}
+
+// AGREGAR NOTA BITÁCORA
+function agregarNotaBitacora() {
+    const nota = document.getElementById("inputNotaBitacora").value;
+    if (!nota.trim()) return mostrarAlerta("Por favor, escribe una anotación.", "warning");
+
+    const fechaInput = document.getElementById("inputBitacoraFecha").value;
+    const agregarCal = document.getElementById("checkBitacoraCalendario").checked;
+
+    const fechaISO = fechaInput || new Date().toISOString().slice(0, 10);
+    const [y, m, d] = fechaISO.split("-");
+    const fechaDisplay = `${d}/${m}/${y} ${new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+
+    const nuevaNota = {
+        id: Date.now(),
+        texto: nota,
+        fecha: fechaDisplay,
+        fechaISO: agregarCal ? fechaISO : null
+    };
+    bitacorasData.unshift(nuevaNota);
+    document.getElementById("inputNotaBitacora").value = "";
+    document.getElementById("inputBitacoraFecha").value = "";
+    guardarBitacoras();
+    renderTodo();
+    renderCalendario();
+}
+
+function eliminarBitacora(id) {
+    if (!confirm("¿Eliminar esta anotación de la bitácora?")) return;
+    bitacorasData = bitacorasData.filter((b, i) => (b.id ?? i) !== id);
+    guardarBitacoras();
+    renderTodo();
+    renderCalendario();
+    mostrarAlerta("Anotación eliminada de la bitácora.", "success");
+}
+
+// ═══════════════════════════════════════════
+// COMPARATIVA MES A MES
+// ═══════════════════════════════════════════
+// Calcula los mismos KPIs headline (ventas acumuladas, conversión, accesorización, ticket
+// promedio) para un mes cualquiera de datosPorMes, sin depender de que ese mes esté
+// actualmente seleccionado. Se usa para comparar el mes que se está viendo contra el mes
+// inmediato anterior. Devuelve null si ese mes no existe en datosPorMes (nunca se visitó).
+function calcularResumenKPIsMes(mesISO) {
+    const mesData = datosPorMes[mesISO];
+    if (!mesData || !mesData.appData) return null;
+
+    const asesores = mesData.appData.asesores || {};
+    let ventaSemanalSolo = 0;
+    let garexMontoSolo = 0;
+    const montosTienda = { mac: 0, ipad: 0, iphone: 0, watch: 0, airpods: 0, audio: 0, acc_apple: 0, acc_terceros: 0 };
+
+    Object.values(asesores).forEach(asor => {
+        ventaSemanalSolo += asor.ventaSemanal || 0;
+        garexMontoSolo += sumarMontoVenta(asor.ventasGarex || []);
+        const m = asor.montos || {};
+        Object.keys(montosTienda).forEach(k => { montosTienda[k] += m[k] || 0; });
+    });
+
+    const inicio = mesData.appData.inicio || {};
+    const accesorizacion = inicio.accesorizacionManual
+        ? (inicio.accesorizacionManualValor || 0)
+        : calcularAccesorizacion(montosTienda);
+
+    return {
+        ventasTotalMostrado: conIVA(ventaSemanalSolo) + garexMontoSolo,
+        conversion: inicio.conversion || 0,
+        accesorizacion,
+        ticket: inicio.ticket || 0
+    };
+}
+
+// Arma el HTML de un badge "▲/▼ X% vs mes anterior" a partir de dos valores. Si no hay mes
+// anterior con datos (mesData === null), no se muestra nada (evita comparar contra un mes
+// que nunca se llegó a usar). Si el mes anterior existe pero el valor era 0, se marca como
+// "nuevo" porque el % de cambio no se puede calcular (división entre cero).
+function formatearComparativaMes(actual, anterior) {
+    if (anterior === null || anterior === undefined) return "";
+    actual = actual || 0;
+    if (anterior === 0) {
+        if (actual === 0) return `<span class="v-cmp-badge v-cmp-neutral">Sin cambios vs mes anterior</span>`;
+        return `<span class="v-cmp-badge v-cmp-up">▲ Nuevo vs mes anterior</span>`;
+    }
+    const delta = ((actual - anterior) / Math.abs(anterior)) * 100;
+    if (Math.abs(delta) < 0.05) return `<span class="v-cmp-badge v-cmp-neutral">Sin cambios vs mes anterior</span>`;
+    const signo = delta > 0 ? "▲" : "▼";
+    const clase = delta > 0 ? "v-cmp-up" : "v-cmp-down";
+    return `<span class="v-cmp-badge ${clase}">${signo} ${Math.abs(delta).toFixed(1)}% vs mes anterior</span>`;
+}
+
+// Pinta los 4 badges de comparación mes a mes (ventas, conversión, accesorización, ticket)
+// contra el mes calendario inmediatamente anterior a mesSeleccionado.
+function renderComparativaMesAMes(resumenMesActual) {
+    const contenedorVentas = document.getElementById("cmpVentasAcumuladas");
+    const contenedorConv   = document.getElementById("cmpConversion");
+    const contenedorAcc    = document.getElementById("cmpAccesorizacion");
+    const contenedorTicket = document.getElementById("cmpTicket");
+    if (!contenedorVentas && !contenedorConv && !contenedorAcc && !contenedorTicket) return;
+
+    const mesAnteriorISO = sumarMesesISO(mesSeleccionado, -1);
+    const resumenAnterior = calcularResumenKPIsMes(mesAnteriorISO);
+
+    if (contenedorVentas) contenedorVentas.innerHTML = formatearComparativaMes(resumenMesActual.ventasTotalMostrado, resumenAnterior ? resumenAnterior.ventasTotalMostrado : null);
+    if (contenedorConv)   contenedorConv.innerHTML   = formatearComparativaMes(resumenMesActual.conversion,          resumenAnterior ? resumenAnterior.conversion          : null);
+    if (contenedorAcc)    contenedorAcc.innerHTML     = formatearComparativaMes(resumenMesActual.accesorizacion,      resumenAnterior ? resumenAnterior.accesorizacion      : null);
+    if (contenedorTicket) contenedorTicket.innerHTML  = formatearComparativaMes(resumenMesActual.ticket,              resumenAnterior ? resumenAnterior.ticket              : null);
+}
+
+// ═══════════════════════════════════════════
+// SEMÁFORO VISUAL (Resumen Ventas): mismos umbrales que Plan SOS
+// (evaluarSemaforoApple) — verde >=100%, amarillo >=85%, rojo por debajo.
+// ═══════════════════════════════════════════
+function claseSemaforoPct(pct) {
+    const n = parseFloat(pct) || 0;
+    if (n >= 100) return "sem-verde";
+    if (n >= 85) return "sem-amarillo";
+    return "sem-rojo";
+}
+function colorSemaforoPct(pct) {
+    const n = parseFloat(pct) || 0;
+    return n >= 100 ? "#34C759" : n >= 85 ? "#FF9500" : "#FF3B30";
+}
+// Anillo de cumplimiento en SVG (reemplaza el % como puro texto en cada tarjeta
+// de Resumen Ventas): dibuja el arco proporcional al % con el color del semáforo.
+function renderAnilloCumplimiento(pct, size = 54) {
+    const stroke = 5;
+    const r = (size - stroke) / 2;
+    const c = 2 * Math.PI * r;
+    const n = Math.max(0, Math.min(parseFloat(pct) || 0, 100));
+    const offset = c - (n / 100) * c;
+    const center = size / 2;
+    return `<div class="ra-ring" style="width:${size}px; height:${size}px;">
+        <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+            <circle cx="${center}" cy="${center}" r="${r}" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="${stroke}"/>
+            <circle cx="${center}" cy="${center}" r="${r}" fill="none" stroke="${colorSemaforoPct(pct)}" stroke-width="${stroke}"
+                stroke-linecap="round" stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"
+                transform="rotate(-90 ${center} ${center})"/>
+        </svg>
+        <span class="ra-ring-label">${Math.round(parseFloat(pct) || 0)}%</span>
+    </div>`;
+}
+
+// Íconos para distinguir de un vistazo las filas de UNIDADES (caja azul) de las
+// de MONTO ($ verde) en "Metas por Categoría" — antes se veían idénticas y
+// solo el texto ("uds" vs "$") decía cuál era cuál.
+const ICONO_UNIDADES = '<span class="ra-accent-blue"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;"><path d="M3 8l9-4 9 4-9 4-9-4z"/><path d="M3 8v8l9 4 9-4V8"/><path d="M12 12v8"/></svg></span>';
+const ICONO_MONTO = '<span class="ra-accent-green"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;"><circle cx="12" cy="12" r="9"/><path d="M9.5 15.3c0 1.2 1.1 2 2.5 2s2.5-.8 2.5-2c0-1.4-1.2-1.8-2.5-2.2-1.3-.4-2.5-.8-2.5-2.2 0-1.2 1.1-2 2.5-2s2.5.8 2.5 2"/><line x1="12" y1="6.7" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="17.3"/></svg></span>';
+
+// Silueta simple por tipo de dispositivo (junto al nombre en cada fila de
+// "Metas por Categoría"), en gris neutro (.ra-muted) para no competir con el
+// color azul/verde que ya distingue unidades de monto a nivel de sección.
+function iconoDispositivo(svgInner) {
+    return `<span class="ra-muted"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px; margin-right:4px;">${svgInner}</svg></span>`;
+}
+const ICONOS_DISPOSITIVO = {
+    mac: iconoDispositivo('<rect x="4" y="4" width="16" height="11" rx="1.2"/><path d="M2.5 18.5h19l-1.8-3H4.3l-1.8 3z"/>'),
+    ipad: iconoDispositivo('<rect x="3" y="5" width="18" height="14" rx="2.2"/><circle cx="12" cy="16.3" r="0.6" fill="currentColor" stroke="none"/>'),
+    iphone: iconoDispositivo('<rect x="6" y="2.5" width="12" height="19" rx="3"/><rect x="8" y="4.5" width="5.5" height="5.5" rx="1.3"/><circle cx="9.6" cy="6.1" r="0.55" fill="currentColor" stroke="none"/><circle cx="11.9" cy="6.1" r="0.55" fill="currentColor" stroke="none"/><circle cx="9.6" cy="8.4" r="0.55" fill="currentColor" stroke="none"/>'),
+    watch: iconoDispositivo('<path d="M9 5.5V3.2a1 1 0 011-1h4a1 1 0 011 1V5.5"/><path d="M9 18.5v2.3a1 1 0 001 1h4a1 1 0 001-1v-2.3"/><rect x="6.5" y="5.5" width="11" height="13" rx="3"/><path d="M17.5 10v3"/>'),
+    airpods: iconoDispositivo('<path d="M11.2 8V18.8a1.2 1.2 0 01-2.4 0V11.8A4.2 4.2 0 1 1 11.2 8z"/><path d="M12.8 8V18.8a1.2 1.2 0 002.4 0V11.8A4.2 4.2 0 1 0 12.8 8z"/>'),
+    audio: iconoDispositivo('<path d="M9 7.5V6a1 1 0 011-1h4a1 1 0 011 1v1.5"/><rect x="2.5" y="7.5" width="19" height="11" rx="3.5"/><circle cx="8" cy="13" r="2.6"/><circle cx="16" cy="13" r="2.6"/>'),
+    acc_apple: iconoDispositivo('<path d="M9 2.5v5"/><path d="M15 2.5v5"/><path d="M6.5 7.5h11v3.5a5.5 5.5 0 01-11 0V7.5z"/><path d="M12 16.5v5"/>'),
+    acc_terceros: iconoDispositivo('<path d="M9 2.5v5"/><path d="M15 2.5v5"/><path d="M6.5 7.5h11v3.5a5.5 5.5 0 01-11 0V7.5z"/><path d="M12 16.5v5"/>')
+};
+
+// Lista única de dispositivos/categorías para "Metas por Categoría": antes había
+// dos arreglos casi idénticos (uno para unidades, otro para monto) que generaban
+// dos filas y dos barras por dispositivo. Ahora es una sola fuente, y
+// "tieneUnidades" marca qué categorías también llevan conteo de unidades
+// (Audio y los dos tipos de accesorios solo se miden en $, no hay meta de
+// unidades configurada para ellos).
+const CATEGORIAS_DISPOSITIVO = [
+    { label: "Mac",              key: "mac",          tieneUnidades: true },
+    { label: "iPad",             key: "ipad",         tieneUnidades: true },
+    { label: "iPhone",           key: "iphone",       tieneUnidades: true },
+    { label: "Watch",            key: "watch",        tieneUnidades: true },
+    { label: "AirPods",          key: "airpods",      tieneUnidades: true },
+    { label: "Audio",            key: "audio",        tieneUnidades: false },
+    { label: "Accesorios Apple", key: "acc_apple",    tieneUnidades: false },
+    { label: "Acc. Terceros",    key: "acc_terceros", tieneUnidades: false }
+];
+
+// Tarjeta por dispositivo en "Metas por Categoría": un anillo con el ícono del
+// dispositivo adentro, las unidades "lleva / meta" debajo y el monto en plata al pie.
+// El anillo se llena según UNIDADES (la métrica prioritaria). Las categorías sin meta
+// de unidades (Audio, accesorios) —o sin meta de unidades configurada— usan el % de MONTO.
+// El color sigue el mismo semáforo del resto de la app (verde >=100, amarillo >=85, rojo).
+// Valor grande + "/ meta" en gris (solo si la meta está configurada) para QR y Trade-In.
+function statConMeta(valor, meta) {
+    return `${valor}${meta > 0 ? `<span class="ra-stat-meta"> / ${meta}</span>` : ""}`;
+}
+
+function renderAnilloDispositivo(pct, iconoHtml, size = 68, stroke = 6) {
+    const r = (size - stroke) / 2;
+    const c = 2 * Math.PI * r;
+    const n = Math.max(0, Math.min(parseFloat(pct) || 0, 100));
+    const offset = c - (n / 100) * c;
+    const center = size / 2;
+    return `<div class="ra-dev-ring" style="width:${size}px; height:${size}px;">
+        <svg class="ra-dev-svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" aria-hidden="true">
+            <circle class="ra-dev-track" cx="${center}" cy="${center}" r="${r}" fill="none" stroke-width="${stroke}"/>
+            <circle cx="${center}" cy="${center}" r="${r}" fill="none" stroke="${colorSemaforoPct(pct)}" stroke-width="${stroke}"
+                stroke-linecap="round" stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"
+                transform="rotate(-90 ${center} ${center})"/>
+        </svg>
+        <span class="ra-dev-icon">${iconoHtml}</span>
+    </div>`;
+}
+
+function renderTileDispositivo(cat, llevaUnid, metaUnid, llevaMonto, metaMonto, metaMontoMostrada) {
+    const pctMonto = metaMonto > 0 ? (llevaMonto / metaMonto) * 100 : 0;
+    const usaUnidades = cat.tieneUnidades && metaUnid > 0;
+    const pct = usaUnidades ? (llevaUnid / metaUnid) * 100 : pctMonto;
+
+    const unidadesHtml = cat.tieneUnidades
+        ? `<div class="ra-dev-units"><strong>${llevaUnid}</strong><span class="ra-muted"> / ${metaUnid}</span></div>
+           <div class="ra-dev-units-label">unidades</div>`
+        : `<div class="ra-dev-units-label">solo monto</div>`;
+
+    return `
+        <div class="ra-dev-tile" title="${cat.label}: ${Math.round(pct)}%">
+            ${renderAnilloDispositivo(pct, ICONOS_DISPOSITIVO[cat.key] || "")}
+            <div class="ra-dev-name">${cat.label}</div>
+            ${unidadesHtml}
+            <div class="ra-dev-monto"><strong>$${Math.round(conIVA(llevaMonto)).toLocaleString()}</strong><span class="ra-muted"> / $${Math.round(metaMontoMostrada).toLocaleString()}</span></div>
+        </div>`;
+}
+
+// RENDERS MÚLTIPLES
+function renderTodo() {
+    renderSelectAsesor();
+    renderListaAsesoresConfig();
+    let acumuladoTotalVentas = 0;
+    let acumuladoVentaSemanalSolo = 0; // solo venta de dispositivos/accesorios (SÍ lleva 13% si el toggle está activo)
+    let acumuladoGarexMontoSolo = 0;   // monto cobrado por Garex (NUNCA lleva 13%)
+    // La meta total de la tienda viene directo de lo configurado en "Meta Mensual de la Tienda",
+    // no de la suma de los % asignados a cada asesor (que podrían no sumar exactamente 100%).
+    const metaTotalTienda = calcularMetaTotalTienda();
+    let totalGarex = 0;
+    let totalSeguros = 0;
+    let totalQR = 0;
+    let totalTradeIn = 0;
+
+    // Acumuladores para el attach rate por dispositivo (Garex y Seguros) y, junto con
+    // airpods/audio, para el resumen de unidades de TODA la tienda (Resumen Ventas).
+    const unidadesPorDispositivo = { mac: 0, ipad: 0, iphone: 0, watch: 0, airpods: 0, audio: 0 };
+    const garexPorDispositivo = { Mac: 0, iPad: 0, iPhone: 0, Watch: 0 };
+    const segurosPorDispositivo = { Mac: 0, iPad: 0, iPhone: 0, Watch: 0 };
+
+    // Acumuladores para la accesorización automática de toda la tienda
+    const montosTienda = { mac: 0, ipad: 0, iphone: 0, watch: 0, airpods: 0, audio: 0, acc_apple: 0, acc_terceros: 0 };
+
+    // Procesar Datos Globales de Asesores
+    let htmlResumenAsesores = "";
+    Object.keys(appData.asesores).forEach(key => {
+        const asor = appData.asesores[key];
+        const metaAsor = calcularMetaAsesor(asor);
+        acumuladoTotalVentas += asor.ventaSemanal;
+        acumuladoTotalVentas += sumarMontoVenta(asor.ventasGarex);
+        acumuladoVentaSemanalSolo += asor.ventaSemanal;
+        acumuladoGarexMontoSolo += sumarMontoVenta(asor.ventasGarex);
+        // Insurama (seguros) NO se suma a la meta de ventas: solo se contabiliza para sus propios reportes/incentivos.
+        totalGarex += sumarCantidad(asor.ventasGarex);
+        totalSeguros += sumarCantidad(asor.ventasInsurama);
+        totalQR += asor.qr;
+        totalTradeIn += asor.tradeIn;
+
+        // Unidades vendidas por dispositivo (base para el attach rate)
+        unidadesPorDispositivo.mac     += asor.unidades.mac;
+        unidadesPorDispositivo.ipad    += asor.unidades.ipad;
+        unidadesPorDispositivo.iphone  += asor.unidades.iphone;
+        unidadesPorDispositivo.watch   += asor.unidades.watch;
+        unidadesPorDispositivo.airpods += asor.unidades.airpods;
+        unidadesPorDispositivo.audio   += asor.unidades.audio;
+
+        // Montos por dispositivo y accesorio (base para la accesorización automática de tienda)
+        montosTienda.mac          += asor.montos.mac;
+        montosTienda.ipad         += asor.montos.ipad;
+        montosTienda.iphone       += asor.montos.iphone;
+        montosTienda.watch        += asor.montos.watch;
+        montosTienda.airpods      += asor.montos.airpods;
+        montosTienda.audio        += asor.montos.audio;
+        montosTienda.acc_apple    += asor.montos.acc_apple;
+        montosTienda.acc_terceros += asor.montos.acc_terceros;
+
+        // Garex e Insurama colocados por dispositivo
+        asor.ventasGarex.forEach(v => {
+            if (garexPorDispositivo[v.dispositivo] !== undefined) garexPorDispositivo[v.dispositivo] += v.cantidad;
+        });
+        asor.ventasInsurama.forEach(v => {
+            if (segurosPorDispositivo[v.dispositivo] !== undefined) segurosPorDispositivo[v.dispositivo] += v.cantidad;
+        });
+
+        const cumplimiento = metaAsor > 0 ? ((asor.ventaSemanal / metaAsor) * 100).toFixed(1) : 0;
+        const u = asor.unidades;
+        const m = asor.montos;
+        const totalUnidades = u.mac + u.ipad + u.iphone + u.watch + u.airpods + u.audio;
+
+        // Conteo de Garex y Seguros colocados por este asesor, por dispositivo
+        const garexAsorPorDispositivo = { Mac: 0, iPad: 0, iPhone: 0, Watch: 0, AirPods: 0, Audio: 0 };
+        asor.ventasGarex.forEach(v => {
+            if (garexAsorPorDispositivo[v.dispositivo] !== undefined) garexAsorPorDispositivo[v.dispositivo] += v.cantidad;
+        });
+        const segurosAsorPorDispositivo = { Mac: 0, iPad: 0, iPhone: 0, Watch: 0 };
+        asor.ventasInsurama.forEach(v => {
+            if (segurosAsorPorDispositivo[v.dispositivo] !== undefined) segurosAsorPorDispositivo[v.dispositivo] += v.cantidad;
+        });
+
+        const incentivoGarex   = sumarIncentivo(asor.ventasGarex);
+        const incentivoInsurama = sumarIncentivo(asor.ventasInsurama);
+        const incentivoTotal    = incentivoGarex + incentivoInsurama;
+
+        // Meta por categoría (dispositivo/accesorio) del asesor: % asignado x meta de esa
+        // categoría en la Meta Mensual de la Tienda. "Llevan" es lo realmente vendido (m.*).
+        const porcentajeAsor = asor.porcentajeMeta || 0;
+        // Una sola fila y una sola barra por dispositivo (antes eran dos listas
+        // separadas — Unidades y Monto — cada una con su propia barra). La barra
+        // se llena según el % de MONTO, que es la métrica que usa el resto de la
+        // app; unidades se muestra como dato de apoyo junto a su ícono azul.
+        const filasDispositivos = CATEGORIAS_DISPOSITIVO.map(c => {
+            const metaCat = (porcentajeAsor / 100) * (METAS_TIENDA.ventas[c.key] || 0);
+            const metaUnidCat = c.tieneUnidades ? Math.ceil((porcentajeAsor / 100) * (METAS_TIENDA.unidades[c.key] || 0)) : 0;
+            return renderTileDispositivo(c, u[c.key] || 0, metaUnidCat, m[c.key] || 0, metaCat, metaCat);
+        }).join("");
+
+        htmlResumenAsesores += `
+            <div class="ra-card">
+                <div class="ra-header">
+                    ${renderAnilloCumplimiento(cumplimiento)}
+                    <div class="ra-header-info">
+                        <div class="ra-header-top">
+                            <strong>${asor.nombre}</strong>
+                            <span class="ra-cumplimiento">${cumplimiento}% de cumplimiento</span>
+                        </div>
+                        <div class="ra-header-badges">
+                            <span class="ra-incentivo"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 15.3c0 1.2 1.1 2 2.5 2s2.5-.8 2.5-2c0-1.4-1.2-1.8-2.5-2.2-1.3-.4-2.5-.8-2.5-2.2 0-1.2 1.1-2 2.5-2s2.5.8 2.5 2"/><line x1="12" y1="6.7" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="17.3"/></svg> Incentivos: $${incentivoTotal.toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="barra-progreso"><div class="progreso-relleno ${claseSemaforoPct(cumplimiento)}" style="width:${Math.min(cumplimiento,100)}%;"></div></div>
+                <div class="ra-stat-strip">
+                    <div class="ra-stat"><span class="ra-stat-label">Venta</span><span class="ra-stat-value">$${conIVA(asor.ventaSemanal).toLocaleString()}</span></div>
+                    <div class="ra-stat"><span class="ra-stat-label">Meta</span><span class="ra-stat-value">$${Math.round(conIVA(metaAsor)).toLocaleString()}</span></div>
+                    <div class="ra-stat"><span class="ra-stat-label">QR Colocados</span><span class="ra-stat-value">${statConMeta(asor.qr, Math.ceil((porcentajeAsor / 100) * (METAS_SOS.qr || 0)))}</span></div>
+                    <div class="ra-stat"><span class="ra-stat-label">Trade-In</span><span class="ra-stat-value">${statConMeta(asor.tradeIn, Math.ceil((porcentajeAsor / 100) * (METAS_SOS.tradeIn || 0)))}</span></div>
+                </div>
+
+                <div class="ra-tabs" role="tablist">
+                    <button type="button" class="ra-tab-btn active" onclick="cambiarTabAsesor('${key}','metas',this)">Metas por Categoría</button>
+                    <button type="button" class="ra-tab-btn" onclick="cambiarTabAsesor('${key}','acumulados',this)">Acumulados</button>
+                </div>
+
+                <div class="ra-tab-panel active" id="raTab-${key}-metas">
+                    <div class="ra-section" style="margin-top:0; padding-top:0; border-top:none;">
+                        <p class="ra-section-title">Metas por Dispositivo — <span class="ra-accent-blue">${porcentajeAsor}% de la meta de tienda</span></p>
+                        <div class="ra-dev-grid">
+                            ${filasDispositivos}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ra-tab-panel" id="raTab-${key}-acumulados">
+                    <div class="ra-section" style="margin-top:0; padding-top:0; border-top:none;">
+                        <p class="ra-section-title">Unidades acumuladas — <span class="ra-accent-blue">${totalUnidades} total</span></p>
+                        <div class="ra-tile-grid ra-grid-3">
+                            <div class="ra-tile"><span class="ra-tile-label">Mac</span><span class="ra-tile-value">${u.mac}</span><span class="ra-tile-caption">$${conIVA(m.mac).toLocaleString()}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">iPad</span><span class="ra-tile-value">${u.ipad}</span><span class="ra-tile-caption">$${conIVA(m.ipad).toLocaleString()}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">iPhone</span><span class="ra-tile-value">${u.iphone}</span><span class="ra-tile-caption">$${conIVA(m.iphone).toLocaleString()}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">Watch</span><span class="ra-tile-value">${u.watch}</span><span class="ra-tile-caption">$${conIVA(m.watch).toLocaleString()}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">AirPods</span><span class="ra-tile-value">${u.airpods}</span><span class="ra-tile-caption">$${conIVA(m.airpods).toLocaleString()}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">Audio</span><span class="ra-tile-value">${u.audio}</span><span class="ra-tile-caption">$${conIVA(m.audio).toLocaleString()}</span></div>
+                        </div>
+                    </div>
+                    <div class="ra-section">
+                        <p class="ra-section-title">Garex colocados — <span class="ra-accent-green">${sumarCantidad(asor.ventasGarex)} total</span></p>
+                        <div class="ra-tile-grid ra-grid-3">
+                            <div class="ra-tile"><span class="ra-tile-label">Mac</span><span class="ra-tile-value">${garexAsorPorDispositivo.Mac}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">iPad</span><span class="ra-tile-value">${garexAsorPorDispositivo.iPad}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">iPhone</span><span class="ra-tile-value">${garexAsorPorDispositivo.iPhone}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">Watch</span><span class="ra-tile-value">${garexAsorPorDispositivo.Watch}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">AirPods</span><span class="ra-tile-value">${garexAsorPorDispositivo.AirPods}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">Audio</span><span class="ra-tile-value">${garexAsorPorDispositivo.Audio}</span></div>
+                        </div>
+                    </div>
+                    <div class="ra-section">
+                        <p class="ra-section-title">Seguros colocados — <span class="ra-accent-green">${sumarCantidad(asor.ventasInsurama)} total</span></p>
+                        <div class="ra-tile-grid ra-grid-4">
+                            <div class="ra-tile"><span class="ra-tile-label">Mac</span><span class="ra-tile-value">${segurosAsorPorDispositivo.Mac}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">iPad</span><span class="ra-tile-value">${segurosAsorPorDispositivo.iPad}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">iPhone</span><span class="ra-tile-value">${segurosAsorPorDispositivo.iPhone}</span></div>
+                            <div class="ra-tile"><span class="ra-tile-label">Watch</span><span class="ra-tile-value">${segurosAsorPorDispositivo.Watch}</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+    });
+    document.getElementById("resumenAsesoresVisual").innerHTML = htmlResumenAsesores;
+
+    // Render Pestaña Ventas
+    // Monto mostrado: venta de dispositivos/accesorios con 13% (si aplica) + Garex SIN 13%.
+    // Meta mostrada: meta de tienda con 13% (si aplica) — así "faltante" y "meta diaria"
+    // quedan consistentes con lo que se ve en pantalla.
+    // El % de cumplimiento SIEMPRE usa los montos reales (sin 13%), para no distorsionar
+    // el seguimiento real de la meta.
+    const acumuladoTotalVentasMostrado = conIVA(acumuladoVentaSemanalSolo) + acumuladoGarexMontoSolo;
+    const metaTotalTiendaMostrado = conIVA(metaTotalTienda);
+    document.getElementById("ventasAcumuladas").textContent = `$${acumuladoTotalVentasMostrado.toLocaleString()}`;
+    document.getElementById("v_metaTotalTienda").textContent = `$${metaTotalTiendaMostrado.toLocaleString()}`;
+    const porcMetaTienda = metaTotalTienda > 0 ? ((acumuladoTotalVentas / metaTotalTienda) * 100).toFixed(1) : 0;
+    document.getElementById("cumplimientoMetaTotal").textContent = `${porcMetaTienda}%`;
+
+    // Render Pestaña Resumen Ventas — tarjeta de TODA la tienda (agregado de todos los
+    // asesores), para ver el total vendido además del desglose por asesor de más abajo.
+    const elResumenTienda = document.getElementById("resumenTiendaVisual");
+    if (elResumenTienda) {
+        const filasDispositivosTienda = CATEGORIAS_DISPOSITIVO.map(c => {
+            const metaCat = METAS_TIENDA.ventas[c.key] || 0;
+            const metaUnidCat = c.tieneUnidades ? (METAS_TIENDA.unidades[c.key] || 0) : 0;
+            return renderTileDispositivo(c, unidadesPorDispositivo[c.key] || 0, metaUnidCat, montosTienda[c.key] || 0, metaCat, conIVA(metaCat));
+        }).join("");
+
+        // Accesorización de "Toda la Tienda": la misma que se ve en Plan SOS (respeta
+        // el valor manual si el usuario reemplazó el cálculo automático ahí), en vez
+        // de recalcularla aparte solo con los montos — para no mostrar dos números
+        // distintos de "accesorización de la tienda" en pestañas diferentes.
+        const accesorizacionTienda = appData.inicio.accesorizacionManual
+            ? (appData.inicio.accesorizacionManualValor || 0)
+            : calcularAccesorizacion(montosTienda);
+
+        elResumenTienda.innerHTML = `
+            <div class="ra-card">
+                <div class="ra-header">
+                    ${renderAnilloCumplimiento(porcMetaTienda)}
+                    <div class="ra-header-info">
+                        <div class="ra-header-top">
+                            <strong>Toda la Tienda</strong>
+                            <span class="ra-cumplimiento">${porcMetaTienda}% de cumplimiento</span>
+                        </div>
+                        <div class="ra-header-badges">
+                            <span class="ra-acc-badge">Conversión: ${(appData.inicio.conversion || 0).toFixed(1)}%</span>
+                            <span class="ra-acc-badge">Accesorización: ${accesorizacionTienda.toFixed(1)}%</span>
+                            <span class="ra-acc-badge">Ticket Promedio: $${(appData.inicio.ticket || 0).toLocaleString()}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="barra-progreso"><div class="progreso-relleno ${claseSemaforoPct(porcMetaTienda)}" style="width:${Math.min(porcMetaTienda,100)}%;"></div></div>
+                <div class="ra-stat-strip">
+                    <div class="ra-stat"><span class="ra-stat-label">Venta</span><span class="ra-stat-value">$${(conIVA(acumuladoVentaSemanalSolo) + acumuladoGarexMontoSolo).toLocaleString()}</span></div>
+                    <div class="ra-stat"><span class="ra-stat-label">Meta</span><span class="ra-stat-value">$${conIVA(metaTotalTienda).toLocaleString()}</span></div>
+                    <div class="ra-stat"><span class="ra-stat-label">QR Colocados</span><span class="ra-stat-value">${statConMeta(totalQR, METAS_SOS.qr || 0)}</span></div>
+                    <div class="ra-stat"><span class="ra-stat-label">Trade-In</span><span class="ra-stat-value">${statConMeta(totalTradeIn, METAS_SOS.tradeIn || 0)}</span></div>
+                </div>
+
+                <div class="ra-section" style="margin-top:0; padding-top:0; border-top:none;">
+                    <p class="ra-section-title">Metas por Dispositivo — <span class="ra-accent-blue">Meta de tienda</span></p>
+                    <div class="ra-dev-grid">
+                        ${filasDispositivosTienda}
+                    </div>
+                </div>
+                <div class="ra-section">
+                    <p class="ra-section-title">Protecciones colocadas</p>
+                    <div class="ra-tile-grid ra-grid-3">
+                        <div class="ra-tile"><span class="ra-tile-label">Garex</span><span class="ra-tile-value">${totalGarex}</span></div>
+                        <div class="ra-tile"><span class="ra-tile-label">Seguros</span><span class="ra-tile-value">${totalSeguros}</span></div>
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    // Animar arco SVG de cumplimiento de meta
+    const arcCircle = document.getElementById("v_arcCircle");
+    if (arcCircle) {
+        const circumference = 263.9;
+        const pct = Math.min(parseFloat(porcMetaTienda) / 100, 1);
+        arcCircle.style.strokeDashoffset = circumference - pct * circumference;
+        arcCircle.style.stroke = pct >= 1 ? "#34C759" : pct >= 0.85 ? "#FF9500" : "#FF3B30";
+        arcCircle.style.transition = "stroke-dashoffset 0.8s cubic-bezier(.4,0,.2,1), stroke 0.4s";
+    }
+
+    // Barra de progreso de meta
+    const fillProgreso = document.getElementById("v_progresoMetaFill");
+    if (fillProgreso) {
+        const pctBarra = metaTotalTienda > 0 ? Math.min((acumuladoTotalVentas / metaTotalTienda) * 100, 100) : 0;
+        fillProgreso.style.width = `${pctBarra}%`;
+        document.getElementById("v_progresoMetaTexto").textContent =
+            `$${acumuladoTotalVentasMostrado.toLocaleString()} de $${metaTotalTiendaMostrado.toLocaleString()}`;
+    }
+
+    // Meta diaria: lo que falta por vender repartido entre los días que quedan del mes
+    // actual (incluyendo hoy). Se recalcula cada vez que cambian las ventas acumuladas,
+    // así que baja automáticamente conforme se va vendiendo, y sube si un día se vende
+    // menos de lo necesario.
+    const elMetaDiaria = document.getElementById("v_metaDiaria");
+    const elMetaDiariaDias = document.getElementById("v_metaDiariaDias");
+    const elSub = document.getElementById("v_metaDiariaSub");
+    if (elMetaDiaria && elMetaDiariaDias && elSub) {
+        const hoy = new Date();
+        const diasEnMesActual = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
+        const diasRestantes = Math.max(1, diasEnMesActual - hoy.getDate() + 1);
+        // Usa la meta y el acumulado YA ajustados con el 13% (los mismos que se muestran
+        // arriba en "Ventas acumuladas" y "Meta tienda acumulada"), para que el faltante
+        // y la meta diaria sean consistentes con lo que se ve en pantalla.
+        const faltante = Math.max(0, metaTotalTiendaMostrado - acumuladoTotalVentasMostrado);
+        const metaDiaria = faltante / diasRestantes;
+
+        elMetaDiariaDias.textContent = `${diasRestantes} día${diasRestantes === 1 ? "" : "s"} restante${diasRestantes === 1 ? "" : "s"}`;
+
+        if (faltante <= 0) {
+            elMetaDiaria.textContent = "$0.00";
+            elSub.textContent = "¡Meta del mes alcanzada!";
+        } else {
+            elMetaDiaria.textContent = `$${metaDiaria.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            elSub.textContent = `Faltan $${faltante.toLocaleString()} para la meta`;
+        }
+    }
+
+    // KPIs Plan SOS
+    document.getElementById("conversionReal").textContent = `${appData.inicio.conversion.toFixed(1)}%`;
+
+    // Accesorización de tienda: por defecto se calcula automáticamente sumando montos de
+    // accesorios y dispositivos de todos los asesores. Si el usuario fijó un valor manual,
+    // ese valor se muestra en su lugar hasta que decida volver al cálculo automático.
+    if (appData.inicio.accesorizacionManual) {
+        appData.inicio.accesorizacion = appData.inicio.accesorizacionManualValor || 0;
+    } else {
+        appData.inicio.accesorizacion = calcularAccesorizacion(montosTienda);
+    }
+    document.getElementById("accesorizacionReal").textContent = `${appData.inicio.accesorizacion.toFixed(1)}%`;
+    document.getElementById("ticketReal").textContent = `$${appData.inicio.ticket.toLocaleString()}`;
+
+    // Comparativa mes a mes (badges "▲/▼ X% vs mes anterior" junto a los 4 KPIs headline)
+    if (typeof renderComparativaMesAMes === "function") {
+        renderComparativaMesAMes({
+            ventasTotalMostrado: acumuladoTotalVentasMostrado,
+            conversion: appData.inicio.conversion,
+            accesorizacion: appData.inicio.accesorizacion,
+            ticket: appData.inicio.ticket
+        });
+    }
+
+    const avisoAccManual = document.getElementById("v_accManualAviso");
+    if (avisoAccManual) avisoAccManual.style.display = appData.inicio.accesorizacionManual ? "flex" : "none";
+
+    evaluarSemaforoApple("cardConversion", appData.inicio.conversion, METAS_SOS.conversion);
+    evaluarSemaforoApple("cardAccesorizacion", appData.inicio.accesorizacion, METAS_SOS.accesorizacion);
+    evaluarSemaforoApple("cardTicket", appData.inicio.ticket, METAS_SOS.ticket);
+
+    // Rellenar barras de progreso SOS
+    function setPctBar(fillId, real, meta) {
+        const el = document.getElementById(fillId);
+        if (!el || !meta) return;
+        el.style.width = Math.min((real / meta) * 100, 100) + "%";
+    }
+    setPctBar("fillConversion", appData.inicio.conversion, METAS_SOS.conversion);
+    setPctBar("fillAccesorizacion", appData.inicio.accesorizacion, METAS_SOS.accesorizacion);
+    setPctBar("fillTicket", appData.inicio.ticket, METAS_SOS.ticket);
+
+    document.getElementById("v_total_garex").textContent = totalGarex;
+    document.getElementById("v_total_seguros").textContent = totalSeguros;
+    document.getElementById("v_total_qr").textContent = totalQR;
+    document.getElementById("v_total_tradein").textContent = totalTradeIn;
+    document.getElementById("v_trafico_acumulado").textContent = appData.inicio.trafico.toLocaleString();
+    actualizarLabelTraficoAcumulado();
+
+    // Attach rate por dispositivo: % de unidades vendidas de ese dispositivo que llevaron Garex o Seguro
+    function calcularAttach(cantidadProteccion, unidadesDispositivo) {
+        return unidadesDispositivo > 0 ? ((cantidadProteccion / unidadesDispositivo) * 100).toFixed(1) : "0.0";
+    }
+    document.getElementById("v_attach_garex_iphone").textContent = `${calcularAttach(garexPorDispositivo.iPhone, unidadesPorDispositivo.iphone)}%`;
+    document.getElementById("v_attach_garex_mac").textContent    = `${calcularAttach(garexPorDispositivo.Mac, unidadesPorDispositivo.mac)}%`;
+    document.getElementById("v_attach_garex_ipad").textContent   = `${calcularAttach(garexPorDispositivo.iPad, unidadesPorDispositivo.ipad)}%`;
+    document.getElementById("v_attach_garex_watch").textContent  = `${calcularAttach(garexPorDispositivo.Watch, unidadesPorDispositivo.watch)}%`;
+
+    document.getElementById("v_attach_seguros_iphone").textContent = `${calcularAttach(segurosPorDispositivo.iPhone, unidadesPorDispositivo.iphone)}%`;
+    document.getElementById("v_attach_seguros_mac").textContent    = `${calcularAttach(segurosPorDispositivo.Mac, unidadesPorDispositivo.mac)}%`;
+    document.getElementById("v_attach_seguros_ipad").textContent   = `${calcularAttach(segurosPorDispositivo.iPad, unidadesPorDispositivo.ipad)}%`;
+    document.getElementById("v_attach_seguros_watch").textContent  = `${calcularAttach(segurosPorDispositivo.Watch, unidadesPorDispositivo.watch)}%`;
+
+    document.getElementById("txtDashboardComentarios").textContent = appData.inicio.comentarios || "Sin comentarios registrados.";
+    document.getElementById("txtDashboardOportunidades").textContent = appData.inicio.oportunidades || "Sin oportunidades de mejora detectadas.";
+
+    // Render Pestaña Garex e Insurama (incentivos reales según tabla del Excel)
+    renderTablaGarex("tablaGarexContenedor");
+    renderTablaInsurama("tablaInsuramaContenedor");
+
+    // Render Historial Bitácoras
+    document.getElementById("contenedorBitacoras").innerHTML = bitacorasData.map((b, i) => `
+        <div class="bitacora-item">
+            <div class="bitacora-item-contenido">
+                <p class="bitacora-item-texto">${b.texto}</p>
+                <span class="bitacora-item-fecha">${b.fecha}</span>
+            </div>
+            <button class="r-item-del" onclick="eliminarBitacora(${b.id ?? i})" title="Eliminar">✕</button>
+        </div>
+    `).join("") || `<p style="color:#86868B; font-style:italic;">No hay comentarios registrados en la bitácora.</p>`;
+
+    renderTopVendedores();
+}
+
+// Genera los rankings "Top Ventas", "Top Garex" y "Top Seguros" en la pestaña Ventas
+function renderTopVendedores() {
+    const asesoresArr = Object.values(appData.asesores);
+
+    function pintarTop(contenedorId, items, formatearValor) {
+        const contenedor = document.getElementById(contenedorId);
+        if (!contenedor) return;
+        const top3 = items.filter(i => i.valor > 0).sort((a, b) => b.valor - a.valor).slice(0, 3);
+        if (top3.length === 0) {
+            contenedor.innerHTML = `<div class="v-top-empty">Sin datos registrados aún.</div>`;
+            return;
+        }
+        contenedor.innerHTML = top3.map((item, idx) => `
+            <div class="v-top-row">
+                <span class="v-top-rank">${idx + 1}</span>
+                <span class="v-top-name">${item.nombre}</span>
+                <span class="v-top-value">${formatearValor(item.valor)}</span>
+            </div>
+        `).join("");
+    }
+
+    // Top Ventas (venta semanal + monto cobrado por Garex, igual que el acumulado de tienda usado en la meta)
+    pintarTop("v_top_ventas", asesoresArr.map(a => ({
+        nombre: a.nombre,
+        valor: a.ventaSemanal + sumarMontoVenta(a.ventasGarex)
+    })), v => `$${v.toLocaleString()}`);
+
+    // Top Garex (unidades colocadas)
+    pintarTop("v_top_garex", asesoresArr.map(a => ({
+        nombre: a.nombre,
+        valor: sumarCantidad(a.ventasGarex)
+    })), v => `${v} uds.`);
+
+    // Top Seguros (unidades colocadas)
+    pintarTop("v_top_seguros", asesoresArr.map(a => ({
+        nombre: a.nombre,
+        valor: sumarCantidad(a.ventasInsurama)
+    })), v => `${v} uds.`);
+}
+
+// Suma la cantidad total de unidades en una lista de ventas (Garex o Insurama)
+function sumarCantidad(listaVentas) {
+    return listaVentas.reduce((acc, v) => acc + v.cantidad, 0);
+}
+// Suma el incentivo total ganado en una lista de ventas
+function sumarIncentivo(listaVentas) {
+    return listaVentas.reduce((acc, v) => acc + v.incentivoTotal, 0);
+}
+// Suma el monto de venta al cliente en una lista de ventas
+function sumarMontoVenta(listaVentas) {
+    return listaVentas.reduce((acc, v) => acc + (v.montoVenta || 0), 0);
+}
+
+// ACCESORIZACIÓN AUTOMÁTICA
+// Fórmula: (monto vendido en accesorios) / (monto vendido en dispositivos) × 100
+// Dispositivos: Mac, iPad, iPhone, Watch — Accesorios: AirPods, Audio, Acc. Apple, Acc. Terceros
+function calcularAccesorizacion(montos) {
+    const montoDispositivos = (montos.mac || 0) + (montos.ipad || 0) + (montos.iphone || 0) + (montos.watch || 0);
+    const montoAccesorios = (montos.airpods || 0) + (montos.audio || 0) + (montos.acc_apple || 0) + (montos.acc_terceros || 0);
+    if (montoDispositivos <= 0) return 0;
+    return (montoAccesorios / montoDispositivos) * 100;
+}
+
+// TABLA GAREX: desglose por asesor y dispositivo, con incentivo real ganado
+function renderTablaGarex(idContenedor) {
+    const dispositivos = Object.keys(TABLA_GAREX); // Mac, iPad, iPhone, Watch, AirPods, Audio
+
+    let html = `
+        <div class="tabla-scroll"><table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;">
+            <thead>
+                <tr class="tabla-header-row">
+                    <th style="padding:10px;">Asesor</th>
+                    ${dispositivos.map(d => `<th style="padding:10px; text-align:center;">${d}</th>`).join("")}
+                    <th style="padding:10px; text-align:center;">Total De Unidades</th>
+                    <th style="padding:10px; text-align:right;">Monto Vendido</th>
+                    <th style="padding:10px; text-align:right;">Incentivo Ganado</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+    let granTotalIncentivo = 0;
+    let granTotalUnidades = 0;
+    let granTotalMonto = 0;
+
+    Object.keys(appData.asesores).forEach(key => {
+        const asor = appData.asesores[key];
+        const conteoPorDispositivo = {};
+        dispositivos.forEach(d => conteoPorDispositivo[d] = 0);
+
+        asor.ventasGarex.forEach(v => { conteoPorDispositivo[v.dispositivo] += v.cantidad; });
+
+        const totalUnid = sumarCantidad(asor.ventasGarex);
+        const incentivoAsor = sumarIncentivo(asor.ventasGarex);
+        const montoAsor = sumarMontoVenta(asor.ventasGarex);
+        granTotalIncentivo += incentivoAsor;
+        granTotalUnidades += totalUnid;
+        granTotalMonto += montoAsor;
+
+        html += `
+            <tr style="border-bottom:1px solid #E5E5EA;">
+                <td style="padding:12px; font-weight:500;">${asor.nombre}</td>
+                ${dispositivos.map(d => `<td style="padding:12px; text-align:center;">${conteoPorDispositivo[d]}</td>`).join("")}
+                <td style="padding:12px; text-align:center; font-weight:600;">${totalUnid}</td>
+                <td style="padding:12px; text-align:right;">$${montoAsor.toFixed(2)}</td>
+                <td style="padding:12px; text-align:right; color:#34C759; font-weight:600;">$${incentivoAsor.toFixed(2)}</td>
+            </tr>`;
+    });
+
+    html += `</tbody></table></div>
+    <div style="margin-top:15px; text-align:right; font-weight:600; font-size:14px;">
+        Total Unidades: ${granTotalUnidades} &nbsp;|&nbsp; Total Vendido: $${granTotalMonto.toFixed(2)} &nbsp;|&nbsp; Total Incentivo Tienda: <span style="color:#34C759;">$${granTotalIncentivo.toFixed(2)}</span>
+    </div>`;
+
+    document.getElementById(idContenedor).innerHTML = html;
+    renderDetalleVentas("Garex", idContenedor);
+}
+
+// TABLA INSURAMA: desglose por asesor y dispositivo, con incentivo real ganado
+function renderTablaInsurama(idContenedor) {
+    const dispositivos = Object.keys(TABLA_INSURAMA); // Mac, iPad, iPhone, Watch
+
+    let html = `
+        <div class="tabla-scroll"><table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;">
+            <thead>
+                <tr class="tabla-header-row">
+                    <th style="padding:10px;">Asesor</th>
+                    ${dispositivos.map(d => `<th style="padding:10px; text-align:center;">${d}</th>`).join("")}
+                    <th style="padding:10px; text-align:center;">Total De Unidades</th>
+                    <th style="padding:10px; text-align:right;">Monto Vendido</th>
+                    <th style="padding:10px; text-align:right;">Incentivo Ganado</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+    let granTotalIncentivo = 0;
+    let granTotalUnidades = 0;
+    let granTotalMonto = 0;
+
+    Object.keys(appData.asesores).forEach(key => {
+        const asor = appData.asesores[key];
+        const conteoPorDispositivo = {};
+        dispositivos.forEach(d => conteoPorDispositivo[d] = 0);
+
+        asor.ventasInsurama.forEach(v => { conteoPorDispositivo[v.dispositivo] += v.cantidad; });
+
+        const totalUnid = sumarCantidad(asor.ventasInsurama);
+        const incentivoAsor = sumarIncentivo(asor.ventasInsurama);
+        const montoAsor = sumarMontoVenta(asor.ventasInsurama);
+        granTotalIncentivo += incentivoAsor;
+        granTotalUnidades += totalUnid;
+        granTotalMonto += montoAsor;
+
+        html += `
+            <tr style="border-bottom:1px solid #E5E5EA;">
+                <td style="padding:12px; font-weight:500;">${asor.nombre}</td>
+                ${dispositivos.map(d => `<td style="padding:12px; text-align:center;">${conteoPorDispositivo[d]}</td>`).join("")}
+                <td style="padding:12px; text-align:center; font-weight:600;">${totalUnid}</td>
+                <td style="padding:12px; text-align:right;">$${montoAsor.toFixed(2)}</td>
+                <td style="padding:12px; text-align:right; color:#34C759; font-weight:600;">$${incentivoAsor.toFixed(2)}</td>
+            </tr>`;
+    });
+
+    html += `</tbody></table></div>
+    <div style="margin-top:15px; text-align:right; font-weight:600; font-size:14px;">
+        Total Unidades: ${granTotalUnidades} &nbsp;|&nbsp; Total Vendido: $${granTotalMonto.toFixed(2)} &nbsp;|&nbsp; Total Incentivo Tienda: <span style="color:#34C759;">$${granTotalIncentivo.toFixed(2)}</span>
+    </div>`;
+
+    document.getElementById(idContenedor).innerHTML = html;
+    renderDetalleVentas("Insurama", idContenedor);
+}
+
+// Muestra el detalle línea por línea (cobertura/duración/cantidad/incentivo) de cada venta, agrupado por asesor
+// Elimina UNA línea específica de Garex o Insurama (identificada por su id) de un asesor puntual
+
+function eliminarVentaProteccion(tipo, asesorKey, id) {
+    const asor = appData.asesores[asesorKey];
+    if (!asor) return;
+    if (!confirm(`¿Eliminar este registro de ${tipo}? Esta acción no se puede deshacer.`)) return;
+
+    if (tipo === "Garex") {
+        asor.ventasGarex = asor.ventasGarex.filter(v => String(v.id) !== String(id));
+    } else {
+        asor.ventasInsurama = asor.ventasInsurama.filter(v => String(v.id) !== String(id));
+    }
+
+    sincronizarYRenderizar();
+    actualizarCumplimientoAsesorVisual();
+}
+
+function renderDetalleVentas(tipo, idContenedorTabla) {
+    const esGarex = tipo === "Garex";
+    const detalleId = `detalle_${tipo.toLowerCase()}_${idContenedorTabla}`;
+
+    // Eliminar detalle previo si existe (evita duplicados al re-renderizar)
+    const previo = document.getElementById(detalleId);
+    if (previo) previo.remove();
+
+    let html = `<div id="${detalleId}"><h3 style="font-size:14px; margin:25px 0 10px;">Detalle de Ventas — ${tipo}</h3>`;
+    let hayDatos = false;
+
+    Object.keys(appData.asesores).forEach(key => {
+        const asor = appData.asesores[key];
+        const lista = esGarex ? asor.ventasGarex : asor.ventasInsurama;
+        if (lista.length === 0) return;
+        hayDatos = true;
+
+        html += `<p style="font-size:13px; font-weight:600; margin:14px 0 6px; color:#0071E3;">${asor.nombre}</p>
+        <div class="tabla-scroll"><table style="width:100%; border-collapse:collapse; text-align:left; font-size:12px; margin-bottom:10px;">
+            <thead>
+                <tr class="tabla-header-row">
+                    <th style="padding:8px;">Dispositivo</th>
+                    ${esGarex ? "" : '<th style="padding:8px;">Cobertura</th>'}
+                    <th style="padding:8px; text-align:center;">Duración</th>
+                    <th style="padding:8px; text-align:center;">Cant.</th>
+                    <th style="padding:8px; text-align:right;">Monto Vendido</th>
+                    <th style="padding:8px; text-align:right;">Incentivo</th>
+                    <th style="padding:8px; text-align:right;">Fecha</th>
+                    <th style="padding:8px; text-align:center; width:30px;"></th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+        lista.forEach(v => {
+            html += `
+                <tr style="border-bottom:1px solid #E5E5EA;">
+                    <td style="padding:8px;">${v.dispositivo}</td>
+                    ${esGarex ? "" : `<td style="padding:8px;">${v.cobertura}</td>`}
+                    <td style="padding:8px; text-align:center;">${v.duracion}</td>
+                    <td style="padding:8px; text-align:center;">${v.cantidad}</td>
+                    <td style="padding:8px; text-align:right;">$${(v.montoVenta || 0).toFixed(2)}</td>
+                    <td style="padding:8px; text-align:right; color:#34C759; font-weight:600;">$${v.incentivoTotal.toFixed(2)}</td>
+                    <td style="padding:8px; text-align:right; color:#86868B;">${v.fecha}</td>
+                    <td style="padding:8px; text-align:center;">
+                        <button type="button" onclick="eliminarVentaProteccion('${tipo}', '${key}', '${v.id}')" title="Eliminar este registro" style="background:none; border:none; color:#FF3B30; font-size:15px; cursor:pointer; padding:0 4px; line-height:1;">✕</button>
+                    </td>
+                </tr>`;
+        });
+
+        html += `</tbody></table></div>`;
+    });
+
+    if (!hayDatos) {
+        html += `<p style="color:#86868B; font-style:italic; font-size:13px;">No hay ventas de ${tipo} registradas todavía.</p>`;
+    }
+
+    html += `</div>`;
+    document.getElementById(idContenedorTabla).insertAdjacentHTML("beforeend", html);
+}
+
+function evaluarSemaforoApple(idElemento, valorReal, valorMeta) {
+    const tarjeta = document.getElementById(idElemento);
+    if (!tarjeta) return;
+    tarjeta.classList.remove("verde", "amarillo", "rojo");
+    let estado;
+    if (valorReal >= valorMeta) estado = "verde";
+    else if (valorReal >= (valorMeta * 0.85)) estado = "amarillo";
+    else estado = "rojo";
+    tarjeta.classList.add(estado);
+
+    // Actualizar punto de color (liquid glass dot)
+    const dotId = "dot" + idElemento.replace("card", "");
+    const dot = document.getElementById(dotId);
+    if (dot) {
+        dot.classList.remove("verde", "amarillo", "rojo");
+        dot.classList.add(estado);
+    }
+}
+
+// ═══════════════════════════════════════════
+// GESTIÓN DE ASESORES (agregar / renombrar)
+// ═══════════════════════════════════════════
+
+function renderSelectAsesor(mantenerSeleccion = true) {
+    const sel = document.getElementById("selectAsesor");
+    if (!sel) return;
+    const valorActual = sel.value;
+    // Desconectar temporalmente el listener para evitar disparo accidental
+    const clonado = sel.cloneNode(false);
+    sel.parentNode.replaceChild(clonado, sel);
+    Object.keys(appData.asesores).forEach(key => {
+        const opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = appData.asesores[key].nombre;
+        clonado.appendChild(opt);
+    });
+    if (mantenerSeleccion && appData.asesores[valorActual]) clonado.value = valorActual;
+    // Re-adjuntar el listener de cambio de asesor
+    clonado.addEventListener("change", onSelectAsesorChange);
+}
+
+function renderListaAsesoresConfig() {
+    const contenedor = document.getElementById("listaAsesoresConfig");
+    if (!contenedor) return;
+    const keys = Object.keys(appData.asesores);
+    if (keys.length === 0) { contenedor.innerHTML = "<p style='color:#86868B; font-size:13px;'>No hay asesores registrados.</p>"; return; }
+
+    const metaTotalTienda = calcularMetaTotalTienda();
+
+    contenedor.innerHTML = keys.map((key, i) => {
+        const asor = appData.asesores[key];
+        const porcentaje = asor.porcentajeMeta || 0;
+        const metaCalculada = calcularMetaAsesor(asor);
+        return `
+        <div class="asesor-config-block">
+            <div class="asesor-config-row">
+                <input type="text" id="cfgNombreAsesor_${key}" value="${asor.nombre}"
+                    class="asesor-config-input" placeholder="Nombre">
+                <input type="number" id="cfgPorcentajeAsesor_${key}" value="${porcentaje}" min="0" max="100" step="0.1"
+                    class="asesor-config-input asesor-config-input-porcentaje" placeholder="%"
+                    oninput="previsualizarMetaAsesor('${key}')">
+                <button onclick="renombrarAsesor('${key}')" class="asesor-config-save">
+                    Guardar
+                </button>
+                <button onclick="eliminarAsesor('${key}')" class="asesor-config-del" title="Eliminar asesor permanentemente">
+                    Borrar
+                </button>
+            </div>
+            <p class="asesor-meta-calculada" id="metaCalculada_${key}">
+                Meta calculada: <strong>$${Math.round(metaCalculada).toLocaleString()}</strong>
+                (${porcentaje}% de la meta de tienda de $${Math.round(metaTotalTienda).toLocaleString()})
+            </p>
+        </div>`;
+    }).join("");
+}
+
+// Previsualiza en vivo la meta ($) calculada mientras el usuario escribe el % (sin guardar todavía)
+function previsualizarMetaAsesor(key) {
+    const inputPorcentaje = document.getElementById(`cfgPorcentajeAsesor_${key}`);
+    const texto = document.getElementById(`metaCalculada_${key}`);
+    if (!inputPorcentaje || !texto) return;
+
+    const porcentaje = parseFloat(inputPorcentaje.value) || 0;
+    const metaTotalTienda = calcularMetaTotalTienda();
+    const metaCalculada = (porcentaje / 100) * metaTotalTienda;
+
+    const sumaOtros = Object.keys(appData.asesores)
+        .filter(k => k !== key)
+        .reduce((acc, k) => acc + (appData.asesores[k].porcentajeMeta || 0), 0);
+    const sumaTotal = sumaOtros + porcentaje;
+    const excedeAlerta = sumaTotal > 100
+        ? `<br><span style="color:#FF3B30;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-1px; margin-right:3px;"><path d="M12 4 2.5 20h19L12 4z"/><line x1="12" y1="10" x2="12" y2="14.5"/><line x1="12" y1="17" x2="12" y2="17.1"/></svg>La suma entre asesores sería ${sumaTotal.toFixed(1)}% (supera el 100%). Máximo disponible para este asesor: ${(100 - sumaOtros).toFixed(1)}%.</span>`
+        : "";
+
+    texto.innerHTML = `Meta calculada: <strong>$${Math.round(metaCalculada).toLocaleString()}</strong>
+        (${porcentaje}% de la meta de tienda de $${Math.round(metaTotalTienda).toLocaleString()})${excedeAlerta}`;
+}
+
+function renombrarAsesor(key) {
+    const input = document.getElementById(`cfgNombreAsesor_${key}`);
+    const inputPorcentaje = document.getElementById(`cfgPorcentajeAsesor_${key}`);
+    const nuevoNombre = input ? input.value.trim() : "";
+    if (!nuevoNombre) { mostrarAlerta("El nombre no puede estar vacío.", "warning"); return; }
+
+    const porcentaje = inputPorcentaje ? parseFloat(inputPorcentaje.value) : NaN;
+    if (inputPorcentaje && (isNaN(porcentaje) || porcentaje < 0 || porcentaje > 100)) {
+        mostrarAlerta("El % de meta debe ser un número entre 0 y 100.", "warning");
+        return;
+    }
+
+    // Verificar que la suma de % de TODOS los asesores (incluyendo este con su nuevo valor)
+    // no supere el 100%. Ej: si un asesor tiene 80%, otro no puede tener 21%.
+    if (inputPorcentaje) {
+        const sumaOtros = Object.keys(appData.asesores)
+            .filter(k => k !== key)
+            .reduce((acc, k) => acc + (appData.asesores[k].porcentajeMeta || 0), 0);
+        const sumaTotal = sumaOtros + porcentaje;
+        if (sumaTotal > 100) {
+            mostrarAlerta(`La suma de los % de meta entre todos los asesores no puede superar el 100%. Actualmente los demás asesores suman ${sumaOtros}%, por lo que este asesor puede tener como máximo ${(100 - sumaOtros).toFixed(1)}%.`, "warning");
+            return;
+        }
+    }
+
+    const nombreAnterior = appData.asesores[key].nombre;
+    const nombreCambio = nombreAnterior !== nuevoNombre;
+    appData.asesores[key].nombre = nuevoNombre;
+    appData.asesores[key].porcentajeMeta = inputPorcentaje ? porcentaje : appData.asesores[key].porcentajeMeta;
+
+    if (nombreCambio) {
+        // Actualizar también las entradas del calendario que tengan el nombre anterior
+        ventasCalendario = ventasCalendario.map(v => ({
+            ...v,
+            // El "💰 " es un prefijo antiguo: ya no se agrega a las ventas nuevas, pero
+            // se sigue aceptando aquí para no romper el renombrado en datos guardados
+            // antes de este cambio.
+            label: v.label.replace(`💰 ${nombreAnterior}:`, `${nuevoNombre}:`).replace(`${nombreAnterior}:`, `${nuevoNombre}:`)
+        }));
+        guardarVentasCalendario();
+
+        // Crear clínica de experiencia automática para el asesor con su nombre actualizado
+        clinicasData.push({
+            id: Date.now(),
+            nombre: `Clínica de experiencia — ${nuevoNombre}`,
+            fecha: "",
+            realizada: false,
+            fechaRealizada: null
+        });
+        guardarClinicas();
+        renderClinicas();
+    }
+
+    sincronizarYRenderizar();
+    renderListaAsesoresConfig();
+    renderCalendario();
+    actualizarCumplimientoAsesorVisual();
+    mostrarAlerta(
+        nombreCambio
+            ? `Asesor renombrado a "${nuevoNombre}" correctamente. Se creó una clínica de experiencia para él en la pestaña Recordatorios.`
+            : `Datos de "${nuevoNombre}" actualizados correctamente.`,
+        "success"
+    );
+}
+
+// Lógica compartida para dar de alta un asesor: crea el registro, la clínica de
+// experiencia automática, y refresca todo. Se usa desde el botón "+ Agregar Asesor"
+// de la pestaña Configuración, que es el único lugar de la app donde se agregan
+// asesores nuevos. (Para quitar a alguien de la vista semanal, sin borrar sus
+// datos, se usa el botón ✕ en la pestaña Horario — ver quitarAsesorDeHorario.)
+function crearAsesorConNombre(nombre) {
+    // Generar key única
+    const keys = Object.keys(appData.asesores);
+    const nextNum = keys.length > 0
+        ? Math.max(...keys.map(k => parseInt(k.replace("asesor", "")) || 0)) + 1
+        : 0;
+    const newKey = `asesor${nextNum}`;
+
+    appData.asesores[newKey] = nuevoAsesor(nombre);
+
+    // Crear clínica de experiencia automática para el nuevo asesor
+    clinicasData.push({
+        id: Date.now(),
+        nombre: `Clínica de experiencia — ${nombre}`,
+        fecha: "",
+        realizada: false,
+        fechaRealizada: null
+    });
+    guardarClinicas();
+    renderClinicas();
+    renderCalendario();
+
+    sincronizarYRenderizar();
+    renderListaAsesoresConfig();
+    return newKey;
+}
+
+
+// Elimina PERMANENTEMENTE a un asesor y todos sus datos acumulados (ventas,
+// montos, unidades, Garex, Insurama, etc.). A diferencia de "quitarAsesorDeHorario"
+// (que solo lo oculta de la vista semanal sin borrar nada), esta acción es
+// irreversible: el asesor deja de existir en toda la app.
+function eliminarAsesor(key) {
+    const asor = appData.asesores[key];
+    if (!asor) return;
+
+    const keys = Object.keys(appData.asesores);
+    if (keys.length <= 1) {
+        mostrarAlerta("Debe quedar al menos un asesor registrado. No se puede eliminar el único asesor.", "warning");
+        return;
+    }
+
+    const nombre = asor.nombre;
+    const confirmacion = prompt(
+        `⚠️ Esta acción eliminará PERMANENTEMENTE a "${nombre}" y todos sus datos acumulados ` +
+        `(ventas, montos, unidades, Garex e Insurama). Esto NO se puede deshacer.\n\n` +
+        `Si quieres continuar, escribe el nombre exacto del asesor ("${nombre}") abajo:`
+    );
+    if (confirmacion === null) return;
+    if (confirmacion.trim() !== nombre) {
+        mostrarAlerta("El nombre no coincide. No se eliminó ningún asesor.", "warning");
+        return;
+    }
+
+    // Si estaba seleccionado en el select de Ventas, se recalculará al re-renderizar
+    delete appData.asesores[key];
+
+    // Quitarlo también de la lista de ocultos del Horario, si estaba ahí
+    if (typeof horarioOcultos !== "undefined") {
+        horarioOcultos = horarioOcultos.filter(k => k !== key);
+        if (typeof guardarHorarioOcultos === "function") guardarHorarioOcultos();
+    }
+
+    // Quitar sus turnos guardados de todas las semanas del Horario
+    if (typeof horarioData !== "undefined") {
+        Object.keys(horarioData).forEach(semanaISO => {
+            if (horarioData[semanaISO] && horarioData[semanaISO][key]) {
+                delete horarioData[semanaISO][key];
+            }
+        });
+        if (typeof guardarHorarioData === "function") guardarHorarioData();
+    }
+
+    sincronizarYRenderizar();
+    renderListaAsesoresConfig();
+    renderSelectAsesor(false);
+    if (typeof renderHorario === "function") renderHorario();
+    actualizarCumplimientoAsesorVisual();
+
+    // Guardado inmediato en la nube para que la eliminación quede reflejada
+    // sin esperar el debounce normal.
+    if (typeof guardarNubeInmediato === "function") guardarNubeInmediato();
+
+    mostrarAlerta(`Asesor "${nombre}" eliminado permanentemente junto con todos sus datos.`, "success");
+}
+
+// Cambia entre las pestañas "Metas por Categoría" / "Acumulados" dentro de la
+// tarjeta de resumen de un asesor específico (pestaña Ventas).
+function cambiarTabAsesor(key, tab, btnEl) {
+    const card = btnEl.closest(".ra-card");
+    if (!card) return;
+    card.querySelectorAll(".ra-tab-btn").forEach(b => b.classList.remove("active"));
+    card.querySelectorAll(".ra-tab-panel").forEach(p => p.classList.remove("active"));
+    btnEl.classList.add("active");
+    const panel = document.getElementById(`raTab-${key}-${tab}`);
+    if (panel) panel.classList.add("active");
+}
+
+function sincronizarYRenderizar() {
+    guardarDatosPorMes();
+    renderTodo();
+    if (typeof renderHorario === "function") renderHorario();
+}
+
+// Reinicia a cero SOLO el mes actualmente seleccionado: su Plan SOS y sus asesores (ventas,
+// montos, unidades, Garex, Insurama, QR, Trade-In), además de las ventas del calendario que
+// pertenecen a ese mes. Las Metas del Plan SOS y la Meta Mensual de la Tienda de ese mes NO
+// se tocan (igual que antes). Bitácoras, recordatorios y clínicas ahora son globales — no
+// dependen de qué mes esté seleccionado — así que tampoco se ven afectados por este botón.
+function reiniciarTodoCero() {
+    const mesLabel = formatearMesLabel(mesSeleccionado);
+    if (confirm(`⚠️ ¿Estás completamente seguro de restaurar a cero los datos de ${mesLabel}? Se eliminarán las ventas, asesores y datos de Plan SOS de ese mes. Las metas de ese mes, las bitácoras, los recordatorios y las clínicas NO se verán afectados.`)) {
+        datosPorMes[mesSeleccionado].appData = {
+            inicio: { conversion: 0, accesorizacion: 0, accesorizacionManual: false, accesorizacionManualValor: null, ticket: 0, trafico: 0, comentarios: "", oportunidades: "" },
+            asesores: {
+                asesor0: nuevoAsesor("Asesor 1"),
+                asesor1: nuevoAsesor("Asesor 2"),
+                asesor2: nuevoAsesor("Asesor 3")
+            }
+        };
+        appData = datosPorMes[mesSeleccionado].appData;
+
+        // Solo se eliminan del calendario las ventas que pertenecen al mes que se reinicia;
+        // las de otros meses se conservan.
+        ventasCalendario = ventasCalendario.filter(v => v.mesISO !== mesSeleccionado);
+        guardarVentasCalendario();
+
+        document.querySelectorAll("input, textarea").forEach(el => el.value = "");
+        lineasGarexPendientes = [];
+        lineasInsuramaPendientes = [];
+        renderListaPendiente("garex");
+        renderListaPendiente("insurama");
+        renderCalendario();
+        sincronizarYRenderizar();
+        // Guardado inmediato (sin esperar el debounce normal) para que el borrado
+        // quede reflejado en la nube incluso si la página se recarga enseguida.
+        if (typeof guardarNubeInmediato === "function") guardarNubeInmediato();
+        actualizarCumplimientoAsesorVisual();
+        mostrarAlerta(`Datos de ${mesLabel} reiniciados a cero.`, "success");
+    }
+}
+
+// Borra únicamente los registros de Garex e Insurama (todos los asesores).
+// No afecta ventas, montos, unidades, metas, recordatorios, clínicas ni bitácoras.
+function borrarGarexSeguros() {
+    if (confirm("⚠️ Esto borrará TODOS los registros de Garex y Seguros (Insurama) de todos los asesores. Las ventas, montos y unidades NO se verán afectados. ¿Deseas continuar?")) {
+        Object.keys(appData.asesores).forEach(key => {
+            appData.asesores[key].ventasGarex = [];
+            appData.asesores[key].ventasInsurama = [];
+        });
+
+        // Limpiar también líneas pendientes que no se hayan guardado todavía
+        lineasGarexPendientes = [];
+        lineasInsuramaPendientes = [];
+        renderListaPendiente("garex");
+        renderListaPendiente("insurama");
+
+        sincronizarYRenderizar();
+        if (typeof guardarNubeInmediato === "function") guardarNubeInmediato();
+        actualizarCumplimientoAsesorVisual();
+        mostrarAlerta("Registros de Garex y Seguros borrados correctamente.", "success");
+    }
+}
+
+// Borra únicamente los datos de ventas (monto semanal, montos por categoría,
+// unidades, QR, Trade-In y el historial del calendario de ventas) de todos los asesores.
+// No afecta Garex, Insurama, metas, recordatorios, clínicas ni bitácoras.
+function borrarVentas() {
+    if (confirm("⚠️ Esto borrará TODAS las ventas acumuladas (monto, montos por categoría, unidades, QR y Trade-In) de todos los asesores, además del historial de ventas en el calendario. Garex y Seguros NO se verán afectados. ¿Deseas continuar?")) {
+        Object.keys(appData.asesores).forEach(key => {
+            const a = appData.asesores[key];
+            a.ventaSemanal = 0;
+            a.qr = 0;
+            a.tradeIn = 0;
+            a.montos = { mac:0, ipad:0, iphone:0, watch:0, airpods:0, audio:0, acc_apple:0, acc_terceros:0 };
+            a.unidades = { mac:0, ipad:0, iphone:0, watch:0, airpods:0, audio:0 };
+        });
+
+        // Quitar del calendario solo las entradas de tipo "venta" del mes actualmente
+        // seleccionado (no toca recordatorios/clínicas ni las ventas de otros meses)
+        ventasCalendario = ventasCalendario.filter(v => !(v.tipo === "venta" && v.mesISO === mesSeleccionado));
+        guardarVentasCalendario();
+        renderCalendario();
+
+        sincronizarYRenderizar();
+        if (typeof guardarNubeInmediato === "function") guardarNubeInmediato();
+        actualizarCumplimientoAsesorVisual();
+        mostrarAlerta("Ventas borradas correctamente.", "success");
+    }
+}
+// ═══════════════════════════════════════════
+// RECORDATORIOS MENSUALES
+// ═══════════════════════════════════════════
+
+let recordatoriosData = JSON.parse(localStorage.getItem("recordatoriosData")) || [];
+let clinicasData = JSON.parse(localStorage.getItem("clinicasData")) || [];
+let ventasCalendario = JSON.parse(localStorage.getItem("ventasCalendario")) || [];
+
+function guardarRecordatorios() {
+    localStorage.setItem("recordatoriosData", JSON.stringify(recordatoriosData));
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
+}
+function guardarClinicas() {
+    localStorage.setItem("clinicasData", JSON.stringify(clinicasData));
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
+}
+function guardarVentasCalendario() {
+    localStorage.setItem("ventasCalendario", JSON.stringify(ventasCalendario));
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
+}
+
+function agregarRecordatorio() {
+    const fecha  = document.getElementById("inputRecordatorioFecha").value;
+    const texto  = document.getElementById("inputRecordatorioTexto").value.trim();
+    const tipo   = document.getElementById("selectRecordatorioTipo").value;
+
+    if (!fecha || !texto) {
+        mostrarAlerta("Por favor ingresa la fecha y la descripción del recordatorio.", "warning");
+        return;
+    }
+
+    recordatoriosData.push({ id: Date.now(), fecha, texto, tipo });
+    recordatoriosData.sort((a, b) => a.fecha.localeCompare(b.fecha));
+    guardarRecordatorios();
+    renderRecordatorios();
+    renderCalendario();
+
+    document.getElementById("inputRecordatorioFecha").value = "";
+    document.getElementById("inputRecordatorioTexto").value = "";
+    document.getElementById("selectRecordatorioTipo").value = "mantenimiento";
+}
+
+function eliminarRecordatorio(id) {
+    if (!confirm("¿Eliminar este recordatorio?")) return;
+    recordatoriosData = recordatoriosData.filter(r => r.id !== id);
+    guardarRecordatorios();
+    renderRecordatorios();
+    renderCalendario();
+}
+
+function renderRecordatorios() {
+    const cont = document.getElementById("listaRecordatorios");
+    if (!cont) return;
+
+    // Solo se muestran los recordatorios cuya fecha cae dentro del mes que se está viendo
+    // (mesSeleccionado), igual que el resto del dashboard.
+    const recordatoriosDelMes = recordatoriosData.filter(r => r.fecha && r.fecha.startsWith(mesSeleccionado));
+
+    if (recordatoriosDelMes.length === 0) {
+        const mensaje = recordatoriosData.length === 0
+            ? "No hay recordatorios registrados."
+            : "No hay recordatorios registrados para este mes.";
+        cont.innerHTML = `<p style="color:rgba(0,0,0,0.35); font-size:13px; text-align:center; padding:10px 0;">${mensaje}</p>`;
+        return;
+    }
+
+    const badgeLabels = { mantenimiento: "Mantenimiento", reunion: "Reunión", tarea: "Tarea", otro: "Otro" };
+
+    cont.innerHTML = recordatoriosDelMes.map(r => {
+        const [y, m, d] = r.fecha.split("-");
+        const fechaDisplay = `${d}/${m}/${y}`;
+        return `
+        <div class="r-item">
+            <span class="r-item-fecha">${fechaDisplay}</span>
+            <span class="r-item-badge r-badge-${r.tipo}">${badgeLabels[r.tipo] || r.tipo}</span>
+            <span class="r-item-texto">${r.texto}</span>
+            <button class="r-item-del" onclick="eliminarRecordatorio(${r.id})" title="Eliminar">✕</button>
+        </div>`;
+    }).join("");
+}
+
+// ═══════════════════════════════════════════
+// CLÍNICAS DE EXPERIENCIA
+// ═══════════════════════════════════════════
+
+function agregarClinica() {
+    const nombre = document.getElementById("inputClinicaNombre").value.trim();
+    const fecha  = document.getElementById("inputClinicaFecha").value;
+
+    if (!nombre) {
+        mostrarAlerta("Por favor ingresa el nombre de la clínica.", "warning");
+        return;
+    }
+
+    clinicasData.push({ id: Date.now(), nombre, fecha, realizada: false, fechaRealizada: null });
+    guardarClinicas();
+    renderClinicas();
+    renderCalendario();
+
+    document.getElementById("inputClinicaNombre").value = "";
+    document.getElementById("inputClinicaFecha").value = "";
+}
+
+async function toggleClinica(id) {
+    const clinica = clinicasData.find(c => c.id === id);
+    if (!clinica) return;
+
+    if (!clinica.realizada) {
+        // Se está marcando como completada: preguntar en qué fecha se realizó
+        const hoy = new Date().toISOString().slice(0, 10);
+        const fechaElegida = await pedirFecha(`¿Cuándo se realizó la clínica "${clinica.nombre}"?`, hoy);
+        if (!fechaElegida) return; // cancelado por el usuario
+        clinica.realizada = true;
+        clinica.fechaRealizada = fechaElegida;
+    } else {
+        // Se está desmarcando: vuelve a pendiente
+        clinica.realizada = false;
+        clinica.fechaRealizada = null;
+    }
+
+    guardarClinicas();
+    renderClinicas();
+    renderCalendario();
+}
+
+function eliminarClinica(id) {
+    if (!confirm("¿Eliminar esta clínica?")) return;
+    clinicasData = clinicasData.filter(c => c.id !== id);
+    guardarClinicas();
+    renderClinicas();
+    renderCalendario();
+}
+
+// La clínica interna fija (sin fecha propia) siempre se muestra, sin importar el mes que se
+// esté viendo. Las demás (con fecha programada o ya realizada) solo se muestran si esa fecha
+// cae dentro de mesSeleccionado, igual que Recordatorios.
+function clinicaPerteneceAlMesSeleccionado(c) {
+    if (!c.fecha) return true;
+    const fechaRelevante = (c.realizada && c.fechaRealizada) ? c.fechaRealizada : c.fecha;
+    return !!fechaRelevante && fechaRelevante.startsWith(mesSeleccionado);
+}
+
+function renderClinicas() {
+    const cont = document.getElementById("listaClinicas");
+    if (!cont) return;
+
+    const clinicasDelMes = clinicasData.filter(clinicaPerteneceAlMesSeleccionado);
+
+    if (clinicasDelMes.length === 0) {
+        const mensaje = clinicasData.length === 0
+            ? "No hay clínicas registradas."
+            : "No hay clínicas registradas para este mes.";
+        cont.innerHTML = `<p style="color:rgba(0,0,0,0.35); font-size:13px; text-align:center; padding:10px 0;">${mensaje}</p>`;
+        return;
+    }
+
+    cont.innerHTML = clinicasDelMes.map(c => {
+        const realizada = c.realizada;
+        const fechaDisplay = c.fecha ? (() => { const [y,m,d] = c.fecha.split("-"); return `${d}/${m}/${y}`; })() : "Sin fecha";
+        const fechaRealizadaDisplay = c.fechaRealizada ? (() => { const [y,m,d] = c.fechaRealizada.split("-"); return `${d}/${m}/${y}`; })() : "";
+        return `
+        <div class="c-item">
+            <div class="c-item-check ${realizada ? 'realizada' : ''}" onclick="toggleClinica(${c.id})" title="${realizada ? 'Marcar como pendiente' : 'Marcar como realizada'}">
+                ${realizada ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4.5 4.5L19 7"/></svg>' : ''}
+            </div>
+            <span class="c-item-nombre ${realizada ? 'realizada' : ''}">${c.nombre}</span>
+            <span class="c-item-fecha">${realizada ? 'Realizada: ' + fechaRealizadaDisplay : 'Programada: ' + fechaDisplay}</span>
+            <span class="c-item-estado ${realizada ? 'c-estado-realizada' : 'c-estado-pendiente'}">${realizada
+                ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5 5.5-6"/></svg> Realizada'
+                : '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.5l3.5 2"/></svg> Pendiente'}</span>
+            <button class="c-item-del" onclick="eliminarClinica(${c.id})" title="Eliminar">✕</button>
+        </div>`;
+    }).join("");
+}
+
+// Garantiza que siempre exista la clínica fija "Clínica de experiencia — Interna", sin importar reinicios
+function asegurarClinicaInterna() {
+    const existe = clinicasData.some(c => c.nombre === "Clínica de experiencia — Interna");
+    if (!existe) {
+        clinicasData.unshift({
+            id: Date.now(),
+            nombre: "Clínica de experiencia — Interna",
+            fecha: "",
+            realizada: false,
+            fechaRealizada: null
+        });
+        guardarClinicas();
+    }
+}
+
+// Inicializar las listas al cargar la página
+document.addEventListener("DOMContentLoaded", function () {
+    asegurarClinicaInterna();
+    renderRecordatorios();
+    renderClinicas();
+    renderCalendario();
+});
+
+// ═══════════════════════════════════════════
+// CALENDARIO
+// ═══════════════════════════════════════════
+
+let calAño  = new Date().getFullYear();
+let calMes  = new Date().getMonth(); // 0-11
+let calDiaSeleccionado = null;
+
+// Las flechas ‹ › del mini calendario ahora mueven el mes de TODA la página (el mismo
+// mesSeleccionado que usa el selector de arriba), en vez de navegar el calendario por su
+// cuenta. Así los dos quedan siempre en el mismo mes, sin importar desde cuál de los dos
+// se navegue.
+function calNavegar(delta) {
+    if (typeof cambiarMesSeleccionado === "function") {
+        cambiarMesSeleccionado(delta);
+        return;
+    }
+    // Respaldo por si cambiarMesSeleccionado no está disponible: navega solo el calendario.
+    calMes += delta;
+    if (calMes > 11) { calMes = 0; calAño++; }
+    if (calMes < 0)  { calMes = 11; calAño--; }
+    calDiaSeleccionado = null;
+    renderCalendario();
+    const detalle = document.getElementById("calDetalle");
+    if (detalle) detalle.style.display = "none";
+}
+
+// El botón "Hoy" del mini calendario también lleva a toda la página de vuelta al mes actual.
+function calIrHoy() {
+    if (typeof irAMesActual === "function" && typeof mesSeleccionado !== "undefined" && typeof mesISOActual === "function") {
+        if (mesSeleccionado !== mesISOActual()) {
+            irAMesActual();
+            return;
+        }
+    }
+    const hoy = new Date();
+    calAño = hoy.getFullYear();
+    calMes = hoy.getMonth();
+    calDiaSeleccionado = null;
+    renderCalendario();
+    document.getElementById("calDetalle").style.display = "none";
+}
+
+// Salta el mini calendario al mes que esté seleccionado arriba (mesSeleccionado, "YYYY-MM"),
+// para que no se quede mostrando un mes distinto al que se está viendo en el resto del
+// dashboard. Se llama al cambiar de mes con el selector de arriba.
+function sincronizarCalendarioConMesSeleccionado() {
+    if (typeof mesSeleccionado === "undefined" || !mesSeleccionado) return;
+    const [y, m] = mesSeleccionado.split("-").map(Number);
+    if (!y || !m) return;
+    calAño = y;
+    calMes = m - 1;
+    calDiaSeleccionado = null;
+    const detalle = document.getElementById("calDetalle");
+    if (detalle) detalle.style.display = "none";
+}
+
+// Recopila todos los eventos de todas las fuentes y los indexa por "YYYY-MM-DD"
+function obtenerEventosPorFecha() {
+    const mapa = {}; // { "2026-06-15": [ {tipo, label, color}, ... ] }
+
+    function agregar(fecha, evento) {
+        if (!fecha) return;
+        if (!mapa[fecha]) mapa[fecha] = [];
+        mapa[fecha].push(evento);
+    }
+
+    // 1. Recordatorios
+    const coloresRec = { mantenimiento:"#0071E3", reunion:"#0071E3", tarea:"#0071E3", otro:"#0071E3" };
+    recordatoriosData.forEach(r => {
+        agregar(r.fecha, { tipo:"recordatorio", label: r.texto, color:"#0071E3", pillClass:"cal-pill-recordatorio" });
+    });
+
+    // 2. Clínicas
+    clinicasData.forEach(c => {
+        if (c.realizada && c.fechaRealizada) {
+            agregar(c.fechaRealizada, { tipo:"clinica-r", label: c.nombre, color:"#34C759", pillClass:"cal-pill-clinica-r" });
+        } else if (c.fecha) {
+            agregar(c.fecha, { tipo:"clinica-p", label: c.nombre, color:"#FF9500", pillClass:"cal-pill-clinica-p" });
+        }
+    });
+
+    // 3. Bitácoras (usan fechaISO si está disponible)
+    bitacorasData.forEach(b => {
+        if (b.fechaISO) {
+            agregar(b.fechaISO, { tipo:"bitacora", label: b.texto.substring(0, 50) + (b.texto.length > 50 ? "…" : ""), color:"#86868B", pillClass:"cal-pill-bitacora" });
+        }
+    });
+
+    // 4. Ventas ingresadas desde Asesores
+    ventasCalendario.forEach(v => {
+        agregar(v.fecha, { tipo:"venta", id: v.id, label: v.label, color:"#34C759", pillClass:"cal-pill-venta", asesorKey: v.asesorKey, monto: v.monto, grupoId: v.grupoId, visibleEnCalendario: v.visibleEnCalendario !== false });
+    });
+
+    return mapa;
+}
+
+function renderCalendario() {
+    const grid   = document.getElementById("calGrid");
+    const titulo = document.getElementById("calTitulo");
+    if (!grid || !titulo) return;
+
+    const hoy = new Date();
+    const hoyStr = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,"0")}-${String(hoy.getDate()).padStart(2,"0")}`;
+
+    // Título
+    const nombreMes = new Date(calAño, calMes, 1).toLocaleString("es-ES", { month:"long", year:"numeric" });
+    titulo.textContent = nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1);
+
+    const eventos = obtenerEventosPorFecha();
+
+    // Primer día de la semana (0=Dom) y total de días del mes
+    const primerDia = new Date(calAño, calMes, 1).getDay();
+    const diasEnMes = new Date(calAño, calMes + 1, 0).getDate();
+    const diasMesAnterior = new Date(calAño, calMes, 0).getDate();
+
+    let celdas = "";
+
+    // Días del mes anterior (relleno)
+    for (let i = primerDia - 1; i >= 0; i--) {
+        const d = diasMesAnterior - i;
+        const mesAnterior = calMes === 0 ? 12 : calMes;
+        const añoAnterior = calMes === 0 ? calAño - 1 : calAño;
+        const fecha = `${añoAnterior}-${String(mesAnterior).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+        celdas += renderCelda(d, fecha, true, hoyStr, eventos, false);
+    }
+
+    // Días del mes actual
+    for (let d = 1; d <= diasEnMes; d++) {
+        const fecha = `${calAño}-${String(calMes+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+        celdas += renderCelda(d, fecha, false, hoyStr, eventos, true);
+    }
+
+    // Relleno final (días del mes siguiente)
+    const totalCeldas = primerDia + diasEnMes;
+    const restantes = totalCeldas % 7 === 0 ? 0 : 7 - (totalCeldas % 7);
+    for (let d = 1; d <= restantes; d++) {
+        const mesSiguiente = calMes === 11 ? 1 : calMes + 2;
+        const añoSiguiente = calMes === 11 ? calAño + 1 : calAño;
+        const fecha = `${añoSiguiente}-${String(mesSiguiente).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+        celdas += renderCelda(d, fecha, true, hoyStr, eventos, false);
+    }
+
+    grid.innerHTML = celdas;
+}
+
+function renderCelda(dia, fecha, otroMes, hoyStr, eventos, esDelMes) {
+    const esHoy = fecha === hoyStr;
+    const esSeleccionada = fecha === calDiaSeleccionado;
+    // En la celda del día solo se muestran los eventos visibles (las ventas marcadas
+    // para no reflejarse en el calendario quedan ocultas aquí, pero siguen disponibles
+    // en el detalle del día al hacer clic, para poder eliminarlas si es necesario).
+    const evs = (eventos[fecha] || []).filter(e => e.tipo !== "venta" || e.visibleEnCalendario !== false);
+
+    let clases = "cal-celda";
+    if (otroMes) clases += " otro-mes";
+    if (esHoy)   clases += " hoy";
+    if (esSeleccionada) clases += " seleccionada";
+
+    const numHTML = `<div class="cal-dia-num">${dia}</div>`;
+
+    // Máximo 3 pills visibles
+    const pillsHTML = evs.slice(0, 3).map(e =>
+        `<div class="cal-evento-pill ${e.pillClass}">${e.label}</div>`
+    ).join("");
+
+    const masHTML = evs.length > 3
+        ? `<div style="font-size:10px;color:rgba(0,0,0,0.35);padding-left:4px;">+${evs.length - 3} más</div>`
+        : "";
+
+    return `<div class="${clases}" onclick="calClickDia('${fecha}')">${numHTML}<div class="cal-eventos">${pillsHTML}${masHTML}</div></div>`;
+}
+
+function calClickDia(fecha) {
+    calDiaSeleccionado = fecha;
+    renderCalendario();
+
+    const eventos = obtenerEventosPorFecha();
+    const evsDia  = eventos[fecha] || [];
+    const detalle = document.getElementById("calDetalle");
+    const contenido = document.getElementById("calDetalleContenido");
+    const tituloEl  = document.getElementById("calDetalleFecha");
+    if (!detalle || !contenido || !tituloEl) return;
+
+    // Formatear fecha bonita
+    const [y, m, d] = fecha.split("-");
+    const nombreDia = new Date(parseInt(y), parseInt(m)-1, parseInt(d))
+        .toLocaleDateString("es-ES", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
+    tituloEl.textContent = nombreDia.charAt(0).toUpperCase() + nombreDia.slice(1);
+
+    if (evsDia.length === 0) {
+        contenido.innerHTML = `<p style="color:rgba(0,0,0,0.35); font-size:13px; padding:8px 0;">No hay eventos este día.</p>`;
+    } else {
+        contenido.innerHTML = evsDia.map(e => `
+            <div class="cal-detalle-item" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                <span style="display:flex; align-items:center; gap:8px;">
+                    <span class="cal-detalle-dot" style="background:${e.color};"></span>
+                    <span>${e.label}${e.tipo === "venta" && e.visibleEnCalendario === false ? ' <span style="color:#86868B; font-size:11px;">(oculta del calendario)</span>' : ""}</span>
+                </span>
+                ${e.tipo === "venta" ? `<button type="button" onclick="eliminarVentaCalendario(${e.id}, '${fecha}')" title="Eliminar esta venta" style="background:none; border:none; color:#FF3B30; font-size:15px; cursor:pointer; padding:0 4px; line-height:1; flex-shrink:0;">✕</button>` : ""}
+            </div>
+        `).join("");
+    }
+
+    detalle.style.display = "block";
+    detalle.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+// Elimina una venta puntual del calendario, y resta el monto correspondiente
+// del total acumulado del asesor (asor.ventaSemanal) para mantener todo consistente.
+// Si la venta pertenece a un rango de días repartido en varios días, pregunta
+// si se desea eliminar solo ese día o el rango completo.
+function eliminarVentaCalendario(id, fecha) {
+    const entrada = ventasCalendario.find(v => v.id === id);
+    if (!entrada) return;
+
+    // La venta puede pertenecer a un mes distinto al que se está viendo ahora mismo (los
+    // asesores son independientes por mes), así que hay que buscar al asesor dentro del
+    // bloque del mes en que se registró la venta, no en el mes actualmente seleccionado.
+    // Las ventas guardadas antes de este cambio no tienen mesISO: se asume el mes actual.
+    const mesDeLaVenta = (entrada.mesISO && datosPorMes[entrada.mesISO]) ? entrada.mesISO : mesSeleccionado;
+    const asor = entrada.asesorKey ? datosPorMes[mesDeLaVenta].appData.asesores[entrada.asesorKey] : null;
+
+    // Ventas guardadas antes de este arreglo no traen desglose: solo se puede restar el monto.
+    let ventasSinDesglose = 0;
+
+    if (entrada.grupoId) {
+        const diasDelGrupo = ventasCalendario.filter(v => v.grupoId === entrada.grupoId);
+        const borrarTodo = confirm(
+            `Esta venta forma parte de un rango repartido en ${diasDelGrupo.length} día(s) (total $${(entrada.montoTotalGrupo || 0).toLocaleString()}).\n\n` +
+            `Presiona "Aceptar" para eliminar TODO el rango, o "Cancelar" para elegir entre eliminar solo este día.`
+        );
+
+        if (borrarTodo) {
+            if (asor) asor.ventaSemanal = Math.max(0, asor.ventaSemanal - (entrada.montoTotalGrupo || 0));
+            diasDelGrupo.forEach(d => { if (d.detalle) revertirDetalleVenta(asor, d.detalle); else ventasSinDesglose++; });
+            ventasCalendario = ventasCalendario.filter(v => v.grupoId !== entrada.grupoId);
+        } else {
+            const borrarSoloEsteDia = confirm(`¿Eliminar únicamente el registro de este día (${fecha})? Se restará solo su parte proporcional ($${entrada.monto.toFixed(0)}).`);
+            if (!borrarSoloEsteDia) return;
+            if (asor) asor.ventaSemanal = Math.max(0, asor.ventaSemanal - entrada.monto);
+            if (entrada.detalle) revertirDetalleVenta(asor, entrada.detalle); else ventasSinDesglose++;
+            ventasCalendario = ventasCalendario.filter(v => v.id !== id);
+        }
+    } else {
+        if (!confirm(`¿Eliminar esta venta del ${fecha}? Se restará $${(entrada.monto || 0).toLocaleString()} del total acumulado del asesor, junto con sus unidades, montos por categoría, QR y Trade-In. Esta acción no se puede deshacer.`)) return;
+        if (asor) asor.ventaSemanal = Math.max(0, asor.ventaSemanal - (entrada.monto || 0));
+        if (entrada.detalle) revertirDetalleVenta(asor, entrada.detalle); else ventasSinDesglose++;
+        ventasCalendario = ventasCalendario.filter(v => v.id !== id);
+    }
+
+    guardarVentasCalendario();
+    sincronizarYRenderizar();
+    renderCalendario();
+    calClickDia(fecha);
+
+    if (ventasSinDesglose > 0) {
+        mostrarAlerta("Se restó el monto de la venta, pero esta venta se registró antes de que se guardara el desglose, así que sus unidades, montos por categoría, QR y Trade-In no se pudieron restar automáticamente.", "warning");
+    }
+}
+// Tipos de turno rápidos (chips) + tipo "custom" para texto libre.
+// bg/text ya vienen listos para usarse como estilo inline, siguiendo
+// el mismo patrón de color que las pastillas del calendario.
+const TIPOS_TURNO = {
+    libre:       { label: "Libre",        emoji: "", bg: "rgba(134,134,139,0.14)",text: "#3a3a3c" },
+    vacaciones:  { label: "Vacaciones",   emoji: "", bg: "rgba(52,199,89,0.16)",  text: "#1a6e35" },
+    incapacidad: { label: "Incapacidad",  emoji: "", bg: "rgba(255,59,48,0.14)",  text: "#c92f25" },
+    custom:      { label: "Personalizado",emoji: "", bg: "rgba(175,82,222,0.14)", text: "#7d2a9e" }
+};
+
+// Convierte un color elegido a mano (input type="color", ej. "#0071e3") en el mismo
+// patrón visual de fondo suave + texto oscuro saturado que usan los colores por
+// defecto de TIPOS_TURNO, para que un turno con color personalizado (turno.color)
+// se vea consistente con el resto de la app.
+function coloresTurnoDesdeHex(hex) {
+    const limpio = (hex || "").replace("#", "");
+    const completo = limpio.length === 3 ? limpio.split("").map(c => c + c).join("") : limpio;
+    const num = parseInt(completo, 16) || 0;
+    const r = (num >> 16) & 255, g = (num >> 8) & 255, b = num & 255;
+    return {
+        bg: `rgba(${r},${g},${b},0.18)`,
+        text: `rgb(${Math.round(r * 0.55)},${Math.round(g * 0.55)},${Math.round(b * 0.55)})`
+    };
+}
+
+// Dado un turno guardado, devuelve {bg, text}: su color personalizado si tiene uno,
+// o el color por defecto de su tipo (TIPOS_TURNO) en caso contrario.
+function coloresDeTurno(turno) {
+    if (turno && turno.color) return coloresTurnoDesdeHex(turno.color);
+    const base = turno && TIPOS_TURNO[turno.tipo] ? TIPOS_TURNO[turno.tipo] : TIPOS_TURNO.custom;
+    return { bg: base.bg, text: base.text };
+}
+ 
+const DIAS_SEMANA = [
+    { key: "lun", label: "Lun" },
+    { key: "mar", label: "Mar" },
+    { key: "mie", label: "Mié" },
+    { key: "jue", label: "Jue" },
+    { key: "vie", label: "Vie" },
+    { key: "sab", label: "Sáb" },
+    { key: "dom", label: "Dom" }
+];
+
+// Accesos rápidos configurables por el usuario (además de Libre/Vacaciones/Incapacidad):
+// valores fijos de texto (ej. "Horario normal" o "10:00 am – 7:00 pm") que se guardan una
+// vez desde el modal de turno y después se reutilizan con un solo clic, en vez de tener que
+// escribirlos cada vez. Es una lista global (no depende del mes ni de la semana), igual que
+// Bitácoras/Recordatorios/Clínicas, y se sincroniza con la nube junto con esos datos.
+const HORARIO_PRESETS_DEFAULT = [
+    { id: "preset_normal", texto: "Horario normal" },
+    { id: "preset_10_7",   texto: "10:00 am – 7:00 pm" }
+];
+let horarioPresets = JSON.parse(localStorage.getItem("horarioPresets")) || HORARIO_PRESETS_DEFAULT.map(p => ({ ...p }));
+
+function guardarHorarioPresets() {
+    localStorage.setItem("horarioPresets", JSON.stringify(horarioPresets));
+    if (typeof programarGuardadoNube === "function") programarGuardadoNube();
+}
+
+// Agrega un nuevo acceso rápido si el texto no está vacío y no existe ya uno igual
+// (comparación sin distinguir mayúsculas/minúsculas ni espacios sobrantes).
+function agregarHorarioPreset(texto) {
+    const limpio = (texto || "").trim();
+    if (!limpio) return;
+    const yaExiste = horarioPresets.some(p => p.texto.trim().toLowerCase() === limpio.toLowerCase());
+    if (yaExiste) return;
+    horarioPresets.push({ id: "preset_" + Date.now(), texto: limpio });
+    guardarHorarioPresets();
+}
+
+function eliminarHorarioPreset(id) {
+    horarioPresets = horarioPresets.filter(p => p.id !== id);
+    guardarHorarioPresets();
+}
+ 
+// Datos guardados por semana. Clave = fecha ISO del lunes de esa semana. Vive dentro del
+// bloque del mes actualmente seleccionado (datosPorMes[mesSeleccionado].horarioData), porque
+// las claves "asesor0/1/2..." se reutilizan mes a mes para personas distintas: si el horario
+// fuera global, el turno de una persona de un mes se vería mezclado con el de otra persona
+// en otro mes que compartiera la misma clave.
+// Estructura: { "2026-07-06": { asesor0: { lun: {tipo,texto}, mar: {...}, ... }, asesor1: {...} } }
+let horarioData = datosPorMes[mesSeleccionado].horarioData;
+
+function guardarHorarioData() {
+    // Re-enlaza por si horarioData fue reasignado a un objeto nuevo en vez de mutado en
+    // sitio (ej. al eliminar un asesor), para que quede guardado en el mes correcto.
+    datosPorMes[mesSeleccionado].horarioData = horarioData;
+    guardarDatosPorMes();
+}
+
+// Semana actualmente visible en pantalla (se navega con las flechas ‹ ›)
+let horarioFechaBase = new Date();
+ 
+// Devuelve una fecha en formato YYYY-MM-DD usando el calendario LOCAL del
+// navegador. A propósito NO se usa fecha.toISOString(), porque esa función
+// convierte a UTC y puede adelantar o atrasar un día según la zona horaria
+// y la hora del día (por eso el horario podía mostrar el lunes equivocado).
+function fechaLocalISO(fecha) {
+    const y = fecha.getFullYear();
+    const m = String(fecha.getMonth() + 1).padStart(2, "0");
+    const d = String(fecha.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
+
+// Dada cualquier fecha, devuelve el ISO (YYYY-MM-DD) del lunes de esa semana
+function obtenerLunesISO(fecha) {
+    const d = new Date(fecha);
+    const dia = d.getDay(); // 0 = domingo, 1 = lunes, ..., 6 = sábado
+    const diferencia = dia === 0 ? -6 : 1 - dia; // si cae domingo, retrocede 6 días; si no, ubica el lunes de esa semana
+    d.setDate(d.getDate() + diferencia);
+    return fechaLocalISO(d);
+}
+function obtenerLunesActualISO() {
+    return obtenerLunesISO(horarioFechaBase);
+}
+
+// Agrega una persona nueva desde la pestaña Configuración. Este es el único
+// lugar de la app donde se pueden agregar asesores; la persona queda
+// disponible también en Ventas/Asesores y Horario (misma lista, un solo
+// lugar de verdad).
+function agregarNuevoAsesor() {
+    const input = document.getElementById("inputNuevoAsesor");
+    const nombre = input ? input.value.trim() : "";
+    if (!nombre) { mostrarAlerta("Ingresa un nombre para el nuevo asesor.", "warning"); return; }
+
+    crearAsesorConNombre(nombre);
+    if (input) input.value = "";
+    mostrarAlerta(`Asesor "${nombre}" agregado correctamente. Se creó una clínica de experiencia para él en la pestaña Recordatorios.`, "success");
+}
+
+// Lista de asesores ocultos en la pestaña Horario. Ocultar a alguien aquí NO borra
+// nada de sus datos (ventas, Garex, Insurama, etc.) — solo deja de aparecer en la
+// grilla del horario. Esta lista es independiente de appData.asesores a propósito, y
+// vive dentro del mismo bloque del mes seleccionado, por la misma razón que horarioData.
+let horarioOcultos = datosPorMes[mesSeleccionado].horarioOcultos;
+
+function guardarHorarioOcultos() {
+    // Re-enlaza por si horarioOcultos fue reasignado a un array nuevo en vez de mutado en
+    // sitio (ej. al eliminar un asesor), para que quede guardado en el mes correcto.
+    datosPorMes[mesSeleccionado].horarioOcultos = horarioOcultos;
+    guardarDatosPorMes();
+}
+
+// Quita a un asesor únicamente de la pestaña Horario. Sus datos de ventas, Garex,
+// Insurama y su registro en Ventas Asesores/Configuración permanecen intactos.
+function quitarAsesorDeHorario(key) {
+    const nombre = appData.asesores[key]?.nombre || key;
+    if (!confirm(`¿Quitar a "${nombre}" de la pestaña Horario? Sus datos de ventas, Garex e Insurama no se verán afectados; solo dejará de aparecer aquí.`)) return;
+    if (!horarioOcultos.includes(key)) horarioOcultos.push(key);
+    guardarHorarioOcultos();
+    renderHorario();
+    mostrarAlerta(`"${nombre}" se quitó de la pestaña Horario.`, "success");
+}
+
+// ── PERSONAS SOLO DEL HORARIO (sin ventas, metas, Garex ni Insurama) ───────
+// A diferencia de appData.asesores, estas personas existen únicamente para poder
+// asignarles turnos en la pestaña Horario (ej. personal de otra área, practicantes).
+// Viven en su propia lista dentro del mes seleccionado y su orden (⠿) es independiente
+// del de los asesores reales: nunca se mezclan entre sí al arrastrar.
+let horarioPersonasExtra = datosPorMes[mesSeleccionado].horarioPersonasExtra;
+
+function guardarHorarioPersonasExtra() {
+    // Re-enlaza por si horarioPersonasExtra fue reasignado a un objeto nuevo en vez de
+    // mutado en sitio (ej. al reordenar), para que quede guardado en el mes correcto.
+    datosPorMes[mesSeleccionado].horarioPersonasExtra = horarioPersonasExtra;
+    guardarDatosPorMes();
+}
+
+function agregarPersonaHorario() {
+    const input = document.getElementById("inputNuevaPersonaHorario");
+    const nombre = input ? input.value.trim() : "";
+    if (!nombre) { mostrarAlerta("Ingresa un nombre para la nueva persona del Horario.", "warning"); return; }
+
+    const keys = Object.keys(horarioPersonasExtra);
+    const nextNum = keys.length > 0
+        ? Math.max(...keys.map(k => parseInt(k.replace("extra", "")) || 0)) + 1
+        : 0;
+    const newKey = `extra${nextNum}`;
+
+    horarioPersonasExtra[newKey] = { nombre };
+    guardarHorarioPersonasExtra();
+    renderHorario();
+    if (input) input.value = "";
+    mostrarAlerta(`"${nombre}" se agregó al Horario.`, "success");
+}
+
+// Elimina PERMANENTEMENTE a una persona agregada solo para el Horario, junto con sus
+// turnos guardados en todas las semanas. Como no tiene ventas, metas ni ningún otro dato
+// en el resto de la app, no hace falta pedir que se escriba el nombre para confirmar
+// (a diferencia de "eliminarAsesor", donde sí se pierden datos de ventas reales).
+function eliminarPersonaHorario(key) {
+    const persona = horarioPersonasExtra[key];
+    if (!persona) return;
+    if (!confirm(`¿Quitar a "${persona.nombre}" del Horario? Se eliminarán también sus turnos guardados.`)) return;
+
+    delete horarioPersonasExtra[key];
+    guardarHorarioPersonasExtra();
+
+    Object.keys(horarioData).forEach(semanaISO => {
+        if (horarioData[semanaISO] && horarioData[semanaISO][key]) {
+            delete horarioData[semanaISO][key];
+        }
+    });
+    guardarHorarioData();
+
+    renderHorario();
+    mostrarAlerta(`"${persona.nombre}" se quitó del Horario.`, "success");
+}
+
+// Mueve keyOrigen justo antes de keyDestino en el orden de horarioPersonasExtra (lista
+// independiente del orden de appData.asesores; ver moverAsesorAPosicion más abajo).
+function moverPersonaHorarioAPosicion(keyOrigen, keyDestino) {
+    const keys = Object.keys(horarioPersonasExtra);
+    const idxOrigen = keys.indexOf(keyOrigen);
+    if (idxOrigen === -1) return;
+    keys.splice(idxOrigen, 1);
+
+    const idxDestino = keys.indexOf(keyDestino);
+    keys.splice(idxDestino === -1 ? keys.length : idxDestino, 0, keyOrigen);
+
+    const reordenado = {};
+    keys.forEach(k => { reordenado[k] = horarioPersonasExtra[k]; });
+    horarioPersonasExtra = reordenado;
+
+    guardarHorarioPersonasExtra();
+    renderHorario();
+}
+
+// ── REORDENAR ARRASTRANDO CON EL CURSOR (o el dedo) ────────────────────────
+// El orden es compartido por toda la app (select de Asesores, Configuración,
+// Horario), ya que reconstruye appData.asesores respetando el nuevo orden de
+// sus llaves. Se usa el manejador (⠿) de cada fila con Pointer Events, que
+// funciona igual con mouse que con pantallas táctiles.
+let horarioArrastreKey = null;
+let horarioArrastreObjetivo = null;
+// 'asesor' | 'extra' — evita que una persona del Horario se pueda soltar entre los
+// asesores reales (o viceversa), ya que cada grupo tiene su propio orden independiente.
+let horarioArrastreGrupo = null;
+
+function horarioPointerDown(e, key, grupo = 'asesor') {
+    if (e.button !== undefined && e.button !== 0 && e.pointerType === "mouse") return;
+    horarioArrastreKey = key;
+    horarioArrastreObjetivo = null;
+    horarioArrastreGrupo = grupo;
+    const celda = e.currentTarget.closest(".horario-nombre-cell");
+    if (celda) celda.classList.add("horario-arrastrando");
+    e.currentTarget.setPointerCapture(e.pointerId);
+    e.preventDefault();
+}
+
+function horarioPointerMove(e) {
+    if (!horarioArrastreKey) return;
+    e.preventDefault();
+    document.querySelectorAll(".horario-nombre-cell.horario-drop-objetivo")
+        .forEach(el => el.classList.remove("horario-drop-objetivo"));
+
+    const elBajoCursor = document.elementFromPoint(e.clientX, e.clientY);
+    const celdaObjetivo = elBajoCursor ? elBajoCursor.closest(".horario-nombre-cell") : null;
+    if (celdaObjetivo && celdaObjetivo.dataset.key && celdaObjetivo.dataset.grupo === horarioArrastreGrupo && celdaObjetivo.dataset.key !== horarioArrastreKey) {
+        celdaObjetivo.classList.add("horario-drop-objetivo");
+        horarioArrastreObjetivo = celdaObjetivo.dataset.key;
+    } else {
+        horarioArrastreObjetivo = null;
+    }
+}
+
+function horarioPointerUp(e) {
+    document.querySelectorAll(".horario-nombre-cell.horario-arrastrando, .horario-nombre-cell.horario-drop-objetivo")
+        .forEach(el => el.classList.remove("horario-arrastrando", "horario-drop-objetivo"));
+
+    if (horarioArrastreKey && horarioArrastreObjetivo && horarioArrastreKey !== horarioArrastreObjetivo) {
+        if (horarioArrastreGrupo === 'extra') moverPersonaHorarioAPosicion(horarioArrastreKey, horarioArrastreObjetivo);
+        else moverAsesorAPosicion(horarioArrastreKey, horarioArrastreObjetivo);
+    }
+    horarioArrastreKey = null;
+    horarioArrastreObjetivo = null;
+    horarioArrastreGrupo = null;
+}
+
+// Mueve keyOrigen justo antes de keyDestino en el orden de appData.asesores
+function moverAsesorAPosicion(keyOrigen, keyDestino) {
+    const keys = Object.keys(appData.asesores);
+    const idxOrigen = keys.indexOf(keyOrigen);
+    if (idxOrigen === -1) return;
+    keys.splice(idxOrigen, 1);
+
+    const idxDestino = keys.indexOf(keyDestino);
+    keys.splice(idxDestino === -1 ? keys.length : idxDestino, 0, keyOrigen);
+
+    const asesoresReordenados = {};
+    keys.forEach(k => { asesoresReordenados[k] = appData.asesores[k]; });
+    appData.asesores = asesoresReordenados;
+
+    sincronizarYRenderizar();
+}
+ 
+function horarioNavegar(delta) {
+    horarioFechaBase.setDate(horarioFechaBase.getDate() + delta * 7);
+    renderHorario();
+}
+function horarioIrHoy() {
+    horarioFechaBase = new Date();
+    renderHorario();
+}
+ 
+// Guarda o actualiza el turno de un asesor en un día específico de la semana
+function guardarTurno(asesorKey, diaKey, semanaISO, turno) {
+    if (!horarioData[semanaISO]) horarioData[semanaISO] = {};
+    if (!horarioData[semanaISO][asesorKey]) horarioData[semanaISO][asesorKey] = {};
+    horarioData[semanaISO][asesorKey][diaKey] = turno;
+    guardarHorarioData();
+    renderHorario();
+    mostrarAlerta("Turno actualizado.", "success");
+}
+ 
+// Elimina el turno de un asesor en un día específico
+function quitarTurno(asesorKey, diaKey, semanaISO) {
+    if (horarioData[semanaISO] && horarioData[semanaISO][asesorKey]) {
+        delete horarioData[semanaISO][asesorKey][diaKey];
+    }
+    guardarHorarioData();
+    renderHorario();
+    mostrarAlerta("Turno eliminado.", "success");
+}
+
+// Genera el HTML de los chips de accesos rápidos (se re-usa también para refrescar
+// esa sección del modal sin cerrarlo, al agregar o eliminar un acceso rápido).
+function renderHorarioChipsPresets() {
+    if (horarioPresets.length === 0) {
+        return `<p class="horario-vacio-msg" style="font-size:12px; margin-top:6px;">Aún no tienes accesos rápidos guardados. Escribe un texto abajo y marca la casilla para crear el primero.</p>`;
+    }
+    return `<div class="horario-chips horario-chips-presets">
+        ${horarioPresets.map(p => `
+            <span class="horario-chip-preset-wrap">
+                <button type="button" class="horario-chip horario-chip-preset" data-preset-id="${p.id}" style="background:rgba(0,113,227,0.12); color:#0071E3;">${p.texto}</button>
+                <button type="button" class="horario-chip-preset-del" data-preset-id="${p.id}" title="Eliminar este acceso rápido">✕</button>
+            </span>`).join("")}
+    </div>`;
+}
+ 
+// Modal para asignar un turno: chips rápidos de Libre/Vacaciones/Incapacidad (guardan y
+// cierran al instante), chips de accesos rápidos personalizados (mismo comportamiento, y
+// además se pueden eliminar con la "x"), y un campo de texto libre para casos puntuales
+// (requiere presionar "Guardar texto"; con la casilla marcada, también queda guardado
+// como acceso rápido para la próxima vez).
+function abrirModalTurno(asesorKey, diaKey, fechaISO, nombreAsesor, diaLabel) {
+    const semanaISO = obtenerLunesActualISO();
+    const turnoActual = (horarioData[semanaISO] && horarioData[semanaISO][asesorKey])
+        ? horarioData[semanaISO][asesorKey][diaKey]
+        : null;
+ 
+    const overlay = document.createElement("div");
+    overlay.className = "modal-overlay";
+    overlay.innerHTML = `
+        <div class="modal-glass horario-modal">
+            <h3 class="modal-title">${nombreAsesor} — ${diaLabel}</h3>
+            <div class="horario-chips">
+                ${Object.entries(TIPOS_TURNO)
+                    .filter(([key]) => key !== "custom")
+                    .map(([key, t]) => `
+                        <button type="button" class="horario-chip" data-tipo="${key}" style="background:${t.bg}; color:${t.text};">
+                            ${t.emoji} ${t.label}
+                        </button>`).join("")}
+            </div>
+            <label class="cal-checkbox-wrap" for="horarioUsarColor" style="padding-top:14px; padding-bottom:${turnoActual && turnoActual.color ? "10px" : "0"};">
+                <input type="checkbox" id="horarioUsarColor" ${turnoActual && turnoActual.color ? "checked" : ""}>
+                <span>Elegir un color personalizado para este turno</span>
+            </label>
+            <div class="form-group" id="horarioColorBox" style="margin-top:0; margin-bottom:14px; ${turnoActual && turnoActual.color ? "" : "display:none;"}">
+                <label for="horarioColorPersonalizado">Color del turno</label>
+                <input type="color" id="horarioColorPersonalizado" class="horario-color-input" value="${turnoActual && turnoActual.color ? turnoActual.color : "#8E8E93"}">
+            </div>
+            <div class="form-group" style="margin-top:16px; margin-bottom:6px;">
+                <label>Accesos rápidos</label>
+            </div>
+            <div id="horarioChipsPresetsBox">${renderHorarioChipsPresets()}</div>
+            <div class="form-group" style="margin-top:16px;">
+                <label for="horarioTextoLibre">Texto personalizado (opcional)</label>
+                <input type="text" id="horarioTextoLibre" placeholder="Ej: 10am - 6pm, cita médica...">
+            </div>
+            <label class="cal-checkbox-wrap" for="horarioGuardarComoAcceso" style="padding-top:0; padding-bottom:14px;">
+                <input type="checkbox" id="horarioGuardarComoAcceso">
+                <span>Guardar como acceso rápido para reutilizar después</span>
+            </label>
+            <div class="modal-actions">
+                ${turnoActual ? `<button type="button" class="modal-btn modal-btn-cancel" id="horarioBtnQuitar" style="color:#FF3B30;">Quitar turno</button>` : ""}
+                <button type="button" class="modal-btn modal-btn-cancel" id="horarioBtnCancelar">Cancelar</button>
+                <button type="button" class="modal-btn modal-btn-confirm" id="horarioBtnGuardarTexto">Guardar texto</button>
+            </div>
+        </div>`;
+ 
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add("modal-open"));
+ 
+    const inputTexto = overlay.querySelector("#horarioTextoLibre");
+    if (turnoActual && turnoActual.tipo === "custom" && turnoActual.texto) {
+        inputTexto.value = turnoActual.texto;
+    }
+ 
+    const cerrar = () => {
+        overlay.classList.remove("modal-open");
+        overlay.classList.add("modal-out");
+        setTimeout(() => overlay.remove(), 280);
+    };
+
+    // Color personalizado (opcional): el checkbox muestra/oculta el input de color,
+    // y se aplica sin importar qué opción se elija después (chip fijo, acceso rápido
+    // o texto libre) mientras esté marcado.
+    const chkColor = overlay.querySelector("#horarioUsarColor");
+    const colorBox = overlay.querySelector("#horarioColorBox");
+    const inputColor = overlay.querySelector("#horarioColorPersonalizado");
+    chkColor.addEventListener("change", () => {
+        colorBox.style.display = chkColor.checked ? "" : "none";
+    });
+    const obtenerColorSeleccionado = () => (chkColor.checked ? inputColor.value : null);
+
+    // Chips fijos (Libre/Vacaciones/Incapacidad): un clic guarda y cierra de inmediato
+    overlay.querySelectorAll(".horario-chip[data-tipo]").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const color = obtenerColorSeleccionado();
+            guardarTurno(asesorKey, diaKey, semanaISO, { tipo: btn.dataset.tipo, texto: "", ...(color ? { color } : {}) });
+            cerrar();
+        });
+    });
+
+    // Accesos rápidos: se re-renderizan al agregar/eliminar uno sin cerrar el modal, así
+    // que se usa delegación de eventos en el contenedor en vez de listeners directos.
+    const presetsBox = overlay.querySelector("#horarioChipsPresetsBox");
+    presetsBox.addEventListener("click", (e) => {
+        const btnDel = e.target.closest(".horario-chip-preset-del");
+        if (btnDel) {
+            const preset = horarioPresets.find(p => p.id === btnDel.dataset.presetId);
+            if (preset && confirm(`¿Eliminar el acceso rápido "${preset.texto}"? Esto no afecta los turnos que ya lo tengan asignado.`)) {
+                eliminarHorarioPreset(btnDel.dataset.presetId);
+                presetsBox.innerHTML = renderHorarioChipsPresets();
+            }
+            return;
+        }
+        const btnPreset = e.target.closest(".horario-chip-preset");
+        if (btnPreset) {
+            const preset = horarioPresets.find(p => p.id === btnPreset.dataset.presetId);
+            if (!preset) return;
+            const color = obtenerColorSeleccionado();
+            guardarTurno(asesorKey, diaKey, semanaISO, { tipo: "custom", texto: preset.texto, ...(color ? { color } : {}) });
+            cerrar();
+        }
+    });
+
+    // Texto libre: requiere presionar "Guardar texto". Si la casilla está marcada, ese
+    // mismo texto también se guarda como acceso rápido para la próxima vez.
+    overlay.querySelector("#horarioBtnGuardarTexto").addEventListener("click", () => {
+        const texto = inputTexto.value.trim();
+        if (!texto) {
+            mostrarAlerta("Escribe un texto personalizado o elige una opción rápida.", "warning");
+            return;
+        }
+        const chkAcceso = overlay.querySelector("#horarioGuardarComoAcceso");
+        if (chkAcceso && chkAcceso.checked) agregarHorarioPreset(texto);
+        const color = obtenerColorSeleccionado();
+        guardarTurno(asesorKey, diaKey, semanaISO, { tipo: "custom", texto, ...(color ? { color } : {}) });
+        cerrar();
+    });
+ 
+    const btnQuitar = overlay.querySelector("#horarioBtnQuitar");
+    if (btnQuitar) {
+        btnQuitar.addEventListener("click", () => {
+            quitarTurno(asesorKey, diaKey, semanaISO);
+            cerrar();
+        });
+    }
+ 
+    overlay.querySelector("#horarioBtnCancelar").addEventListener("click", cerrar);
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) cerrar(); });
+    inputTexto.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") overlay.querySelector("#horarioBtnGuardarTexto").click();
+    });
+}
+ 
+// Dibuja la grilla completa de la semana visible
+function renderHorario() {
+    const semanaISO = obtenerLunesActualISO();
+    const lunes = new Date(semanaISO + "T00:00:00");
+ 
+    const domingoFin = new Date(lunes);
+    domingoFin.setDate(domingoFin.getDate() + 6);
+    const rango = `${lunes.toLocaleDateString("es-ES", { day: "numeric", month: "short" })} — ${domingoFin.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}`;
+ 
+    const tituloEl = document.getElementById("horarioTitulo");
+    if (tituloEl) tituloEl.textContent = rango;
+    const capturaTituloEl = document.getElementById("horarioCapturaTitulo");
+    if (capturaTituloEl) capturaTituloEl.textContent = `Horario semanal · ${rango}`;
+ 
+    const grid = document.getElementById("horarioGrid");
+    if (!grid) return;
+
+    // Fecha de hoy (ISO local), para resaltar su columna si la semana visible la incluye
+    const hoyISO = fechaLocalISO(new Date());
+ 
+    let html = `<div class="horario-grid-header">
+        <div class="horario-head-cell horario-head-asesor">Asesor</div>
+        ${DIAS_SEMANA.map((d, i) => {
+            const fecha = new Date(lunes);
+            fecha.setDate(fecha.getDate() + i);
+            const esHoy = fechaLocalISO(fecha) === hoyISO;
+            return `<div class="horario-head-cell${esHoy ? " horario-head-cell-hoy" : ""}">${d.label}<br><span class="horario-head-daynum${esHoy ? " horario-head-daynum-hoy" : ""}">${fecha.getDate()}</span></div>`;
+        }).join("")}
+    </div>`;
+ 
+    const asesorKeys = Object.keys(appData.asesores).filter(k => !horarioOcultos.includes(k));
+    const extraKeys = Object.keys(horarioPersonasExtra);
+
+    if (asesorKeys.length === 0 && extraKeys.length === 0) {
+        html += `<div class="horario-fila"><p class="horario-vacio-msg" style="grid-column: 1 / -1; font-size:13px; text-align:center; padding:16px 0;">No hay personas en el horario. Agrégalas abajo.</p></div>`;
+    }
+
+    // Dibuja una fila de la grilla (nombre + 7 celdas de días). Se reutiliza tanto para
+    // asesores reales como para personas agregadas solo al Horario: ambas comparten la misma
+    // estructura de horarioData (turnos guardados por clave), solo cambia qué botón de quitar
+    // se usa y a qué grupo ('asesor'/'extra') pertenecen para el reordenamiento con ⠿.
+    function filaHorarioHTML(key, nombre, grupo, btnQuitarHTML) {
+        const inicial = nombre.trim().charAt(0).toUpperCase() || "?";
+        return `<div class="horario-fila">
+            <div class="horario-nombre-cell" data-key="${key}" data-grupo="${grupo}">
+                <span class="horario-drag-handle"
+                    onpointerdown="horarioPointerDown(event,'${key}','${grupo}')"
+                    onpointermove="horarioPointerMove(event)"
+                    onpointerup="horarioPointerUp(event)"
+                    onpointercancel="horarioPointerUp(event)"
+                    title="Arrastra para reordenar"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span>
+                <span class="horario-avatar">${inicial}</span>
+                <span class="horario-nombre-texto">${nombre}</span>
+                ${btnQuitarHTML}
+            </div>
+            ${DIAS_SEMANA.map((d, i) => {
+                const fecha = new Date(lunes);
+                fecha.setDate(fecha.getDate() + i);
+                const fechaISO = fechaLocalISO(fecha);
+                const esHoy = fechaISO === hoyISO;
+                const turno = horarioData[semanaISO] && horarioData[semanaISO][key]
+                    ? horarioData[semanaISO][key][d.key]
+                    : null;
+
+                let contenido;
+                if (turno && turno.tipo === "custom") {
+                    const colores = coloresDeTurno(turno);
+                    contenido = `<div class="horario-pill" style="background:${colores.bg}; color:${colores.text};">${turno.texto}</div>`;
+                } else if (turno && TIPOS_TURNO[turno.tipo]) {
+                    const t = TIPOS_TURNO[turno.tipo];
+                    const colores = coloresDeTurno(turno);
+                    contenido = `<div class="horario-pill" style="background:${colores.bg}; color:${colores.text};">${t.emoji} ${t.label}</div>`;
+                } else {
+                    contenido = `<span class="horario-celda-vacia">+</span>`;
+                }
+
+                const nombreEscapado = nombre.replace(/'/g, "\\'");
+                return `<div class="horario-celda${esHoy ? " horario-celda-hoy" : ""}" onclick="abrirModalTurno('${key}','${d.key}','${fechaISO}', '${nombreEscapado}', '${d.label} ${fecha.getDate()}')">${contenido}</div>`;
+            }).join("")}
+        </div>`;
+    }
+
+    asesorKeys.forEach((key) => {
+        const asor = appData.asesores[key];
+        const btnQuitar = `<button type="button" class="horario-mini-btn horario-mini-btn-del" onclick="quitarAsesorDeHorario('${key}')" title="Quitar del horario (no borra sus datos)">✕</button>`;
+        html += filaHorarioHTML(key, asor.nombre, 'asesor', btnQuitar);
+    });
+
+    if (extraKeys.length > 0) {
+        html += `<div class="horario-fila"><div class="horario-separador-label" style="grid-column: 1 / -1;">Otras personas (sin ventas ni metas)</div></div>`;
+        extraKeys.forEach((key) => {
+            const persona = horarioPersonasExtra[key];
+            const btnQuitar = `<button type="button" class="horario-mini-btn horario-mini-btn-del" onclick="eliminarPersonaHorario('${key}')" title="Quitar a esta persona del Horario">✕</button>`;
+            html += filaHorarioHTML(key, persona.nombre, 'extra', btnQuitar);
+        });
+    }
+
+    grid.innerHTML = html;
+ 
+    const leyenda = document.getElementById("horarioLeyenda");
+    if (leyenda) {
+        leyenda.innerHTML = Object.entries(TIPOS_TURNO)
+            .filter(([key]) => key !== "custom")
+            .map(([, t]) => `<span class="horario-leyenda-item"><span class="horario-leyenda-dot" style="background:${t.text};"></span>${t.emoji} ${t.label}</span>`)
+            .join("");
+    }
+}
+ 
+// ═══════════════════════════════════════════
+// COMPARTIR EL HORARIO
+// ═══════════════════════════════════════════
+ 
+// Genera una imagen PNG del horario y ofrece compartirla (Web Share API)
+// o descargarla directamente si el navegador no soporta compartir archivos.
+async function compartirHorarioComoImagen() {
+    const area = document.getElementById("horarioCapturaArea");
+    if (!area) return;
+ 
+    if (typeof html2canvas === "undefined") {
+        mostrarAlerta("No se pudo cargar el generador de imágenes. Puedes tomar una captura de pantalla manualmente.", "warning");
+        return;
+    }
+ 
+    area.classList.add("modo-captura");
+    // El contenedor con scroll podría recortar la captura: se libera mientras se genera la imagen
+    const wrapCaptura = area.parentElement;
+    const overflowPrevio = wrapCaptura ? wrapCaptura.style.overflow : "";
+    if (wrapCaptura) wrapCaptura.style.overflow = "visible";
+    try {
+        const canvas = await html2canvas(area, {
+            backgroundColor: "#ffffff",
+            scale: 2,
+            width: area.scrollWidth,
+            windowWidth: Math.max(document.documentElement.clientWidth, area.scrollWidth + 40)
+        });
+        area.classList.remove("modo-captura");
+        if (wrapCaptura) wrapCaptura.style.overflow = overflowPrevio;
+ 
+        canvas.toBlob(async (blob) => {
+            if (!blob) {
+                mostrarAlerta("No se pudo generar la imagen.", "error");
+                return;
+            }
+            const archivo = new File([blob], "horario-semana.png", { type: "image/png" });
+ 
+            if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
+                try {
+                    await navigator.share({ files: [archivo], title: "Horario de la semana" });
+                    return;
+                } catch (e) {
+                    // Si el usuario cancela el share, seguimos con la descarga directa
+                }
+            }
+            const link = document.createElement("a");
+            link.download = "horario-semana.png";
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+            mostrarAlerta("Imagen del horario descargada.", "success");
+        });
+    } catch (err) {
+        area.classList.remove("modo-captura");
+        if (wrapCaptura) wrapCaptura.style.overflow = overflowPrevio;
+        console.error(err);
+        mostrarAlerta("Ocurrió un error generando la imagen. Intenta con una captura de pantalla manual.", "error");
+    }
+}
+ 
+// Genera un resumen de texto plano del horario semanal y lo copia al portapapeles
+function copiarHorarioComoTexto() {
+    const semanaISO = obtenerLunesActualISO();
+    const rango = document.getElementById("horarioTitulo")?.textContent || "";
+    let texto = `🗓️ Horario semanal (${rango})\n\n`;
+ 
+    // Genera las líneas de una persona (asesor real o agregada solo al Horario): ambas
+    // comparten el mismo formato de texto, solo cambia de dónde sale el nombre.
+    const agregarPersonaAlTexto = (key, nombre) => {
+        texto += `👤 ${nombre}\n`;
+        DIAS_SEMANA.forEach(d => {
+            const turno = horarioData[semanaISO] && horarioData[semanaISO][key]
+                ? horarioData[semanaISO][key][d.key]
+                : null;
+            let descripcion = "Sin asignar";
+            if (turno && turno.tipo === "custom") {
+                descripcion = turno.texto;
+            } else if (turno && TIPOS_TURNO[turno.tipo]) {
+                descripcion = `${TIPOS_TURNO[turno.tipo].emoji} ${TIPOS_TURNO[turno.tipo].label}`;
+            }
+            texto += `   ${d.label}: ${descripcion}\n`;
+        });
+        texto += `\n`;
+    };
+
+    Object.keys(appData.asesores).filter(k => !horarioOcultos.includes(k)).forEach(key => {
+        agregarPersonaAlTexto(key, appData.asesores[key].nombre);
+    });
+    Object.keys(horarioPersonasExtra).forEach(key => {
+        agregarPersonaAlTexto(key, horarioPersonasExtra[key].nombre);
+    });
+
+    navigator.clipboard.writeText(texto).then(() => {
+        mostrarAlerta("Horario copiado. Ya puedes pegarlo en el chat con tus compañeros.", "success");
+    }).catch(() => {
+        mostrarAlerta("No se pudo copiar automáticamente. Selecciona el texto manualmente.", "warning");
+    });
+}
+ 
+// Inicializar la grilla al cargar la página
+document.addEventListener("DOMContentLoaded", function () {
+    renderHorario();
+});
