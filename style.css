@@ -1,4 +1,3 @@
-
 /* =================================================== */
 /* COMPLEMENTOS PARA EL DISEÃ‘O DEL SISTEMA             */
 /* =================================================== */
@@ -2586,7 +2585,14 @@ body.dark-mode .horario-fila > .horario-celda:nth-child(8):hover {
  
 /* Modo captura: oculta el "+" de celdas vacÃ­as y quita el hover, para
    que la imagen generada se vea limpia y sin elementos de ediciÃ³n */
-.modo-captura .horario-nombre-texto { overflow: visible; text-overflow: clip; white-space: normal; overflow-wrap: anywhere; }
+/* IMAGEN DESCARGADA: la columna de nombres se ajusta al nombre más largo y el nombre
+   completo va en una sola línea. Se ocultan el ícono de arrastre y la ✕ (no sirven en la imagen). */
+.horario-captura-area.modo-captura { width: max-content; min-width: 640px; }
+.horario-captura-area.modo-captura .horario-grid { grid-template-columns: max-content repeat(7, minmax(90px, 1fr)); }
+.modo-captura .horario-drag-handle,
+.modo-captura .horario-mini-btn { display: none !important; }
+.modo-captura .horario-nombre-cell { padding-right: 14px; }
+.modo-captura .horario-nombre-texto { overflow: visible; text-overflow: clip; white-space: nowrap; flex: none; min-width: max-content; }
 .modo-captura .horario-celda-vacia { visibility: hidden; }
 .modo-captura .horario-celda { cursor: default; }
 .modo-captura .horario-celda:hover { background: #F5F5F7; border-color: #ECECEE; }
